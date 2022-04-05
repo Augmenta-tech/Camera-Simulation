@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <title>Augmenta Simulator</title>
+  </head>
+  <body>
+    <div class="row full-height">
+    <div id="main">
+      <div id="header">
+        <img src="img/augmenta-logo.png" alt="">
+        <div data-button>Share</div>
+        <p>Help ?</p>
+      </div>
+      <div id="viewport">
+        <div id="gizmo"></div>
+        <div id="toolbar" class="row">
+          <div data-tool="1" class="active"></div>
+          <div data-tool="2"></div>
+          <div data-tool="3"></div>
+          <div data-tool="4"></div>
+        </div>
+        <div id="img-cam"></div>
+        <div id="viewport-button" class="row center">
+          <div data-button  class="active">
+            <p>Frustrum</p>
+          </div>
+          <div data-button  class="active">
+            <p>Measure</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="inspector">
+      <div id="scene-info">
+        <h1>Tracking data</h1>
+        <div class="row">
+          <div>
+          <p>Centroid (x,y)</p>
+          <p>Overlaps</p>
+          </div><div>
+          <p>Rotation</p>
+          <p>Boundingbox</p>
+          </div>  </div>
+          <br>
+        <h1>Surface cover</h1>
+        <div class="row">
+        <div>
+          <p>Width</p>
+            </div>
+                  <div>
+          <p>Height</p>
+        </div>
+          </div>
+      </div>
+      <div data-camera="0" class="active">
+            <h1>Camera 1</h1>
+            <div class="row">
+            <p>  Astra plus </p>
+              <p>FOV H    45°</p>
+              <p>FOV V    45°</p>
+            </div>
+
+            <div class="row">
+            <p>  Astra plus </p>
+              <p>FOV H    45°</p>
+              <p>FOV V    45°</p>
+            </div>
+      </div>
+      <div id="new-camera" class="active" data-button>
+      <p>+       New Camera</p>
+    </div>
+    </div>
+
+    </div>
+
+  </body>
+</html>
