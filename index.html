@@ -7,14 +7,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <title>Augmenta Simulator</title>
+    <script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
   </head>
   <body>
     <div class="row full-height">
     <div id="main">
-      <div id="header">
+      <div id="header" class="row s-p">
         <img src="img/augmenta-logo.png" alt="">
-        <div data-button>Share</div>
+        <div id="project-name"> <p> Unsaved Draft</p></div>
+        <div class="row">
+        <div data-button class="active">
+          <p> Share </p></div>
         <p>Help ?</p>
+        </div>
       </div>
       <div id="viewport">
         <div id="gizmo"></div>
@@ -59,18 +64,54 @@
           </div>
       </div>
       <div data-camera="0" class="active">
+        <div class="row s-p">
+          <div class="row">
+            <div class="camera-color"></div>
             <h1>Camera 1</h1>
-            <div class="row">
-            <p>  Astra plus </p>
+          </div>
+          <div>
+            <!-- <span class="iconify" data-icon="gg:eye"></span> -->
+            <span class="iconify" data-icon="gg:border-style-solid"></span>
+            <span class="iconify" data-icon="gg:lock"></span>
+          </div>
+            </div>
+            <div id="select-camera" class="row s-p">
+              <div class="2-column row ">
+            <p class="select">  Astra plus </p> <span class="iconify" data-icon="gg:chevron-down"></span>
+            </div>
+            <div class="row s-p column-2">
               <p>FOV H    45°</p>
               <p>FOV V    45°</p>
+              </div>
+            </div>
+            <div class="row s-p">
+              <div class="2-column ">
+            <p>  Position </p>
+            </div>
+            <div class="row s-p column-2">
+              <p>X <strong> 15m</strong></p>
+              <p>Y  <strong> 15m</strong></p>
+              <p>Z  <strong> 15m</strong> </p>
+              </div>
+            </div>
+            <div  class="row s-p">
+              <div class="2-column ">
+            <p>  Rotation </p>
+            </div>
+            <div class="row s-p column-2">
+              <p>X <strong> 15m</strong></p>
+              <p>Y  <strong> 15m</strong></p>
+              <p>Z  <strong> 15m</strong> </p>
+              </div>
             </div>
 
-            <div class="row">
+
+
+            <!-- <div class="row">
             <p>  Astra plus </p>
               <p>FOV H    45°</p>
               <p>FOV V    45°</p>
-            </div>
+            </div> -->
       </div>
       <div id="new-camera" class="active" data-button>
       <p>+       New Camera</p>
