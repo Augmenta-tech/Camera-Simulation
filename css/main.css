@@ -82,7 +82,7 @@ strong{
 
 
 #header img{
-  margin: 12px 0 0 20px;
+  margin: 12px 0 0 33px;
   width: 20px;
   height: 21px;
 }
@@ -125,15 +125,22 @@ strong{
   background-color: var(--color-select-camera);
 }
 
+[data-tool] [data-icon]{
+  width : 24px;
+  height : 24px;
+  margin: 7px;
+  color : var(--color-white);
+}
 
-[data-icon]{
+
+[data-camera] [data-icon]{
   width: 13px;
   height: 13px;
     margin: 5px 8px 0 8px;
   color: var(--color-dark-purple);
     cursor: pointer;
 }
-[data-icon="gg:lock"]{
+[data-camera] [data-icon="gg:lock"]{
   margin: 2px 0px 0 0;
 }
 
@@ -175,12 +182,12 @@ strong{
 [data-tool]{
   width: 40px;
   height: 40px;
-  background-color: var(--color-dark-purple);
+  background-color: var(--color-grey-p);
   transition: 0.2s all ease;
 }
 
 [data-tool]:hover:not(.active){
-    background-color: var(--color-grey-p);
+    background-color: var(--color-blue-2);
     cursor: pointer;
 }
 
