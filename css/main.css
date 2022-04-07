@@ -18,19 +18,19 @@ body{
 
 h1{
   margin-bottom: 18px;
-font-style: normal;
-font-weight: 600;
-font-size: 13px;
-line-height: 16px;
-color: var(--color-dark-purple);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--color-dark-purple);
 }
 
 p{
-font-style: normal;
-font-weight: 400;
-font-size: 12px;
-line-height: 15px;
-color: var(--color-grey-p);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 15px;
+  color: var(--color-grey-p);
 }
 
 strong{
@@ -42,6 +42,7 @@ strong{
 
 #main{
   width : calc( 100% - 400px);
+  overflow: hidden;
 }
 
 .row {
@@ -96,7 +97,7 @@ strong{
 
 #inspector{
   width : 400px;
-
+  overflow: auto;
 }
 
 #scene-info{
@@ -168,15 +169,10 @@ strong{
   width: 40px;
 }
 
-#img-cam{
-  background-size: contain;
-  width: 70%;
-  height: 80vh;
-  background-image: url(../img/viewport.png);
-  background-repeat: no-repeat;
-  margin-top: 5vh;
+canvas{
+  width: 100% !important;
+  height: 100% !important;
   position: absolute;
-  left: 15%;
 }
 
 [data-tool]{
