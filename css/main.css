@@ -9,11 +9,11 @@
 }
 
 *{
-    margin : 0;
+  margin : 0;
 }
 body{
   font-family: 'Roboto', sans-serif;
-    min-width: 1100px;
+  min-width: 1100px;
 }
 
 h1{
@@ -60,7 +60,7 @@ strong{
   height: 100vh;
 }
 .column-2{
-  width:50%;
+  width:70%;
 }
 
 #header{
@@ -78,7 +78,7 @@ strong{
 }
 
 #project-name{
-     margin-top: 18px;
+  margin-top: 18px;
 }
 
 
@@ -109,8 +109,7 @@ strong{
   width: 10px;
   height: 10px;
 }
-[data-camera="0"] .camera-color{
-  background-color: #37A48A;
+[data-camera] .camera-color{
   margin: 2px 8px 0 0;
 }
 
@@ -143,6 +142,13 @@ strong{
 }
 [data-camera] [data-icon="gg:lock"]{
   margin: 2px 0px 0 0;
+}
+
+#cam-type {
+  border: none;
+  border-radius: 25px;
+  padding-left: 5px;
+  margin-left: -5px;
 }
 
 #scene-info .row div{
@@ -196,45 +202,45 @@ canvas{
 }
 
 [data-tool].active{
-    background:  var(--color-blue); ;
+  background:  var(--color-blue); ;
 }
 
 [data-button]{
   transition: .2s all ease;
-border: 1px solid var(--color-blue);
-width: 111px;
-height: 24px;
-box-sizing: border-box;
-cursor: pointer;
-border-radius: 2px;
-margin: 0 20px 0 20px;
- text-align: center;
- filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  border: 1px solid var(--color-blue);
+  width: 111px;
+  height: 24px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-radius: 2px;
+  margin: 0 20px 0 20px;
+  text-align: center;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 }
 [data-button].active:hover{
   background:  var(--color-blue-2);
 }
 [data-button].active{
-    background:  var(--color-blue);
+  background:  var(--color-blue);
 }
 
 #inspector [data-button]{
-      margin: 30px auto 0 auto;
+  margin: 30px auto 0 auto;
 }
 
 [data-button].active p{
-    color:  var(--color-white);
+  color:  var(--color-white);
 }
 [data-button] p{
-    color:  var(--color-blue);
-    margin: 0;
-    line-height: 24px;
+  color:  var(--color-blue);
+  margin: 0;
+  line-height: 24px;
 }
 
 #viewport-button{
-    position: absolute;
-    width: 100%;
-    bottom: 25px;
+  position: absolute;
+  width: 100%;
+  bottom: 25px;
 }
 
 #select-camera{

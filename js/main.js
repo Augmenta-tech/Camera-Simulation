@@ -13,6 +13,7 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { OrbitControls } from 'three-controls/OrbitControls.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
+import { Color } from 'three';
 
 
 
@@ -45,9 +46,6 @@ const DEFAULT_CAMERA_PITCH = - Math.PI / 2.0;
 
 let font;
 const fontLoader = new FontLoader();
-    fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
-        font = response;
-    } );
 const SIZE_TEXT_CAMERA = 0.7
 
 class Camera{
@@ -67,7 +65,8 @@ class Camera{
         this.cameraPerspective = new THREE.PerspectiveCamera( DEFAULT_CAMERA_TYPE.VFov, DEFAULT_CAMERA_TYPE.aspectRatio, DEFAULT_CAMERA_TYPE.rangeNear, DEFAULT_CAMERA_TYPE.rangeFar );
         this.cameraPerspectiveHelper = new THREE.CameraHelper( this.cameraPerspective );
     
-        const material = new THREE.MeshPhongMaterial( { color: 0x4080ff, dithering: true } );
+        this.color = new THREE.Color(Math.random(), Math.random(), Math.random());
+        const material = new THREE.MeshPhongMaterial( { color: this.color, dithering: true } );
         const geometry = new THREE.BoxGeometry( 0.2,0.2,0.2 );
         this.mesh = new THREE.Mesh( geometry, material );
 
@@ -92,9 +91,6 @@ class Camera{
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.nameText.position.set(this.XPos - SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + SIZE_TEXT_CAMERA/2.0);
         this.nameText.rotation.x = -Math.PI / 2.0;
-
-        this.guiInfos = document.createElement( 'div' );
-
     }
 
     addCameraToScene()
@@ -121,6 +117,16 @@ class Camera{
         document.getElementById('overlaps' + this.id).innerHTML = overlapsDisplay;
     }
 
+    changeVisibility()
+    {
+        let value = !this.areaAppear;
+        this.areaAppear = value;
+        this.cameraPerspective.visible = value;
+        this.cameraPerspectiveHelper.visible = value;
+        let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
+        iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+    }
+
     render()
     {
         this.cameraPerspective.updateProjectionMatrix();
@@ -140,8 +146,6 @@ class Camera{
         this.raysWallX = [];
         this.raysWallZ = [];
         scene.remove(this.nameText);
-        this.guiInfos.remove();
-        this.gui.destroy()
     }
 }
 
@@ -371,7 +375,11 @@ function onWindowResize() {
 }
 
 /* ADDING  CAMERA */
-document.getElementById('new-camera').addEventListener("click", addCamera);
+//document.getElementById('new-camera').addEventListener("click", addCamera);
+fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+    font = response;
+    document.getElementById('new-camera').onclick = addCamera;
+} );
 
 function addCamera()
 {
@@ -384,59 +392,192 @@ function addCameraGUI(cam)
 {
     const CamPresets = { "Orbbec Astra +" : camerasTypes.OrbbecAstraPlus, "Orbbec Astra Pro" : camerasTypes.OrbbecAstraPro };
     let cameraUIdiv = document.createElement( 'div');
-    cameraUIdiv.setAttribute("data-camera", cam.id);
+    cameraUIdiv.dataset.camera = cam.id;
     cameraUIdiv.classList.add("active");
+    cameraUIdiv.classList.add("cameraUI");
     cameraUIdiv.innerHTML = `
-    <div class="row s-p">
-        <div class="row">
-            <div class="camera-color"></div>
-            <h1>Camera ` + (cam.id + 1) + `</h1>
+        <div class="row s-p">
+            <div class="row">
+                <div class="camera-color" style="background-color: #`+ cam.color.getHexString() + `;"></div>
+                <h1>Camera ` + (cam.id + 1) + `</h1>
+            </div>
+            <div class="row">
+                <div id="cam-` + (cam.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
+                <!-- <div><span class="iconify" data-icon="gg:border-style-solid"></span></div> -->
+                <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
+            </div>
         </div>
-        <div>
-            <!-- <span class="iconify" data-icon="gg:eye"></span> -->
-            <!--<span class="iconify" data-icon="gg:border-style-solid"></span> -->
-            <!--<span class="iconify" data-icon="fluent:lock-open-16-regular"></span> -->
+        <div id="select-camera" class="row s-p">
+            <div class="column-2 row ">
+                <select id="cam-type" name="camType">
+                    <option value="plus" selected">Orbbec Astra +</option>
+                    <option value="pro">Orbbec Astra Pro</option>
+                </select>
+                <!-- <p class="select">  Astra plus </p> <span class="iconify" data-icon="gg:chevron-down"></span> -->
+            </div>
+            <div class="row s-p column-2">
+                <p id="hfov` + cam.id + `">FOV H    ` + cam.type.HFov + `°</p>
+                <p id="vfov` + cam.id + `">FOV V    ` + cam.type.VFov + `°</p>
+            </div>
         </div>
-    </div>
-    <div id="select-camera" class="row s-p">
-        <div class="2-column row ">
-            <p class="select">  Astra plus </p> <span class="iconify" data-icon="gg:chevron-down"></span>
+        <div class="row s-p">
+            <div class="2-column ">
+                <p>  Position </p>
+            </div>
+            <div class="row s-p column-2">
+                <p>X <strong id="x-pos-`+ cam.id +`"> 0</strong>m</p>
+                <p>Y  <strong id="y-pos-`+ cam.id +`"> 0</strong>m</p>
+                <p>Z  <strong id="z-pos-`+ cam.id +`"> 7</strong>m</p>
+            </div>
         </div>
-        <div class="row s-p column-2">
-            <p>FOV H    45°</p> <!-- REPLACE BY VALUES -->
-            <p>FOV V    45°</p> <!-- REPLACE BY VALUES -->
-        </div>
-    </div>
-    <div class="row s-p">
-        <div class="2-column ">
-            <p>  Position </p>
-        </div>
-        <div class="row s-p column-2">
-            <p>X <strong> 15m</strong></p> <!-- REPLACE BY SLIDERS -->
-            <p>Y  <strong> 15m</strong></p> <!-- REPLACE BY SLIDERS -->
-            <p>Z  <strong> 15m</strong> </p> <!-- REPLACE BY SLIDERS -->
-        </div>
-    </div>
-    <div  class="row s-p">
-        <div class="2-column ">
-            <p>  Rotation </p>
-        </div>
-        <div class="row s-p column-2">
-            <p>X <strong> 15m</strong></p> <!-- REPLACE BY SLIDERS -->
-            <p>Y  <strong> 15m</strong></p> <!-- REPLACE BY SLIDERS -->
-            <p>Z  <strong> 15m</strong> </p> <!-- REPLACE BY SLIDERS -->
-        </div>
-    </div>`;
+        <div  class="row s-p">
+            <div class="2-column ">
+                <p>  Rotation </p>
+            </div>
+            <div class="row s-p column-2">
+                <p>PITCH <strong id="pitch-rot-`+ cam.id +`"> 0</strong>°</p>
+                <p>YAW  <strong id="yaw-rot-`+ cam.id +`"> 0</strong>°</p>
+                <p>ROLL  <strong id="roll-rot-`+ cam.id +`"> 0</strong>° </p>
+            </div>
+        </div>`;
 
     let inspectorDiv = document.getElementById('inspector');
     inspectorDiv.appendChild(cameraUIdiv);
+
+    document.getElementById('cam-' + (cam.id) + '-visible').onclick = changeVisibilityofCam;
+    document.getElementById('cam-type').onchange = function(){
+            switch(document.getElementById('cam-type').value)
+            {
+                case "plus":
+                    cam.type = camerasTypes.OrbbecAstraPlus;
+                    break;
+                case "pro":
+                    cam.type = camerasTypes.OrbbecAstraPro;
+                    break;
+                default:
+                    cam.type = camerasTypes.OrbbecAstraPlus;
+            }
+            
+            document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H    ' + cam.type.HFov + '°';
+            document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V    ' + cam.type.VFov + '°';
+            //document.getElementById('near' + cam.id + '').innerHTML = 'Min distance: ' + cam.type.rangeNear + 'm';
+            //document.getElementById('far' + cam.id + '').innerHTML = 'Max distance: ' + cam.type.rangeFar + 'm';
+         
+            
+            cam.cameraPerspective.fov = cam.type.VFov;
+            cam.cameraPerspective.aspect = cam.type.aspectRatio;
+            cam.cameraPerspective.near = cam.type.rangeNear;
+            cam.cameraPerspective.far = cam.type.rangeFar;
+        }
+
+    //Make elements draggable:
+    dragElement(document.getElementById("x-pos-" + cam.id));
+    dragElement(document.getElementById("y-pos-" + cam.id));
+    dragElement(document.getElementById("z-pos-" + cam.id));
+    dragElement(document.getElementById("pitch-rot-" + cam.id));
+    dragElement(document.getElementById("yaw-rot-" + cam.id));
+    dragElement(document.getElementById("roll-rot-" + cam.id));
 }
+
+function changeVisibilityofCam()
+{
+    cameras[parseInt(this.id.split('-')[1])].changeVisibility();
+}
+
+function dragElement(element) {
+    let value = parseFloat(element.innerHTML);
+    let mousePosX = 0;
+    let diffX = 0;
+    element.onmousedown = dragMouseDown;
+
+
+    function dragMouseDown(e) {
+        console.log(value);
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        mousePosX = e.clientX;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        diffX = e.clientX - mousePosX;
+        mousePosX = e.clientX;
+
+        let fac = 1;
+        switch(element.id.split('-')[1])
+        {
+            case "pos" :
+                fac = 1 / 10.0;
+                break;
+            case "rot":
+                fac = 1;
+                break;
+            default:
+                fac = 1;
+                break;
+        }
+
+        value += diffX * fac;
+        element.innerHTML = Math.round(value*100)/100.0;
+        console.log(value);
+
+        let cam = cameras[element.id.split('-')[2]];
+        switch(element.id.split('-')[0])
+        {
+            case "x":
+                cam.XPos = value;
+                cam.cameraPerspective.position.x = cam.XPos;
+                cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
+                break;
+            case "y":
+                cam.ZPos = - value;
+                cam.cameraPerspective.position.z = cam.ZPos;
+                cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
+                break;
+            case "z":
+                cam.YPos = value;
+                cam.cameraPerspective.position.y = cam.YPos;
+                cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
+                break;
+            case "pitch":
+                cam.cameraPerspective.rotateOnWorldAxis(cam.xRotationAxis, (value-90) * (Math.PI / 180.0) - cam.pitch);
+                cam.pitch = (value-90) * (Math.PI / 180.0);
+                break;
+            case "yaw":
+                cam.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
+                cam.xRotationAxis.applyAxisAngle(new THREE.Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
+                cam.xRotationAxis.normalize();
+                cam.yaw = value * (Math.PI / 180.0);
+                break;
+            case "roll":
+                let rotationAxis = new THREE.Vector3();
+                cam.cameraPerspective.getWorldDirection(rotationAxis);
+                cam.cameraPerspective.rotateOnWorldAxis(rotationAxis, value * (Math.PI / 180.0) - cam.roll);
+                cam.roll = value * (Math.PI / 180.0);
+                break;
+            default:
+                break;
+        }
+    }
+
+    function closeDragElement() {
+        /* stop changing when mouse button is released:*/
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+
+  }
 
 function addCameraUI(camera) //rename addCameraGUI to make it work
 {
-    const CamPresets = { "Orbbec Astra +" : camerasTypes.OrbbecAstraPlus, "Orbbec Astra Pro" : camerasTypes.OrbbecAstraPro };
+    //const CamPresets = { "Orbbec Astra +" : camerasTypes.OrbbecAstraPlus, "Orbbec Astra Pro" : camerasTypes.OrbbecAstraPro };
 
-    const settingsCamera = {
+    /*const settingsCamera = {
         CamPreset: DEFAULT_CAMERA_TYPE,
         OffsetX: 0,
         OffsetY: 0,
@@ -444,33 +585,34 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
         Pitch: 0,
         Roll: 0,
         Yaw: 0
-    }
+    }*/
 
-    const surfaceSettings = {
+    /*const surfaceSettings = {
         DrawFrustum: true
-    }
+    }*/
     
-    camera.guiInfos.innerHTML = '<p id="fov' + camera.id + '" class="controller">HFov: ' + DEFAULT_CAMERA_TYPE.HFov + '° - VFov: ' + DEFAULT_CAMERA_TYPE.VFov + '°</p>';
+    //camera.guiInfos.innerHTML = '<p id="fov' + camera.id + '" class="controller">HFov: ' + DEFAULT_CAMERA_TYPE.HFov + '° - VFov: ' + DEFAULT_CAMERA_TYPE.VFov + '°</p>';
     camera.guiInfos.innerHTML += '<p id="near' + camera.id + '" class="controller">Min distance: ' + DEFAULT_CAMERA_TYPE.rangeNear + 'm</p>';
     camera.guiInfos.innerHTML += '<p id="far' + camera.id + '" class="controller">Max distance: ' + DEFAULT_CAMERA_TYPE.rangeFar + 'm</p>';
 
-    const cameraFolder = camerasGUI.addFolder("Camera " + (camera.id + 1) + " control");
+    //const cameraFolder = camerasGUI.addFolder("Camera " + (camera.id + 1) + " control");
 
-    cameraFolder.add(settingsCamera, 'CamPreset', CamPresets).onChange(function ( value ) {
+    //cameraFolder.add(settingsCamera, 'CamPreset', CamPresets).onChange(function ( value ) {
 
-        document.getElementById('fov' + camera.id + '').innerHTML = 'HFov: ' + value.HFov + '° - VFov: ' + value.VFov + '°';
+        //document.getElementById('fov' + camera.id + '').innerHTML = 'HFov: ' + value.HFov + '° - VFov: ' + value.VFov + '°';
         document.getElementById('near' + camera.id + '').innerHTML = 'Min distance: ' + value.rangeNear + 'm';
         document.getElementById('far' + camera.id + '').innerHTML = 'Max distance: ' + value.rangeFar + 'm';
         
-        camera.cameraPerspective.fov = value.VFov;
+        /*camera.cameraPerspective.fov = value.VFov;
         camera.cameraPerspective.aspect = value.aspectRatio;
         camera.cameraPerspective.near = value.rangeNear;
-        camera.cameraPerspective.far = value.rangeFar;
-        camera.cameraPerspective.updateProjectionMatrix();
-        camera.cameraPerspectiveHelper.update();
+        camera.cameraPerspective.far = value.rangeFar;*/
+        //camera.cameraPerspective.updateProjectionMatrix();
+        //camera.cameraPerspectiveHelper.update();
         
-    });
+    //});
 
+    /*
     cameraFolder.add(settingsCamera, 'Hauteur', 0,14).step(0.1).onChange(function ( value ) {
 
         camera.YPos = value;
@@ -508,6 +650,7 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
         camera.cameraPerspective.position.z = camera.ZPos;
         camera.mesh.position.set( camera.XPos, camera.YPos, camera.ZPos );
     });
+    */
 
     camera.guiInfos.innerHTML += '<p id="area' + camera.id + '" class="controller">Area covered: </p>';
     camera.guiInfos.innerHTML += '<p id="overlaps' + camera.id + '" class="controller"></p>';
@@ -519,25 +662,27 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
     camera.guiInfos.setAttribute("data-index", camera.id);
 
     //console.log(camera.guiInfos.dataset.index);
-
+/*
     const surfaceFolder = cameraFolder.addFolder("Options Camera " + (camera.id + 1));
     surfaceFolder.add(surfaceSettings, "DrawFrustum" ).onChange(function ( value ) {
         camera.areaAppear = value;
         camera.cameraPerspective.visible = value;
         camera.cameraPerspectiveHelper.visible = value;
     });
-    surfaceFolder.close();
+    surfaceFolder.close();*/
 
-    cameraFolder.close();
+    /*cameraFolder.close();*/
 
-    camera.gui = cameraFolder;
+    /*camera.gui = cameraFolder;*/
 }
 
 /* RESET SCENE */
+//document.getElementById('delete-cameras').onclick = resetAll;
 function resetAll()
 {
     cameras.forEach(c => c.remove());
     cameras = [];
+    //console.log(document.getElementsByClassName("cameraUI"));
 }
 
 /* ADDING DUMMY */
