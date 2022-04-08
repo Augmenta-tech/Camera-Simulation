@@ -131,7 +131,7 @@ class Camera{
     {
         this.cameraPerspective.updateProjectionMatrix();
         this.cameraPerspectiveHelper.update();
-        //drawProjection(this);
+        drawProjection(this);
     }
 
     remove()
@@ -409,15 +409,21 @@ function addCameraGUI(cam)
         </div>
         <div id="select-camera" class="row s-p">
             <div class="column-2 row ">
-                <select id="cam-type" name="camType">
+                <select id="cam-type-` + (cam.id) + `" class="select" name="camType">
                     <option value="plus" selected">Orbbec Astra +</option>
                     <option value="pro">Orbbec Astra Pro</option>
                 </select>
                 <!-- <p class="select">  Astra plus </p> <span class="iconify" data-icon="gg:chevron-down"></span> -->
             </div>
             <div class="row s-p column-2">
-                <p id="hfov` + cam.id + `">FOV H    ` + cam.type.HFov + `°</p>
-                <p id="vfov` + cam.id + `">FOV V    ` + cam.type.VFov + `°</p>
+                <div>
+                    <p id="hfov` + cam.id + `">FOV H: ` + cam.type.HFov + `°</p>
+                    <p id="near` + cam.id + `">NEAR: ` + cam.type.rangeNear + `m</p>
+                </div>
+                <div>
+                    <p id="vfov` + cam.id + `">FOV V: ` + cam.type.VFov + `°</p>
+                    <p id="far` + cam.id + `">FAR: ` + cam.type.rangeFar + `m</p>
+                </div>
             </div>
         </div>
         <div class="row s-p">
@@ -439,6 +445,12 @@ function addCameraGUI(cam)
                 <p>YAW  <strong id="yaw-rot-`+ cam.id +`"> 0</strong>°</p>
                 <p>ROLL  <strong id="roll-rot-`+ cam.id +`"> 0</strong>° </p>
             </div>
+        </div>
+        <div  class="row s-p">
+            <p id="area` + cam.id + `">AREA COVERED: </p>
+            <div>
+                <p id="show-overlaps-` + cam.id + `" class="data-button">SHOW OVERLAPS</p>
+                <p id="overlaps` + cam.id + `"></p>
         </div>`;
 
     let inspectorDiv = document.getElementById('inspector');
@@ -450,8 +462,8 @@ function addCameraGUI(cam)
         cameras[parseInt(this.id.split('-')[1])].changeVisibility();
     }
 
-    document.getElementById('cam-type').onchange = function(){
-            switch(document.getElementById('cam-type').value)
+    document.getElementById('cam-type-' + cam.id).onchange = function(){
+            switch(document.getElementById('cam-type-' + cam.id).value)
             {
                 case "plus":
                     cam.type = camerasTypes.OrbbecAstraPlus;
@@ -463,10 +475,10 @@ function addCameraGUI(cam)
                     cam.type = camerasTypes.OrbbecAstraPlus;
             }
             
-            document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H    ' + cam.type.HFov + '°';
-            document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V    ' + cam.type.VFov + '°';
-            //document.getElementById('near' + cam.id + '').innerHTML = 'Min distance: ' + cam.type.rangeNear + 'm';
-            //document.getElementById('far' + cam.id + '').innerHTML = 'Max distance: ' + cam.type.rangeFar + 'm';
+            document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H: ' + cam.type.HFov + '°';
+            document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V: ' + cam.type.VFov + '°';
+            document.getElementById('near' + cam.id + '').innerHTML = 'NEAR: ' + cam.type.rangeNear + 'm';
+            document.getElementById('far' + cam.id + '').innerHTML = 'FAR: ' + cam.type.rangeFar + 'm';
          
             
             cam.cameraPerspective.fov = cam.type.VFov;
@@ -590,16 +602,16 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
     }*/
     
     //camera.guiInfos.innerHTML = '<p id="fov' + camera.id + '" class="controller">HFov: ' + DEFAULT_CAMERA_TYPE.HFov + '° - VFov: ' + DEFAULT_CAMERA_TYPE.VFov + '°</p>';
-    camera.guiInfos.innerHTML += '<p id="near' + camera.id + '" class="controller">Min distance: ' + DEFAULT_CAMERA_TYPE.rangeNear + 'm</p>';
-    camera.guiInfos.innerHTML += '<p id="far' + camera.id + '" class="controller">Max distance: ' + DEFAULT_CAMERA_TYPE.rangeFar + 'm</p>';
+    //camera.guiInfos.innerHTML += '<p id="near' + camera.id + '" class="controller">Min distance: ' + DEFAULT_CAMERA_TYPE.rangeNear + 'm</p>';
+    //camera.guiInfos.innerHTML += '<p id="far' + camera.id + '" class="controller">Max distance: ' + DEFAULT_CAMERA_TYPE.rangeFar + 'm</p>';
 
     //const cameraFolder = camerasGUI.addFolder("Camera " + (camera.id + 1) + " control");
 
     //cameraFolder.add(settingsCamera, 'CamPreset', CamPresets).onChange(function ( value ) {
 
         //document.getElementById('fov' + camera.id + '').innerHTML = 'HFov: ' + value.HFov + '° - VFov: ' + value.VFov + '°';
-        document.getElementById('near' + camera.id + '').innerHTML = 'Min distance: ' + value.rangeNear + 'm';
-        document.getElementById('far' + camera.id + '').innerHTML = 'Max distance: ' + value.rangeFar + 'm';
+        //document.getElementById('near' + camera.id + '').innerHTML = 'Min distance: ' + value.rangeNear + 'm';
+        //document.getElementById('far' + camera.id + '').innerHTML = 'Max distance: ' + value.rangeFar + 'm';
         
         /*camera.cameraPerspective.fov = value.VFov;
         camera.cameraPerspective.aspect = value.aspectRatio;
@@ -650,7 +662,7 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
     });
     */
 
-    camera.guiInfos.innerHTML += '<p id="area' + camera.id + '" class="controller">Area covered: </p>';
+    //camera.guiInfos.innerHTML += '<p id="area' + camera.id + '" class="controller">Area covered: </p>';
     camera.guiInfos.innerHTML += '<p id="overlaps' + camera.id + '" class="controller"></p>';
 
     const infosFolder = cameraFolder.addFolder("Infos Camera " + (camera.id + 1));
@@ -956,9 +968,10 @@ function drawProjection(cam)
     }
     */
     //FIN DEBUG
-    //display area value
+
+    //display area value 
     cam.areaValue = calculateArea(coveredPointsFloor);
-    document.getElementById('area' + cam.id + '').innerHTML = 'Area covered: ' + Math.round(cam.areaValue*100)/100 + '㎡';
+    document.getElementById('area' + cam.id + '').innerHTML = 'AREA COVERED: ' + Math.round(cam.areaValue*100)/100 + '㎡';
 
     //draw area
     cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor);

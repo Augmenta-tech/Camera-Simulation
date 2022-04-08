@@ -144,13 +144,6 @@ strong{
   margin: 2px 0px 0 0;
 }
 
-#cam-type {
-  border: none;
-  border-radius: 25px;
-  padding-left: 5px;
-  margin-left: -5px;
-}
-
 #scene-info .row div{
   flex:1;
 }
@@ -248,6 +241,18 @@ canvas{
 }
 
 .select{
-  color: var(--color-dark-purple);
-  font-size: bold;
+  transition: .2s all ease;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: white;
+  border: none;
+  border-radius: 2px;
+  /* padding-left: 5px;
+  margin-left: -5px; */
+  margin-top: 4%;
+  height: 70%;
+}
+
+.select:hover{
+  background-color: var(--color-viewport);
 }
