@@ -13,7 +13,7 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { OrbitControls } from 'three-controls/OrbitControls.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
-import { Color } from 'three';
+import { Color, Vector3 } from 'three';
 
 
 
@@ -46,7 +46,7 @@ const DEFAULT_CAMERA_PITCH = - Math.PI / 2.0;
 
 let font;
 const fontLoader = new FontLoader();
-const SIZE_TEXT_CAMERA = 0.7
+const SIZE_TEXT_CAMERA = 0.4
 
 class Camera{
     constructor(id, scene)
@@ -87,10 +87,25 @@ class Camera{
 
         this.overlaps = {}
 
-        let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.1 } );
+        let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.05 } );
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.nameText.position.set(this.XPos - SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + SIZE_TEXT_CAMERA/2.0);
         this.nameText.rotation.x = -Math.PI / 2.0;
+
+        let areaDisplayGeometry = new TextGeometry( "AREA VALUE", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+        this.areaDisplay = new THREE.Mesh(areaDisplayGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
+        this.areaDisplay.position.set(this.XPos - SIZE_TEXT_CAMERA * 4/3.0, this.YPos - (this.type.rangeFar - 1), this.ZPos + 3*SIZE_TEXT_CAMERA/2.0);
+        this.areaDisplay.rotation.x = -Math.PI / 2.0;
+
+        this.areaOverlaps = {};
+        for(let i = 0; i < this.id; i++)
+        {
+            let areaOverlapGeometry = new TextGeometry( "OVERLAP AREA", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+            let areaOverlap = new THREE.Mesh(areaOverlapGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
+            this.areaOverlaps[i] = areaOverlap;
+            this.areaOverlaps[i].rotation.x = -Math.PI / 2.0;
+            this.areaOverlaps[i].visible = false;
+        }
     }
 
     addCameraToScene()
@@ -99,6 +114,11 @@ class Camera{
         scene.add( this.cameraPerspectiveHelper );
         scene.add( this.mesh );
         scene.add( this.nameText );
+        scene.add( this.areaDisplay );
+        for(let i = 0; i < this.id; i++)
+        {
+            scene.add(this.areaOverlaps[i]);
+        }
 
         addCameraGUI(this);
     }
@@ -111,7 +131,7 @@ class Camera{
             if(this.id != j)
             {
                 let overlap = this.overlaps[j] ? Math.round(this.overlaps[j] * 100)/100.0 : 0;
-                overlapsDisplay += '<p>Overlap with Camera ' + (j+1) + ': ' + overlap + '㎡</p>'; 
+                overlapsDisplay += '<p>Overlap with Camera ' + (j+1) + ': ' + overlap + 'm²</p>'; 
             }
         }
         document.getElementById('overlaps' + this.id).innerHTML = overlapsDisplay;
@@ -147,6 +167,11 @@ class Camera{
         this.raysWallX = [];
         this.raysWallZ = [];
         scene.remove(this.nameText);
+        scene.remove(this.areaDisplay);
+        for(let i = 0; i < this.id; i++)
+        {
+            scene.remove(this.areaOverlaps[i]);
+        }
     }
 }
 
@@ -178,11 +203,8 @@ let cameras = [];
 let dummies = [];
 
 let camerasGUI = new GUI();
-const dummiesGUI = new GUI();
 let camerasGUIdiv = document.getElementsByClassName("lil-gui")[0];
 camerasGUIdiv.classList.add("cameras-gui");
-let dummiesGUIdiv = document.getElementsByClassName("lil-gui")[1];
-dummiesGUIdiv.classList.add("dummies-gui");
 
 let floor, wallX, wallZ;
 const floorNormal = new THREE.Vector3(0,1,0);
@@ -196,16 +218,12 @@ const DEFAULT_WALLZ_DEPTH = -10;
 let wallZDepth = DEFAULT_WALLZ_DEPTH;
 
 const camerasSettings = {
-    addCamera: addCamera,
+    //addCamera: addCamera,
     floorHeight: DEFAULT_FLOOR_HEIGHT,
     wallXDepth: DEFAULT_WALLX_DEPTH,
-    wallZDepth: DEFAULT_WALLZ_DEPTH,
-    resetAll: resetAll
+    wallZDepth: DEFAULT_WALLZ_DEPTH//,
+    //resetAll: resetAll
 }
-
-const dummiesSettings = {
-    addDummy: addDummy
-}	
 
 //DEBUG
 
@@ -268,7 +286,7 @@ function init() {
     scene.add(wallZ);
 
     // GUI
-    camerasGUI.add(camerasSettings, 'addCamera');
+    //camerasGUI.add(camerasSettings, 'addCamera');
     camerasGUI.add(camerasSettings, 'floorHeight', -10, 10).step(0.1).onChange(function ( value ) {
         floorHeight = value;
         floor.position.y = floorHeight - 0.01;
@@ -286,13 +304,9 @@ function init() {
         wallZDepth = value;
         wallZ.position.z = wallZDepth - 0.01;
     });
-    camerasGUI.add(camerasSettings, 'resetAll');
+    //camerasGUI.add(camerasSettings, 'resetAll');
 
     camerasGUI.open();
-
-    dummiesGUI.add(dummiesSettings, 'addDummy');
-
-    dummiesGUI.open()
 
     // Performance stats
     stats = new Stats();
@@ -451,12 +465,6 @@ function addCameraGUI(cam)
                 <p id="yaw-rot-`+ cam.id +`" class="draggable">YAW <strong>0</strong>°</p>
                 <p id="roll-rot-`+ cam.id +`" class="draggable">ROLL <strong>0</strong>° </p>
             </div>
-        </div>
-        <div  class="row s-p">
-            <p id="area` + cam.id + `">AREA COVERED: </p>
-            <div>
-                <p id="show-overlaps-` + cam.id + `" class="data-button">SHOW OVERLAPS</p>
-                <p id="overlaps` + cam.id + `"></p>
         </div>`;
 
     let inspectorDiv = document.getElementById('inspector');
@@ -799,7 +807,7 @@ function onKeyDown( event ) {
 
         case 80: /*P*/
             
-            cameras.forEach(c => console.log("Camera " + (c.id + 1) + " covers " + Math.round(c.areaValue*100)/100 + " square meters"))
+            cameras.forEach(c => console.log(c.areaOverlaps));
             break;
 
     }
@@ -959,14 +967,15 @@ function drawProjection(cam)
     //Place text 
     if(coveredPointsFloor.length > 2)
     {
-        let barycentre = new THREE.Vector3();
-        coveredPointsFloor.forEach(p => barycentre.add(p));
-        barycentre.divideScalar(coveredPointsFloor.length);
-        cam.nameText.position.copy(barycentre.add(new THREE.Vector3( - SIZE_TEXT_CAMERA * 2, 0.1, SIZE_TEXT_CAMERA / 2.0)));
+        let barycentre = getBarycentre(coveredPointsFloor);
+        cam.nameText.position.copy(barycentre.add(new THREE.Vector3( - SIZE_TEXT_CAMERA * 2, 0.1, 0)));
+        cam.areaDisplay.position.copy(barycentre.add(new THREE.Vector3(0, 0, 1.5*SIZE_TEXT_CAMERA )));
+        cam.areaDisplay.visible = true;
     }
     else
     {
         cam.nameText.position.copy(cam.cameraPerspective.position);
+        cam.areaDisplay.visible = false;
     }
 
 
@@ -989,8 +998,13 @@ function drawProjection(cam)
     //FIN DEBUG
 
     //display area value 
+    let previousValue = cam.areaValue;
     cam.areaValue = calculateArea(coveredPointsFloor);
-    document.getElementById('area' + cam.id + '').innerHTML = 'AREA COVERED: ' + Math.round(cam.areaValue*100)/100 + '㎡';
+    if(previousValue != cam.areaValue)
+    {
+        let newTextGeometry = new TextGeometry( Math.round(cam.areaValue*100)/100 + 'm²', { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+        cam.areaDisplay.geometry = newTextGeometry;
+    }
 
     //draw area
     cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor);
@@ -1000,6 +1014,7 @@ function drawProjection(cam)
     cam.areaAppear ? scene.add(cam.areaCoveredFloor) : scene.remove(cam.areaCoveredFloor);
     cam.areaAppear ? scene.add(cam.areaCoveredWallX) : scene.remove(cam.areaCoveredWallX);
     cam.areaAppear ? scene.add(cam.areaCoveredWallZ) : scene.remove(cam.areaCoveredWallZ);
+
     if(cam.areaValue > 0.01)
     {
         for(let i = 0; i < cam.id; i++)
@@ -1033,9 +1048,23 @@ function drawProjection(cam)
 
                 pointsSuperposition.sort((A,B) => sortByAngle(A,B,pointsSuperposition));
                 let superpositionArea = calculateArea(pointsSuperposition);
-                
-                cameras[i].overlaps[cam.id] = superpositionArea; // / cameras[i].areaValue * 100;
-                cameras[cam.id].overlaps[i] = superpositionArea; // / cam.areaValue * 100;
+                //cameras[i].overlaps[cam.id] = superpositionArea; // / cameras[i].areaValue * 100;
+                if(cam.overlaps[i] != superpositionArea)
+                {
+                    if(pointsSuperposition.length > 2)
+                    {
+                        cam.overlaps[i] = superpositionArea; // / cam.areaValue * 100;
+                        let barycentreSuperposition = getBarycentre(pointsSuperposition);
+                        let areaOverlapsGeometry = new TextGeometry(  Math.round(superpositionArea*100)/100 + "m²", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+                        cam.areaOverlaps[i].geometry = areaOverlapsGeometry;
+                        cam.areaOverlaps[i].position.copy(barycentreSuperposition.add(new Vector3( - SIZE_TEXT_CAMERA*2, 0.1, SIZE_TEXT_CAMERA/2.0 )));
+                        cam.areaOverlaps[i].visible = true;
+                    }
+                    else
+                    {
+                        cam.areaOverlaps[i].visible = false;
+                    }
+                }
             }
         }
     }
@@ -1132,6 +1161,14 @@ function calculateArea(borderPoints)
     }
 
     return areaValue;
+}
+
+function getBarycentre(points)
+{
+    let barycentre = new THREE.Vector3();
+    points.forEach(p => barycentre.add(p));
+    barycentre.divideScalar(points.length);
+    return barycentre;
 }
 
 function drawAreaWithPoints(coveredPoints)
