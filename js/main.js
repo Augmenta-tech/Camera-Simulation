@@ -117,9 +117,9 @@ class Camera{
         document.getElementById('overlaps' + this.id).innerHTML = overlapsDisplay;
     }
 
-    changeVisibility()
+    changeVisibility(display = !this.areaAppear)
     {
-        let value = !this.areaAppear;
+        let value = display;
         this.areaAppear = value;
         this.cameraPerspective.visible = value;
         this.cameraPerspectiveHelper.visible = value;
@@ -445,6 +445,11 @@ function addCameraGUI(cam)
     inspectorDiv.appendChild(cameraUIdiv);
 
     document.getElementById('cam-' + (cam.id) + '-visible').onclick = changeVisibilityofCam;
+    function changeVisibilityofCam()
+    {
+        cameras[parseInt(this.id.split('-')[1])].changeVisibility();
+    }
+
     document.getElementById('cam-type').onchange = function(){
             switch(document.getElementById('cam-type').value)
             {
@@ -479,11 +484,6 @@ function addCameraGUI(cam)
     dragElement(document.getElementById("roll-rot-" + cam.id));
 }
 
-function changeVisibilityofCam()
-{
-    cameras[parseInt(this.id.split('-')[1])].changeVisibility();
-}
-
 function dragElement(element) {
     let value = parseFloat(element.innerHTML);
     let mousePosX = 0;
@@ -492,7 +492,6 @@ function dragElement(element) {
 
 
     function dragMouseDown(e) {
-        console.log(value);
         e = e || window.event;
         e.preventDefault();
         // get the mouse cursor position at startup:
@@ -524,7 +523,6 @@ function dragElement(element) {
 
         value += diffX * fac;
         element.innerHTML = Math.round(value*100)/100.0;
-        console.log(value);
 
         let cam = cameras[element.id.split('-')[2]];
         switch(element.id.split('-')[0])
@@ -571,7 +569,7 @@ function dragElement(element) {
         document.onmousemove = null;
     }
 
-  }
+}
 
 function addCameraUI(camera) //rename addCameraGUI to make it work
 {
@@ -659,7 +657,7 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
     infosFolder.$children.appendChild( camera.guiInfos );
     infosFolder.close()
 
-    camera.guiInfos.setAttribute("data-index", camera.id);
+    //camera.guiInfos.setAttribute("data-index", camera.id);
 
     //console.log(camera.guiInfos.dataset.index);
 /*
@@ -677,12 +675,16 @@ function addCameraUI(camera) //rename addCameraGUI to make it work
 }
 
 /* RESET SCENE */
-//document.getElementById('delete-cameras').onclick = resetAll;
+document.getElementById('delete-cameras').onclick = resetAll;
 function resetAll()
 {
+    let camerasUIdivs = document.getElementsByClassName("cameraUI");
+    for(let i = camerasUIdivs.length - 1; i >= 0; i--)
+    {
+        camerasUIdivs[i].remove();
+    }
     cameras.forEach(c => c.remove());
     cameras = [];
-    //console.log(document.getElementsByClassName("cameraUI"));
 }
 
 /* ADDING DUMMY */
@@ -749,6 +751,14 @@ function addDummyGUI(dummy)
         dummy.zPos = value;
         dummy.model.position.z = value;
     });
+}
+
+/* DISPLAY FRUSTUMS */
+document.getElementById('display-frustums').onclick = displayFrustums;
+function displayFrustums()
+{
+    let visibles = cameras.filter(c => c.areaAppear);
+    cameras.forEach(c => c.changeVisibility(visibles.length != cameras.length));
 }
 
 //DEBUG
