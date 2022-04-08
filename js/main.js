@@ -123,6 +123,7 @@ class Camera{
         this.areaAppear = value;
         this.cameraPerspective.visible = value;
         this.cameraPerspectiveHelper.visible = value;
+        this.nameText.visible = value;
         let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
         iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
     }
@@ -155,16 +156,21 @@ class Dummy {
         this.id = id;
 
         this.xPos = 0;
-        this.yPos = 0;
+        this.yPos = floorHeight;
         this.zPos = 0;
 
         this.model = new THREE.Object3D();
     }
 
-    addDummyToScene()
+    /*addDummyToScene()
     {
         loadDummy(this)
         addDummyGUI(this);
+    }*/
+
+    remove()
+    {
+        scene.remove(this.model);
     }
 }
 
@@ -431,9 +437,9 @@ function addCameraGUI(cam)
                 <p>  Position </p>
             </div>
             <div class="row s-p column-2">
-                <p>X <strong id="x-pos-`+ cam.id +`"> 0</strong>m</p>
-                <p>Y  <strong id="y-pos-`+ cam.id +`"> 0</strong>m</p>
-                <p>Z  <strong id="z-pos-`+ cam.id +`"> 7</strong>m</p>
+                <p id="x-pos-`+ cam.id +`" class="draggable">X <strong>0</strong>m</p>
+                <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>0</strong>m</p>
+                <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>7</strong>m</p>
             </div>
         </div>
         <div  class="row s-p">
@@ -441,9 +447,9 @@ function addCameraGUI(cam)
                 <p>  Rotation </p>
             </div>
             <div class="row s-p column-2">
-                <p>PITCH <strong id="pitch-rot-`+ cam.id +`"> 0</strong>°</p>
-                <p>YAW  <strong id="yaw-rot-`+ cam.id +`"> 0</strong>°</p>
-                <p>ROLL  <strong id="roll-rot-`+ cam.id +`"> 0</strong>° </p>
+                <p id="pitch-rot-`+ cam.id +`" class="draggable">PITCH <strong>0</strong>°</p>
+                <p id="yaw-rot-`+ cam.id +`" class="draggable">YAW <strong>0</strong>°</p>
+                <p id="roll-rot-`+ cam.id +`" class="draggable">ROLL <strong>0</strong>° </p>
             </div>
         </div>
         <div  class="row s-p">
@@ -497,7 +503,8 @@ function addCameraGUI(cam)
 }
 
 function dragElement(element) {
-    let value = parseFloat(element.innerHTML);
+    let valueElement = element.getElementsByTagName('strong')[0];
+    let value = parseFloat(valueElement.innerHTML);
     let mousePosX = 0;
     let diffX = 0;
     element.onmousedown = dragMouseDown;
@@ -534,7 +541,7 @@ function dragElement(element) {
         }
 
         value += diffX * fac;
-        element.innerHTML = Math.round(value*100)/100.0;
+        valueElement.innerHTML = Math.round(value*100)/100.0;
 
         let cam = cameras[element.id.split('-')[2]];
         switch(element.id.split('-')[0])
@@ -700,10 +707,12 @@ function resetAll()
 }
 
 /* ADDING DUMMY */
+document.getElementById('add-dummy').onclick = addDummy;
 function addDummy()
 {
     let newDummy = new Dummy(dummies.length);
-    newDummy.addDummyToScene();
+    //newDummy.addDummyToScene();
+    loadDummy(newDummy);
     dummies.push(newDummy);
 }
 
@@ -745,6 +754,7 @@ function loadDummy(dummy)
     } );
 }
 
+/*
 function addDummyGUI(dummy)
 {
     const settingsDummy = {
@@ -763,6 +773,15 @@ function addDummyGUI(dummy)
         dummy.zPos = value;
         dummy.model.position.z = value;
     });
+}
+*/
+
+/* REMOVE DUMMIES */
+document.getElementById('remove-dummies').onclick = removeDummies;
+function removeDummies()
+{
+    dummies.forEach(d => d.remove());
+    dummies = [];
 }
 
 /* DISPLAY FRUSTUMS */

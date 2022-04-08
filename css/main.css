@@ -256,3 +256,14 @@ canvas{
 .select:hover{
   background-color: var(--color-viewport);
 }
+
+#dummies-buttons{
+  display: grid;
+  position: absolute;
+  bottom: 25px;
+  right: 25px;
+}
+
+.draggable{
+  cursor: ew-resize;
+}
