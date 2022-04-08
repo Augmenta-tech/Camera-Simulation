@@ -13,7 +13,7 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { OrbitControls } from 'three-controls/OrbitControls.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
-import { Color, Vector3 } from 'three';
+import { Color, MeshStandardMaterial, Vector3 } from 'three';
 
 
 
@@ -28,11 +28,12 @@ let renderer;
 let camera;
 
 let transformControl;
+const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const onUpPosition = new THREE.Vector2();
 const onDownPosition = new THREE.Vector2();
 
-
+let camMeshes = [];
 
 const camerasTypes = {
     OrbbecAstraPlus: {HFov:55, VFov:45, aspectRatio: 1920.0/1080.0, rangeNear: 0.6,rangeFar: 8},
@@ -69,6 +70,7 @@ class Camera{
         const material = new THREE.MeshPhongMaterial( { color: this.color, dithering: true } );
         const geometry = new THREE.BoxGeometry( 0.2,0.2,0.2 );
         this.mesh = new THREE.Mesh( geometry, material );
+        camMeshes.push(this.mesh);
 
         this.cameraPerspective.position.y = this.YPos;
         this.mesh.position.y = this.YPos;
@@ -155,6 +157,15 @@ class Camera{
 
     render()
     {
+        this.XPos = this.mesh.position.x;
+        this.YPos = this.mesh.position.y;
+        this.ZPos = this.mesh.position.z;
+        this.cameraPerspective.position.set(this.XPos, this.YPos, this.ZPos);
+
+        document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.XPos*10)/10.0;
+        document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.ZPos*10)/10.0;
+        document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.YPos*10)/10.0;
+        
         this.cameraPerspective.updateProjectionMatrix();
         this.cameraPerspectiveHelper.update();
         drawProjection(this);
@@ -164,6 +175,7 @@ class Camera{
     {
         scene.remove(this.cameraPerspectiveHelper);
         scene.remove(this.cameraPerspective);
+        if ( transformControl.object === this.mesh ) transformControl.detach();
         scene.remove(this.mesh);
         scene.remove(this.areaCoveredFloor);
         scene.remove(this.areaCoveredWallX);
@@ -349,11 +361,17 @@ function init() {
     } );
     scene.add( transformControl );
 
-    /*
+    transformControl.addEventListener( 'objectChange', function () {
+
+        //updateSplineOutline();  ///UPDATE VALUES ?
+
+    } );
+
+    
     document.addEventListener( 'pointerdown', onPointerDown );
     document.addEventListener( 'pointerup', onPointerUp );
     document.addEventListener( 'pointermove', onPointerMove );
-    */
+    
     window.addEventListener( 'resize', onWindowResize );
 
     //DEBUG
@@ -362,30 +380,37 @@ function init() {
 }
 
 /* USER'S ACTIONS */
-/*
-function onPointerDown( event ) {
 
+function onPointerDown( event ) {
     onDownPosition.x = event.clientX;
     onDownPosition.y = event.clientY;
 
 }
 
 function onPointerUp() {
-
     onUpPosition.x = event.clientX;
     onUpPosition.y = event.clientY;
 
     if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) transformControl.detach();
-
 }
 
 function onPointerMove( event ) {
 
-    pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    pointer.x = (event.clientX / document.getElementById('viewport').offsetWidth) * 2 - 1;
+    pointer.y = - ((event.clientY - document.getElementById('header').offsetHeight) / document.getElementById('viewport').offsetHeight) * 2 + 1;
+    
+    raycaster.setFromCamera( pointer, camera );
 
+    const intersects = raycaster.intersectObjects( camMeshes, false );
+
+
+    if(intersects.length > 0) {
+        const object = intersects[ 0 ].object;
+        if (object !== transformControl.object) {
+            transformControl.attach( object );
+        }
+    }
 }
-*/
 
 function onWindowResize() {
 
@@ -524,7 +549,8 @@ function dragElement(element) {
 
 
     function dragMouseDown(e) {
-
+        valueElement = element.getElementsByTagName('strong')[0];
+        value = parseFloat(valueElement.innerHTML);
         valueElement.style.textDecoration = "underline";
         e = e || window.event;
         e.preventDefault();
@@ -720,6 +746,7 @@ function resetAll()
     }
     cameras.forEach(c => c.remove());
     cameras = [];
+    camMeshes = [];
 }
 
 /* ADDING DUMMY */
@@ -1238,7 +1265,6 @@ function animate() {
 }
 
 function render() {
-    
     cameras.forEach(c => c.render());
     //cameras.forEach(c => c.displayOverlaps());
 
