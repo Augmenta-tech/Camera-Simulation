@@ -146,6 +146,11 @@ class Camera{
         this.nameText.visible = value;
         let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
         iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+        this.areaDisplay.visible = value;
+        for(let i = 0; i < this.id; i++)
+        {
+            this.areaOverlaps[i].visible = value;
+        }
     }
 
     render()
@@ -519,6 +524,8 @@ function dragElement(element) {
 
 
     function dragMouseDown(e) {
+
+        valueElement.style.textDecoration = "underline";
         e = e || window.event;
         e.preventDefault();
         // get the mouse cursor position at startup:
@@ -591,6 +598,7 @@ function dragElement(element) {
     }
 
     function closeDragElement() {
+        valueElement.style.textDecoration = "none";
         /* stop changing when mouse button is released:*/
         document.onmouseup = null;
         document.onmousemove = null;
@@ -970,7 +978,7 @@ function drawProjection(cam)
         let barycentre = getBarycentre(coveredPointsFloor);
         cam.nameText.position.copy(barycentre.add(new THREE.Vector3( - SIZE_TEXT_CAMERA * 2, 0.1, 0)));
         cam.areaDisplay.position.copy(barycentre.add(new THREE.Vector3(0, 0, 1.5*SIZE_TEXT_CAMERA )));
-        cam.areaDisplay.visible = true;
+        cam.areaDisplay.visible = cam.areaAppear;
     }
     else
     {
@@ -1051,19 +1059,19 @@ function drawProjection(cam)
                 //cameras[i].overlaps[cam.id] = superpositionArea; // / cameras[i].areaValue * 100;
                 if(cam.overlaps[i] != superpositionArea)
                 {
-                    if(pointsSuperposition.length > 2)
-                    {
-                        cam.overlaps[i] = superpositionArea; // / cam.areaValue * 100;
-                        let barycentreSuperposition = getBarycentre(pointsSuperposition);
-                        let areaOverlapsGeometry = new TextGeometry(  Math.round(superpositionArea*100)/100 + "m²", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
-                        cam.areaOverlaps[i].geometry = areaOverlapsGeometry;
-                        cam.areaOverlaps[i].position.copy(barycentreSuperposition.add(new Vector3( - SIZE_TEXT_CAMERA*2, 0.1, SIZE_TEXT_CAMERA/2.0 )));
-                        cam.areaOverlaps[i].visible = true;
-                    }
-                    else
-                    {
-                        cam.areaOverlaps[i].visible = false;
-                    }
+                    cam.overlaps[i] = superpositionArea; // / cam.areaValue * 100;
+                    let barycentreSuperposition = getBarycentre(pointsSuperposition);
+                    let areaOverlapsGeometry = new TextGeometry(  Math.round(superpositionArea*100)/100 + "m²", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+                    cam.areaOverlaps[i].geometry = areaOverlapsGeometry;
+                    cam.areaOverlaps[i].position.copy(barycentreSuperposition.add(new Vector3( - SIZE_TEXT_CAMERA*2, 0.1, SIZE_TEXT_CAMERA/2.0 )));
+                }
+                if(pointsSuperposition.length > 2)
+                {
+                    cam.areaOverlaps[i].visible = cam.areaAppear && cameras[i].areaAppear;
+                }
+                else
+                {
+                    cam.areaOverlaps[i].visible = false;
                 }
             }
         }
