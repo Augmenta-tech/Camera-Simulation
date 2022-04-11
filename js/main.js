@@ -34,6 +34,7 @@ const onUpPosition = new THREE.Vector2();
 const onDownPosition = new THREE.Vector2();
 
 let camMeshes = [];
+let dummiesMeshes = [];
 
 const camerasTypes = {
     OrbbecAstraPlus: {HFov:55, VFov:45, aspectRatio: 1920.0/1080.0, rangeNear: 0.6,rangeFar: 8},
@@ -70,6 +71,7 @@ class Camera{
         const material = new THREE.MeshPhongMaterial( { color: this.color, dithering: true } );
         const geometry = new THREE.BoxGeometry( 0.2,0.2,0.2 );
         this.mesh = new THREE.Mesh( geometry, material );
+        this.mesh.name = 'Camera';
         camMeshes.push(this.mesh);
 
         this.cameraPerspective.position.y = this.YPos;
@@ -77,6 +79,7 @@ class Camera{
         this.cameraPerspective.rotateX(this.pitch);
         
         this.areaCoveredFloor = new THREE.Mesh();
+        this.areaCoveredAbove = new THREE.Mesh();
         this.areaCoveredWallX = new THREE.Mesh();
         this.areaCoveredWallZ = new THREE.Mesh();
 
@@ -84,6 +87,7 @@ class Camera{
         this.areaValue = 0;
 
         this.raysFloor = [];
+        this.raysAbove = [];
         this.raysWallX = [];
         this.raysWallZ = [];
 
@@ -155,7 +159,7 @@ class Camera{
         }
     }
 
-    render()
+    updatePosition()
     {
         this.XPos = this.mesh.position.x;
         this.YPos = this.mesh.position.y;
@@ -166,6 +170,10 @@ class Camera{
         document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.ZPos*10)/10.0;
         document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.YPos*10)/10.0;
         
+    }
+
+    render()
+    {
         this.cameraPerspective.updateProjectionMatrix();
         this.cameraPerspectiveHelper.update();
         drawProjection(this);
@@ -198,21 +206,45 @@ class Dummy {
         this.id = id;
 
         this.xPos = 0;
-        this.yPos = floorHeight;
+        this.yPos = 0;
         this.zPos = 0;
 
+        this.height = 1.8;
+
         this.model = new THREE.Object3D();
+
+        const material = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+        const geometry = new THREE.BoxGeometry( 0.7, this.height, 0.8 );
+        material.transparent = true;
+        material.opacity = 0;
+        this.mesh = new THREE.Mesh( geometry, material );
+        this.mesh.position.y = this.height / 2.0;
+        this.mesh.name = 'Dummy';
+        dummiesMeshes.push(this.mesh);
     }
 
-    /*addDummyToScene()
+    addDummyToScene()
     {
         loadDummy(this)
-        addDummyGUI(this);
-    }*/
+        scene.add(this.mesh);
+        this.model.position.clone(this.mesh.position); 
+        //addDummyGUI(this);
+    }
+
+    updatePosition()
+    {
+        this.XPos = this.mesh.position.x;
+        this.YPos = this.mesh.position.y - this.height / 2.0;
+        this.ZPos = this.mesh.position.z;
+        this.model.position.set(this.XPos, this.YPos, this.ZPos);
+
+    }
 
     remove()
     {
+        if ( transformControl.object === this.mesh ) transformControl.detach();
         scene.remove(this.model);
+        scene.remove(this.mesh);
     }
 }
 
@@ -226,7 +258,7 @@ camerasGUIdiv.classList.add("cameras-gui");
 let floor, wallX, wallZ;
 const floorNormal = new THREE.Vector3(0,1,0);
 const DEFAULT_FLOOR_HEIGHT = 0;
-let floorHeight = DEFAULT_FLOOR_HEIGHT;
+let heightDetected = 1;
 const wallXNormal = new THREE.Vector3(1,0,0);
 const DEFAULT_WALLX_DEPTH = -10;
 let wallXDepth = DEFAULT_WALLX_DEPTH;
@@ -236,7 +268,7 @@ let wallZDepth = DEFAULT_WALLZ_DEPTH;
 
 const camerasSettings = {
     //addCamera: addCamera,
-    floorHeight: DEFAULT_FLOOR_HEIGHT,
+    heightDetected: 1,
     wallXDepth: DEFAULT_WALLX_DEPTH,
     wallZDepth: DEFAULT_WALLZ_DEPTH//,
     //resetAll: resetAll
@@ -280,7 +312,7 @@ function init() {
     const divisions = 50
 
     const gridHelper = new THREE.GridHelper( size, divisions, { color: 0x444444 }, { color: 0x444444 } );
-    gridHelper.position.y = floorHeight - 0.005;
+    gridHelper.position.y = - 0.005;
     scene.add( gridHelper );
 
     // WallX
@@ -304,14 +336,8 @@ function init() {
 
     // GUI
     //camerasGUI.add(camerasSettings, 'addCamera');
-    camerasGUI.add(camerasSettings, 'floorHeight', -10, 10).step(0.1).onChange(function ( value ) {
-        floorHeight = value;
-        floor.position.y = floorHeight - 0.01;
-        gridHelper.position.y = floorHeight - 0.005
-        dummies.forEach(d => {
-            d.yPos = floorHeight;
-            d.model.position.y = floorHeight;
-        });
+    camerasGUI.add(camerasSettings, 'heightDetected', -10, 10).step(0.1).onChange(function ( value ) {
+        heightDetected = value;
     });
     camerasGUI.add(camerasSettings, 'wallXDepth', -30, 10).step(0.1).onChange(function ( value ) {
         wallXDepth = value;
@@ -361,9 +387,10 @@ function init() {
     } );
     scene.add( transformControl );
 
-    transformControl.addEventListener( 'objectChange', function () {
+    transformControl.addEventListener( 'objectChange', function (obj) {
 
-        //updateSplineOutline();  ///UPDATE VALUES ?
+        cameras.forEach(c => c.updatePosition());
+        dummies.forEach(d => d.updatePosition());
 
     } );
 
@@ -401,13 +428,16 @@ function onPointerMove( event ) {
     
     raycaster.setFromCamera( pointer, camera );
 
-    const intersects = raycaster.intersectObjects( camMeshes, false );
+    const meshes = camMeshes.concat(dummiesMeshes);
 
+    const intersects = raycaster.intersectObjects( meshes, false );
 
     if(intersects.length > 0) {
         const object = intersects[ 0 ].object;
         if (object !== transformControl.object) {
             transformControl.attach( object );
+            if(object.name === 'Dummy') transformControl.showY = false;
+            if(object.name === 'Camera') transformControl.showY = true;
         }
     }
 }
@@ -546,12 +576,14 @@ function dragElement(element) {
     let mousePosX = 0;
     let diffX = 0;
     element.onmousedown = dragMouseDown;
+    let dragged = false;
 
 
     function dragMouseDown(e) {
         valueElement = element.getElementsByTagName('strong')[0];
         value = parseFloat(valueElement.innerHTML);
         valueElement.style.textDecoration = "underline";
+        dragged = false;
         e = e || window.event;
         e.preventDefault();
         // get the mouse cursor position at startup:
@@ -561,6 +593,7 @@ function dragElement(element) {
     }
 
     function elementDrag(e) {
+        dragged = true;
         e = e || window.event;
         e.preventDefault();
         // calculate the new cursor position:
@@ -628,6 +661,22 @@ function dragElement(element) {
         /* stop changing when mouse button is released:*/
         document.onmouseup = null;
         document.onmousemove = null;
+
+        /*on clic, change the value with an input*/
+        /* WIP
+        if(!dragged)
+        {
+            let inputElem = document.createElement('input');
+            inputElem.type = "text";
+            inputElem.setAttribute("autofocus", true);
+            inputElem.name = element.id;
+            inputElem.value = valueElement.innerHTML;
+            inputElem.style = `
+                width: 50px;
+                position: fixed;
+            `;
+            element.insertBefore(inputElem, element.firstChild);
+        }*/
     }
 
 }
@@ -754,8 +803,8 @@ document.getElementById('add-dummy').onclick = addDummy;
 function addDummy()
 {
     let newDummy = new Dummy(dummies.length);
-    //newDummy.addDummyToScene();
-    loadDummy(newDummy);
+    newDummy.addDummyToScene();
+    //loadDummy(newDummy);
     dummies.push(newDummy);
 }
 
@@ -842,7 +891,7 @@ function onKeyDown( event ) {
 
         case 80: /*P*/
             
-            cameras.forEach(c => console.log(c.areaOverlaps));
+            console.log(totalAreaCovered());
             break;
 
     }
@@ -853,6 +902,7 @@ function onKeyDown( event ) {
 function drawProjection(cam)
 {
     scene.remove(cam.areaCoveredFloor);
+    scene.remove(cam.areaCoveredAbove);
     scene.remove(cam.areaCoveredWallX);
     scene.remove(cam.areaCoveredWallZ);
     let raysIntersect = [];
@@ -872,14 +922,33 @@ function drawProjection(cam)
         {
             if(Math.abs(plane.normal.x) > 0.01)
             {
-                const point = new THREE.Vector3((- floorHeight*plane.normal.y - plane.constant)/plane.normal.x, floorHeight, 0);
+                const point = new THREE.Vector3(- plane.constant/plane.normal.x, 0, 0);
+                const direction = new THREE.Vector3(- plane.normal.z/plane.normal.x , 0, 1).normalize();
+                const ray = new THREE.Ray(point, direction);
+                raysIntersect.push(ray);
+            }
+            else if(Math.abs(plane.normal.z) > 0.01)
+            {
+                const point = new THREE.Vector3(0, 0, - plane.constant/plane.normal.z);
+                const direction = new THREE.Vector3(1, 0, - plane.normal.x/plane.normal.z).normalize();
+                const ray = new THREE.Ray(point, direction);
+                raysIntersect.push(ray);
+            }
+        }
+
+        //crossing a plane heightDetected m above the floor
+        if(floorN.length() > 0.01)
+        {
+            if(Math.abs(plane.normal.x) > 0.01)
+            {
+                const point = new THREE.Vector3((- heightDetected*plane.normal.y - plane.constant)/plane.normal.x, heightDetected, 0);
                 const direction = new THREE.Vector3((- plane.normal.z)/plane.normal.x , 0, 1).normalize();
                 const ray = new THREE.Ray(point, direction);
                 raysIntersect.push(ray);
             }
             else if(Math.abs(plane.normal.z) > 0.01)
             {
-                const point = new THREE.Vector3(0, floorHeight, (- floorHeight*plane.normal.y - plane.constant)/plane.normal.z);
+                const point = new THREE.Vector3(0, heightDetected, (- heightDetected*plane.normal.y - plane.constant)/plane.normal.z);
                 const direction = new THREE.Vector3(1, 0, (- plane.normal.x)/plane.normal.z).normalize();
                 const ray = new THREE.Ray(point, direction);
                 raysIntersect.push(ray);
@@ -932,15 +1001,23 @@ function drawProjection(cam)
     }
 
     //adding rays for walls intersections
-    let origin = new THREE.Vector3(wallXDepth, floorHeight, wallZDepth);
+    let origin = new THREE.Vector3(wallXDepth, 0, wallZDepth);
     raysIntersect.push(new THREE.Ray(origin, wallXNormal));
     raysIntersect.push(new THREE.Ray(origin, floorNormal));
     raysIntersect.push(new THREE.Ray(origin, wallZNormal));
+
+    let originAbove = new THREE.Vector3(wallXDepth, heightDetected, wallZDepth);
+    raysIntersect.push(new THREE.Ray(originAbove, wallXNormal));
+    raysIntersect.push(new THREE.Ray(originAbove, wallZNormal));
     
     
     //floor points
-    let floorRays = raysIntersect.filter(r => Math.abs(r.origin.y - floorHeight) < 0.01 && Math.abs(r.direction.y) < 0.01);
+    let floorRays = raysIntersect.filter(r => Math.abs(r.origin.y < 0.01 && Math.abs(r.direction.y) < 0.01));
     let intersectionPointsFloor = getIntersectionPoints(floorRays);
+
+    //floor points heightDetected m above floor
+    let aboveRays = raysIntersect.filter(r => Math.abs(r.origin.y - heightDetected) < 0.01 && Math.abs(r.direction.y) < 0.01);
+    let intersectionPointsAbove = getIntersectionPoints(aboveRays);
 
     //wallX points
     let wallXRays = raysIntersect.filter(r => Math.abs(r.origin.x - wallXDepth) < 0.01  && Math.abs(r.direction.x) < 0.01);
@@ -951,6 +1028,7 @@ function drawProjection(cam)
     let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
     cam.raysFloor = floorRays;
+    cam.raysAbove = aboveRays;
     cam.raysWallX = wallXRays;
     cam.raysWallZ = wallZRays;
 
@@ -986,18 +1064,21 @@ function drawProjection(cam)
         frustumScaled.planes[i].constant += 0.01;
     }
 
-    const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > floorHeight - 0.01 && p.z > wallZDepth - 0.01);
-    const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > floorHeight - 0.01 && p.z > wallZDepth - 0.01);
-    const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > floorHeight - 0.01 && p.z > wallZDepth - 0.01);
+    const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
+    const coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
+    const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
+    const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
 
 
     coveredPointsFloor.sort((A, B) => sortByAngle(A, B, coveredPointsFloor));
+    coveredPointsAbove.sort((A, B) => sortByAngle(A, B, coveredPointsAbove));
     coveredPointsWallX.sort((A, B) => sortByAngle(A, B, coveredPointsWallX));
     coveredPointsWallZ.sort((A, B) => sortByAngle(A, B, coveredPointsWallZ));
 
-    coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id);
-    coveredPointsWallX.forEach((p) => p.y += 0.01*cam.id);
-    coveredPointsWallZ.forEach((p) => p.y += 0.01*cam.id);
+    coveredPointsFloor.forEach((p) => p.y += + 0.01*cam.id / cameras.length);
+    coveredPointsAbove.forEach((p) => p.y += -heightDetected + 0.01 + 0.01*cam.id / cameras.length);
+    coveredPointsWallX.forEach((p) => p.y += 0.01*cam.id / cameras.length);
+    coveredPointsWallZ.forEach((p) => p.y += 0.01*cam.id / cameras.length);
 
     //Place text 
     if(coveredPointsFloor.length > 2)
@@ -1042,11 +1123,13 @@ function drawProjection(cam)
     }
 
     //draw area
-    cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor);
+    cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
+    cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
     cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
     cam.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
 
     cam.areaAppear ? scene.add(cam.areaCoveredFloor) : scene.remove(cam.areaCoveredFloor);
+    cam.areaAppear ? scene.add(cam.areaCoveredAbove) : scene.remove(cam.areaCoveredAbove);
     cam.areaAppear ? scene.add(cam.areaCoveredWallX) : scene.remove(cam.areaCoveredWallX);
     cam.areaAppear ? scene.add(cam.areaCoveredWallZ) : scene.remove(cam.areaCoveredWallZ);
 
@@ -1206,7 +1289,7 @@ function getBarycentre(points)
     return barycentre;
 }
 
-function drawAreaWithPoints(coveredPoints)
+function drawAreaWithPoints(coveredPoints, color = 0x008888)
 {
     const geometryArea = new THREE.BufferGeometry();
     let verticesArray = [];
@@ -1242,7 +1325,7 @@ function drawAreaWithPoints(coveredPoints)
     const vertices = new Float32Array( verticesArray );
 
     geometryArea.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-    const materialArea = new THREE.MeshBasicMaterial( { color: 0x008888 } );
+    const materialArea = new THREE.MeshBasicMaterial( { color: color } );
     
     materialArea.transparent = true;
     materialArea.opacity = 0.7;
@@ -1251,6 +1334,20 @@ function drawAreaWithPoints(coveredPoints)
 
     return(areaCovered);
 }
+
+/* WIP
+function totalAreaCovered()
+{
+    let totalAreaCovered = 0;
+    cameras.forEach(c => {
+        totalAreaCovered += c.areaValue;
+        for(let i = 0; i < c.id; i++)
+        {
+            totalAreaCovered -= c.overlaps[i];
+        }
+    });
+    return totalAreaCovered;
+}*/
 
 
 /* RENDER */
