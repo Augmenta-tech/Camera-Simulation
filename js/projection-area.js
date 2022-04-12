@@ -43,7 +43,7 @@ export function initScene(scene)
     const size = 50;
     const divisions = 50
 
-    const gridHelper = new THREE.GridHelper( size, divisions, { color: 0x444444 }, { color: 0x444444 } );
+    const gridHelper = new THREE.GridHelper( size, divisions, 0x666666 , 0x666666 );
     gridHelper.position.y = - 0.005;
     scene.add( gridHelper );
 
@@ -242,7 +242,7 @@ export function drawProjection(cam)
     const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
 
 
-    if(coveredPointsFloor.length > 2)// && coveredPointsAbove.length > 2)
+    if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
     {
         let raysAbove = [...aboveRays];
         raysAbove.forEach(r => r.origin.y -= heightDetected);
@@ -267,6 +267,9 @@ export function drawProjection(cam)
             abovePoint.y += heightDetected;
             return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01;
         })
+    }
+    else{
+        coveredPointsAbove = [];
     }
 
 

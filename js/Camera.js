@@ -15,7 +15,7 @@ export const camerasTypes = {
 
 const DEFAULT_CAMERA_TYPE = camerasTypes.OrbbecAstraPlus
 
-const DEFAULT_CAMERA_HEIGHT = 7
+const DEFAULT_CAMERA_HEIGHT = 4.5
 const DEFAULT_CAMERA_PITCH = - Math.PI / 2.0;
 
 
@@ -69,17 +69,17 @@ export class Camera{
 
         this.overlaps = {}
 
-        let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.05 } );
+        let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.01 } );
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.nameText.position.set(this.XPos - SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + SIZE_TEXT_CAMERA/2.0);
         this.nameText.rotation.x = -Math.PI / 2.0;
 
-        let areaDisplayGeometry = new TextGeometry( "AREA VALUE", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+        let areaDisplayGeometry = new TextGeometry( "AREA VALUE", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         this.areaDisplay = new THREE.Mesh(areaDisplayGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.areaDisplay.position.set(this.XPos - SIZE_TEXT_CAMERA * 4/3.0, this.YPos - (this.type.rangeFar - 1), this.ZPos + 3*SIZE_TEXT_CAMERA/2.0);
         this.areaDisplay.rotation.x = -Math.PI / 2.0;
 
-        this.areaOverlaps = {};
+        /*this.areaOverlaps = {};
         for(let i = 0; i < this.id; i++)
         {
             let areaOverlapGeometry = new TextGeometry( "OVERLAP AREA", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
@@ -87,7 +87,7 @@ export class Camera{
             this.areaOverlaps[i] = areaOverlap;
             this.areaOverlaps[i].rotation.x = -Math.PI / 2.0;
             this.areaOverlaps[i].visible = false;
-        }
+        }*/
     }
 
     addCameraToScene()
@@ -97,10 +97,10 @@ export class Camera{
         scene.add( this.mesh );
         scene.add( this.nameText );
         scene.add( this.areaDisplay );
-        for(let i = 0; i < this.id; i++)
+        /*for(let i = 0; i < this.id; i++)
         {
             scene.add(this.areaOverlaps[i]);
-        }
+        }*/
 
         addCameraGUI(this);
     }
@@ -114,11 +114,11 @@ export class Camera{
 
     changeAreaDisplayed()
     {
-        let newTextGeometry = new TextGeometry( Math.round(this.areaValue*100)/100 + 'm²', { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
+        let newTextGeometry = new TextGeometry( Math.round(this.areaValue*100)/100 + 'm²', { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         this.areaDisplay.geometry = newTextGeometry;
     }
 
-    displayOverlaps()
+    /*displayOverlaps()
     {
         let overlapsDisplay = '';
         for(let j = 0; j < cameras.length; j++)
@@ -130,7 +130,7 @@ export class Camera{
             }
         }
         document.getElementById('overlaps' + this.id).innerHTML = overlapsDisplay;
-    }
+    }*/
 
     changeVisibility(display = !this.areaAppear)
     {
@@ -142,10 +142,10 @@ export class Camera{
         let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
         iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         this.areaDisplay.visible = value;
-        for(let i = 0; i < this.id; i++)
+        /*for(let i = 0; i < this.id; i++)
         {
             this.areaOverlaps[i].visible = value;
-        }
+        }*/
     }
 
     updatePosition()
@@ -183,10 +183,10 @@ export class Camera{
         this.raysWallZ = [];
         scene.remove(this.nameText);
         scene.remove(this.areaDisplay);
-        for(let i = 0; i < this.id; i++)
+        /*for(let i = 0; i < this.id; i++)
         {
             scene.remove(this.areaOverlaps[i]);
-        }
+        }*/
     }
 }
 
@@ -249,7 +249,7 @@ function addCameraGUI(cam)
             <div class="row s-p column-2">
                 <p id="x-pos-`+ cam.id +`" class="draggable">X <strong>0</strong>m</p>
                 <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>0</strong>m</p>
-                <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>7</strong>m</p>
+                <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>` + DEFAULT_CAMERA_HEIGHT + `</strong>m</p>
             </div>
         </div>
         <div  class="row s-p">
