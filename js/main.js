@@ -66,7 +66,7 @@ function init() {
 
     // Creation of user's camera
     camera = new THREE.PerspectiveCamera( 70, aspect, 1, 10000 );
-    camera.position.set(8,8,8); //height and retreat
+    camera.position.set(6,6,6); //height and retreat
 
     // Controls
     const controls = new OrbitControls( camera, renderer.domElement );
