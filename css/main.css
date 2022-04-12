@@ -221,6 +221,12 @@ canvas{
   margin: 30px auto 0 auto;
 }
 
+.inputArea{
+  margin-left: 25%;
+  margin-top: -3%;
+  width:25%;
+}
+
 [data-button].active p{
   color:  var(--color-white);
 }

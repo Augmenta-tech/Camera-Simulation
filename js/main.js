@@ -28,6 +28,13 @@ const onDownPosition = new THREE.Vector2();
 init();
 animate();
 
+
+const geometry = new THREE.BoxGeometry( 9, 0.001, 7 );
+const edges = new THREE.EdgesGeometry( geometry );
+const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
+line.position.y = 0.02;
+scene.add( line );
+
 /* SCENE INITIALIZATION */
 
 function init() {

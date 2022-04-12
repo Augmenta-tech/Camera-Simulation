@@ -272,7 +272,6 @@ export function drawProjection(cam)
         coveredPointsAbove = [];
     }
 
-
     coveredPointsFloor.sort((A, B) => sortByAngle(A, B, coveredPointsFloor));
     coveredPointsAbove.sort((A, B) => sortByAngle(A, B, coveredPointsAbove));
     coveredPointsWallX.sort((A, B) => sortByAngle(A, B, coveredPointsWallX));
@@ -282,8 +281,6 @@ export function drawProjection(cam)
     coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
     coveredPointsWallX.forEach((p) => p.y += 0.01*cam.id / cameras.length);
     coveredPointsWallZ.forEach((p) => p.y += 0.01*cam.id / cameras.length);
-
-
 
     //DEBUG SPHERES
     /*
@@ -305,12 +302,12 @@ export function drawProjection(cam)
 
     //display area value 
     let previousValue = cam.areaValue;
-    cam.areaValue = calculateArea(coveredPointsFloor);
+    cam.areaValue = calculateArea(coveredPointsAbove);
 
     //Place text 
-    if(coveredPointsFloor.length > 2)
+    if(coveredPointsAbove.length > 2)
     {
-        let barycentre = getBarycentre(coveredPointsFloor);
+        let barycentre = getBarycentre(coveredPointsAbove);
         cam.changeTextPosition(barycentre);
         if(previousValue != cam.areaValue) cam.changeAreaDisplayed(barycentre);
     }
