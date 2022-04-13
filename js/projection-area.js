@@ -196,10 +196,10 @@ export function drawProjection(cam)
     let wallZRays = raysIntersect.filter(r => Math.abs(r.origin.z - wallZDepth) < 0.01 && Math.abs(r.direction.z) < 0.01);
     let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
-    cam.raysFloor = floorRays;
+    /*cam.raysFloor = floorRays;
     cam.raysAbove = aboveRays;
     cam.raysWallX = wallXRays;
-    cam.raysWallZ = wallZRays;
+    cam.raysWallZ = wallZRays;*/
 
     //DEBUG RAYS
     /*
@@ -252,6 +252,8 @@ export function drawProjection(cam)
 
         //delete identical points
         candidatesPoints.sort((A,B) => A.length() < B.length());
+        sortByAngle(candidatesPoints, floorNormal);
+
         for(let j = 0; j < candidatesPoints.length - 1; j++)
         {
             if(candidatesPoints[j].distanceTo(candidatesPoints[j + 1]) < 0.01)
