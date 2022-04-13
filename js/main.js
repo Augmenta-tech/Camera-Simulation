@@ -6,6 +6,7 @@ import { TransformControls } from 'three-controls/TransformControls.js';
 import { cameras, camMeshes } from './Camera.js';
 import { dummies, dummiesMeshes } from './Dummy.js';
 import { initScene } from './projection-area.js';
+import { addCamera } from './Camera.js';
 
 
 let SCREEN_WIDTH = window.innerWidth;
@@ -27,6 +28,7 @@ const onDownPosition = new THREE.Vector2();
 
 init();
 animate();
+//window.onload = createSceneFromURL();
 
 /* SCENE INITIALIZATION */
 
@@ -35,6 +37,7 @@ function init() {
     container = document.createElement( 'div' );
     let viewport = document.getElementById('viewport');
     viewport.insertBefore(container, viewport.firstChild);
+
 
     initScene(scene);
 
@@ -89,7 +92,6 @@ function init() {
 
     } );
 
-    
     document.addEventListener( 'pointerdown', onPointerDown );
     document.addEventListener( 'pointerup', onPointerUp );
     document.addEventListener( 'pointermove', onPointerMove );
@@ -176,6 +178,94 @@ function createBorder()
     }
 }
 
+/* Manage URLs */
+document.getElementById("generate-link").onclick = generateLink;
+function generateLink()
+{
+    let url = document.location.href
+    let index = url.indexOf('?')
+    if(index !== -1) url = url.substring(0, index);
+    if(url[url.length-1] != '/') url += '/';
+    url += '?';
+    cameras.forEach(c => {
+        url += "id=";
+        url += c.id;
+        url += ",typeID=";
+        url += c.type.id;
+        url += ",x=";
+        url += c.XPos;
+        url += ",y=";
+        url += c.YPos;
+        url += ",z=";
+        url += c.ZPos;
+        url += ",p=";
+        url += c.pitch;
+        url += ",a=";
+        url += c.yaw;
+        url += ",r=";
+        url += c.roll;
+        url += '&';
+    });
+    url = url.slice(0, -1);
+    console.log(url);
+}
+
+function createSceneFromURL()
+{
+    let url = document.location.href
+    let index = url.indexOf('?')
+    if(index === -1)
+    {
+        addCamera();
+    }
+    else
+    {
+        url = url.substring(index + 1);
+        let cams = url.split('&');
+        
+        cams.forEach(c => {
+            let props = c.split(',');
+            let id, typeID;
+            let x, y, z, p, a, r;
+            props.forEach(prop => {
+                let keyVal = prop.split('=');
+                let key = keyVal[0];
+                let val = parseFloat(keyVal[1]);
+                switch(key)
+                {
+                    case "id":
+                        id = val
+                        break;
+                    case "typeID":
+                        typeID = val;
+                        break;
+                    case "x":
+                        x = val;
+                        break;
+                    case "y":
+                        y = val;
+                        break;
+                    case "z":
+                        z = val;
+                        break;
+                    case "p":
+                        p = val;
+                        break;
+                    case "a":
+                        a = val;
+                        break;
+                    case "r":
+                        r = val;
+                        break;
+                    default:
+                        break;
+                }
+            });
+            addCamera(typeID, x, y, z, p, a, r)
+        })
+    }
+}
+
 //DEBUG
 function onKeyDown( event ) {
 
@@ -184,8 +274,8 @@ function onKeyDown( event ) {
         case 80: /*P*/
             
             //console.log(totalAreaCovered());
-
-            cameras.forEach(c => c.render());
+            createSceneFromURL();
+            console.log(cameras)
             break;
 
     }
