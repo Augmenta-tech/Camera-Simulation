@@ -426,21 +426,16 @@ function displayFrustums()
     cameras.forEach(c => c.changeVisibility(visibles.length != cameras.length));
 }
 
-
-/* CALCULATE A CONFIGURATION FROM GIVEN AREA WIP */
-/*givenWidth = document.getElementById('areaWantedWidth').value
-givenHeight = document.getElementById('areaWantedHeigth').value
-
-// Get the input field
-var input = document.getElementById("myInput");
-
-// Execute a function when the user releases a key on the keyboard
-input.addEventListener("keyup", function(event) {
-  // Number 13 is the "Enter" key on the keyboard
-  if (event.keyCode === 13) {
-    // Cancel the default action, if needed
-    event.preventDefault();
-    // Trigger the button element with a click
-    document.getElementById("myBtn").click();
-  }
-}); */
+/* RESET CAMERAS */
+document.getElementById('delete-cameras').onclick = resetCams;
+function resetCams()
+{
+    let camerasUIdivs = document.getElementsByClassName("cameraUI");
+    for(let i = camerasUIdivs.length - 1; i >= 0; i--)
+    {
+        camerasUIdivs[i].remove();
+    }
+    cameras.forEach(c => c.remove());
+    cameras.splice(0, cameras.length);
+    camMeshes.splice(0, camMeshes.length);
+}

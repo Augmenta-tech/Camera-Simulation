@@ -28,13 +28,6 @@ const onDownPosition = new THREE.Vector2();
 init();
 animate();
 
-
-const geometry = new THREE.BoxGeometry( 9, 0.001, 7 );
-const edges = new THREE.EdgesGeometry( geometry );
-const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x000000 } ) );
-line.position.y = 0.02;
-scene.add( line );
-
 /* SCENE INITIALIZATION */
 
 function init() {
@@ -156,18 +149,31 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 }
 
-/* RESET CAMERAS */
-document.getElementById('delete-cameras').onclick = resetCams;
-function resetCams()
+/* CALCULATE A CONFIGURATION FROM GIVEN AREA WIP */
+let line = new THREE.LineSegments(new THREE.EdgesGeometry(), new THREE.LineBasicMaterial( { color: 0x000000 }));
+scene.add( line );
+
+let inputAreaWidth = document.getElementById("areaWantedWidth");
+let inputAreaHeight = document.getElementById("areaWantedHeight");
+
+//reset values after reloading page
+inputAreaWidth.value = 0;
+inputAreaHeight.value = 0;
+
+inputAreaWidth.onchange = createBorder;
+inputAreaHeight.onchange = createBorder;
+
+function createBorder()
 {
-    let camerasUIdivs = document.getElementsByClassName("cameraUI");
-    for(let i = camerasUIdivs.length - 1; i >= 0; i--)
+    let givenWidth = document.getElementById('areaWantedWidth').value
+    let givenHeight = document.getElementById('areaWantedHeight').value
+
+    if(givenWidth !== "" && givenHeight !=="")
     {
-        camerasUIdivs[i].remove();
+        const geometry = new THREE.BoxGeometry( Math.round(parseFloat(givenWidth)*10) / 10.0, 0.001, Math.round(parseFloat(givenHeight)*10) / 10.0 );
+        line.geometry = new THREE.EdgesGeometry( geometry );
+        line.position.y = 0.02;
     }
-    cameras.forEach(c => c.remove());
-    cameras.splice(0, cameras.length);
-    camMeshes.splice(0, camMeshes.length);
 }
 
 //DEBUG
@@ -177,7 +183,9 @@ function onKeyDown( event ) {
 
         case 80: /*P*/
             
-            console.log(totalAreaCovered());
+            //console.log(totalAreaCovered());
+
+            cameras.forEach(c => c.render());
             break;
 
     }

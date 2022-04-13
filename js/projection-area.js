@@ -272,10 +272,15 @@ export function drawProjection(cam)
         coveredPointsAbove = [];
     }
 
-    coveredPointsFloor.sort((A, B) => sortByAngle(A, B, coveredPointsFloor));
-    coveredPointsAbove.sort((A, B) => sortByAngle(A, B, coveredPointsAbove));
-    coveredPointsWallX.sort((A, B) => sortByAngle(A, B, coveredPointsWallX));
-    coveredPointsWallZ.sort((A, B) => sortByAngle(A, B, coveredPointsWallZ));
+    // coveredPointsFloor.sort((A, B) => sortByAngle(A, B, coveredPointsFloor));
+    // coveredPointsAbove.sort((A, B) => sortByAngle(A, B, coveredPointsAbove));
+    // coveredPointsWallX.sort((A, B) => sortByAngle(A, B, coveredPointsWallX));
+    // coveredPointsWallZ.sort((A, B) => sortByAngle(A, B, coveredPointsWallZ));
+
+    sortByAngle(coveredPointsFloor, floorNormal);
+    sortByAngle(coveredPointsAbove, floorNormal);
+    sortByAngle(coveredPointsWallX, wallXNormal);
+    sortByAngle(coveredPointsWallZ, wallZNormal);
 
     coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
     coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
@@ -361,7 +366,7 @@ export function drawProjection(cam)
                     }
                 }
 
-                pointsSuperposition.sort((A,B) => sortByAngle(A,B,pointsSuperposition));
+                sortByAngle(pointsSuperposition, floorNormal);
                 let superpositionArea = calculateArea(pointsSuperposition);
                 //cameras[i].overlaps[cam.id] = superpositionArea; // / cameras[i].areaValue * 100;
                 if(cam.overlaps[i] != superpositionArea)
@@ -385,20 +390,30 @@ export function drawProjection(cam)
     }*/
 }
 
-function sortByAngle(A, B, coveredPoints){
-    let center = new THREE.Vector3();
-    center.addVectors(coveredPoints[0], coveredPoints[1]).divideScalar(2.0);
+function sortByAngle(coveredPoints, planeNormal)
+{
+    if(coveredPoints.length > 2)
+    {
+        let center = getBarycentre(coveredPoints);
+        let vector = new THREE.Vector3();
+        vector.subVectors(coveredPoints[0], center);
+        let vectorPerp = new THREE.Vector3();
+        vectorPerp.copy(vector);
+        vectorPerp.applyAxisAngle(planeNormal, Math.PI/2.0);
 
-    let vector = new THREE.Vector3();
-    vector.subVectors(coveredPoints[0], center);
+        coveredPoints.sort((A,B) => {
+            let vectorA = new THREE.Vector3();
+            vectorA.subVectors(A, center);
+        
+            let vectorB = new THREE.Vector3();
+            vectorB.subVectors(B, center);
+            
+            let dotProdA = Math.abs(vectorPerp.dot(vectorA)) > 0.001 ? vectorPerp.dot(vectorA) : 1;
+            let dotProdB = Math.abs(vectorPerp.dot(vectorB)) > 0.001 ? vectorPerp.dot(vectorB) : 1;
 
-    let vectorA = new THREE.Vector3();
-    vectorA.subVectors(A, center);
-
-    let vectorB = new THREE.Vector3();
-    vectorB.subVectors(B, center);
-    
-    return vector.angleTo(vectorA) - vector.angleTo(vectorB);
+            return Math.abs(dotProdA) / dotProdA * vector.angleTo(vectorA) < Math.abs(dotProdB) / dotProdB * vector.angleTo(vectorB);
+        });
+    }
 }
 
 function getIntersectionPoints(raysCrossing)
