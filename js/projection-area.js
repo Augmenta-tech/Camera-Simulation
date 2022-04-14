@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 
-import { TextGeometry } from 'three-text-geometry';
-
-import { scene } from './main.js'
 import { cameras } from './Camera.js';
+
+export let scene = new THREE.Scene();
 
 let floor, wallX, wallZ;
 const floorNormal = new THREE.Vector3(0,1,0);
@@ -23,14 +22,14 @@ let rays = [];
 
 //END DEBUG
 
-export function initScene(scene)
+export function initScene()
 {
     // Lighting
     const ambient = new THREE.AmbientLight( 0xffffff, 0.5 );
     scene.add(ambient);
 
     // Floor
-    let materialFloor = new THREE.MeshPhongMaterial( { color: 0x8DAA9D, dithering: true } ); // green-blue
+    let materialFloor = new THREE.MeshPhongMaterial( {color: 0x555555});//{ color: 0x8DAA9D, dithering: true } ); // green-blue
 
     let geometryFloor = new THREE.PlaneGeometry( 2000, 2000 );
 
@@ -43,12 +42,12 @@ export function initScene(scene)
     const size = 50;
     const divisions = 50
 
-    const gridHelper = new THREE.GridHelper( size, divisions, 0x666666 , 0x666666 );
+    const gridHelper = new THREE.GridHelper( size, divisions, 0x444444 , 0x444444 );
     gridHelper.position.y = - 0.005;
     scene.add( gridHelper );
 
     // WallX
-    let materialWallX = new THREE.MeshPhongMaterial( { color: 0x522B47, dithering: true } ); // violet
+    let materialWallX = new THREE.MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
 
     let geometryWallX = new THREE.PlaneGeometry( 2000, 2000 );
 
@@ -58,7 +57,7 @@ export function initScene(scene)
     scene.add(wallX);
 
     // WallZ
-    let materialWallZ = new THREE.MeshPhongMaterial( { color: 0x7B0828, dithering: true } ); // magenta
+    let materialWallZ = new THREE.MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
 
     let geometryWallZ = new THREE.PlaneGeometry( 2000, 2000 );
 

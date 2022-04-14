@@ -3,9 +3,9 @@ import * as THREE from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
 import { TextGeometry } from 'three-text-geometry';
 
-import { scene } from './main.js';
 import { transformControl } from './main.js';
 
+import { scene } from './projection-area.js'
 import { drawProjection } from './projection-area.js';
 
 export const camerasTypes = [
@@ -75,7 +75,6 @@ export class Camera{
         this.raysWallZ = [];
 
         this.overlaps = {}*/
-
         let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.01 } );
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.nameText.position.set(this.XPos - SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + SIZE_TEXT_CAMERA/2.0);
@@ -199,10 +198,7 @@ export class Camera{
 
 
 /* ADDING  CAMERA */
-fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
-    font = response;
-    document.getElementById('new-camera').onclick = addCameraButton;
-} );
+document.getElementById('new-camera').onclick = addCameraButton;
 
 function addCameraButton()
 {
@@ -211,9 +207,23 @@ function addCameraButton()
 
 export function addCamera(typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
 {
-    let newCamera = new Camera(cameras.length, typeID, x, y, z, p, a, r)
-    newCamera.addCameraToScene();
-    cameras.push(newCamera);
+    if(font === undefined)
+    {
+        fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+            font = response;
+            addCam();
+        });
+    }
+    else{
+        addCam();
+    }
+
+    function addCam()
+    {
+        let newCamera = new Camera(cameras.length, typeID, x, y, z, p, a, r)
+        newCamera.addCameraToScene();
+        cameras.push(newCamera);
+    }
 }
 
 function addCameraGUI(cam)
