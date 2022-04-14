@@ -5,6 +5,8 @@ import { TransformControls } from 'three-controls/TransformControls.js';
 
 import { cameras, camMeshes } from './Camera.js';
 import { dummies, dummiesMeshes } from './Dummy.js';
+
+import { scene } from './projection-area.js'
 import { initScene } from './projection-area.js';
 import { addCamera } from './Camera.js';
 
@@ -14,7 +16,6 @@ let SCREEN_HEIGHT = window.innerHeight;
 let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
 let container;
-export let scene = new THREE.Scene();
 let renderer;
 
 let camera;
@@ -25,10 +26,8 @@ const pointer = new THREE.Vector2();
 const onUpPosition = new THREE.Vector2();
 const onDownPosition = new THREE.Vector2();
 
-
 init();
 animate();
-//window.onload = createSceneFromURL();
 
 /* SCENE INITIALIZATION */
 
@@ -38,8 +37,8 @@ function init() {
     let viewport = document.getElementById('viewport');
     viewport.insertBefore(container, viewport.firstChild);
 
-
-    initScene(scene);
+    initScene();
+    createSceneFromURL();
 
     /*
     //CHANGE HEIGHT DETECTED
@@ -100,7 +99,6 @@ function init() {
 
     //DEBUG
     document.addEventListener( 'keydown', onKeyDown );
-
 }
 
 /* USER'S ACTIONS */
@@ -193,11 +191,11 @@ function generateLink()
         url += ",typeID=";
         url += c.type.id;
         url += ",x=";
-        url += c.XPos;
+        url += Math.round(c.XPos*100)/100.0;
         url += ",y=";
-        url += c.YPos;
+        url += Math.round(c.YPos*100)/100.0;
         url += ",z=";
-        url += c.ZPos;
+        url += Math.round(c.ZPos*100)/100.0;
         url += ",p=";
         url += c.pitch;
         url += ",a=";
@@ -207,7 +205,8 @@ function generateLink()
         url += '&';
     });
     url = url.slice(0, -1);
-    console.log(url);
+
+    return url;
 }
 
 function createSceneFromURL()
@@ -266,7 +265,29 @@ function createSceneFromURL()
     }
 }
 
-//DEBUG
+// COPY URL 
+var copyUrlModal = document.getElementById("link-modal");
+var shareButton = document.getElementById("generate-link");
+var closeElem = document.getElementsByClassName("close")[0];
+shareButton.onclick = function() {
+    copyUrlModal.style.display = "block";
+}
+closeElem.onclick = function() {
+    copyUrlModal.style.display = "none";
+}
+window.onclick = function(event) {
+    if (event.target == copyUrlModal) {
+        copyUrlModal.style.display = "none";
+    }
+}
+
+document.getElementById('copy-link').onclick = copyLink;
+function copyLink() {
+    navigator.clipboard.writeText(generateLink());
+}
+
+
+/* DEBUG */
 function onKeyDown( event ) {
 
     switch ( event.keyCode ) {
@@ -300,4 +321,6 @@ function render() {
     renderer.setViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
     renderer.render( scene, camera )
 }
+
+
 
