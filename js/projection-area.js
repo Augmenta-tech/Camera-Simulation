@@ -324,6 +324,12 @@ export function drawProjection(cam)
     }
 
     //draw area
+
+    cam.areaCoveredFloor.geometry.dispose();
+    cam.areaCoveredAbove.geometry.dispose();
+    cam.areaCoveredWallX.geometry.dispose();
+    cam.areaCoveredWallZ.geometry.dispose();
+
     cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
     cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
     cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
@@ -333,6 +339,7 @@ export function drawProjection(cam)
     cam.areaAppear ? scene.add(cam.areaCoveredAbove) : scene.remove(cam.areaCoveredAbove);
     cam.areaAppear ? scene.add(cam.areaCoveredWallX) : scene.remove(cam.areaCoveredWallX);
     cam.areaAppear ? scene.add(cam.areaCoveredWallZ) : scene.remove(cam.areaCoveredWallZ);
+
 
     //Calculate overlaps
     /*
@@ -533,7 +540,6 @@ function drawAreaWithPoints(coveredPoints, color = 0x008888)
     materialArea.alphaTest = 0.5;
     
     const areaCovered = new THREE.Mesh( geometryArea, materialArea );
-
     return(areaCovered);
 }
 

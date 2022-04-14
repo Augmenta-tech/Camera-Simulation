@@ -10,7 +10,6 @@ import { scene } from './projection-area.js'
 import { initScene } from './projection-area.js';
 import { addCamera } from './Camera.js';
 
-
 let SCREEN_WIDTH = window.innerWidth;
 let SCREEN_HEIGHT = window.innerHeight;
 let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
@@ -294,9 +293,6 @@ function onKeyDown( event ) {
 
         case 80: /*P*/
             
-            //console.log(totalAreaCovered());
-            createSceneFromURL();
-            console.log(cameras)
             break;
 
     }
