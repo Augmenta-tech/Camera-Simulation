@@ -41,7 +41,6 @@ class Dummy {
         loadDummy(this)
         scene.add(this.mesh);
         this.model.position.clone(this.mesh.position); 
-        //addDummyGUI(this);
     }
 
     updatePosition()
@@ -67,7 +66,6 @@ function addDummy()
 {
     let newDummy = new Dummy(dummies.length);
     newDummy.addDummyToScene();
-    //loadDummy(newDummy);
     dummies.push(newDummy);
 }
 

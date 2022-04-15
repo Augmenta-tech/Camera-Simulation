@@ -10,6 +10,8 @@ import { scene } from './projection-area.js'
 import { initScene } from './projection-area.js';
 import { addCamera } from './Camera.js';
 
+import { doesCoverArea } from './projection-area.js';
+
 let SCREEN_WIDTH = window.innerWidth;
 let SCREEN_HEIGHT = window.innerHeight;
 let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
@@ -148,33 +150,6 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 }
 
-/* CALCULATE A CONFIGURATION FROM GIVEN AREA WIP */
-let line = new THREE.LineSegments(new THREE.EdgesGeometry(), new THREE.LineBasicMaterial( { color: 0x000000 }));
-scene.add( line );
-
-let inputAreaWidth = document.getElementById("areaWantedWidth");
-let inputAreaHeight = document.getElementById("areaWantedHeight");
-
-//reset values after reloading page
-inputAreaWidth.value = 0;
-inputAreaHeight.value = 0;
-
-inputAreaWidth.onchange = createBorder;
-inputAreaHeight.onchange = createBorder;
-
-function createBorder()
-{
-    let givenWidth = document.getElementById('areaWantedWidth').value
-    let givenHeight = document.getElementById('areaWantedHeight').value
-
-    if(givenWidth !== "" && givenHeight !=="")
-    {
-        const geometry = new THREE.BoxGeometry( Math.round(parseFloat(givenWidth)*10) / 10.0, 0.001, Math.round(parseFloat(givenHeight)*10) / 10.0 );
-        line.geometry = new THREE.EdgesGeometry( geometry );
-        line.position.y = 0.02;
-    }
-}
-
 /* Manage URLs */
 document.getElementById("generate-link").onclick = generateLink;
 function generateLink()
@@ -292,7 +267,6 @@ function onKeyDown( event ) {
     switch ( event.keyCode ) {
 
         case 80: /*P*/
-            
             break;
 
     }
@@ -308,9 +282,11 @@ function animate() {
 
 }
 
+
 function render() {
     cameras.forEach(c => c.render());
     //cameras.forEach(c => c.displayOverlaps());
+    doesCoverArea();
 
     renderer.clear();
 
