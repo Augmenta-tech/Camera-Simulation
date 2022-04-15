@@ -9,9 +9,12 @@ import { scene } from './projection-area.js'
 import { drawProjection } from './projection-area.js';
 
 export const camerasTypes = [
-    {id:0, name:"OrbbecAstraPlus", HFov:55, VFov:45, aspectRatio: 1920.0/1080.0, rangeNear: 0.6,rangeFar: 8},
-    {id:1, name:"OrbbecAstraPro", HFov:60, VFov:49.5, aspectRatio: 1920.0/1080.0, rangeNear: 0.6,rangeFar: 8}
-]
+    {id:0, name:"Orbbec Astra +", HFov:55, VFov:45, rangeNear: 0.6,rangeFar: 8},
+    {id:1, name:"Orbbec Astra Pro", HFov:60, VFov:49.5, rangeNear: 0.6,rangeFar: 8},
+    {id:2, name:"Azure Kinect", HFov:75, VFov:65, rangeNear: 0.5,rangeFar: 3.96},
+    {id:3, name:"Orbbec Femto", HFov:64.6, VFov:50.8, rangeNear: 0.25,rangeFar: 5}
+];
+camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
 const DEFAULT_CAMERA_TYPE_ID = 0;
 
@@ -61,6 +64,8 @@ export class Camera{
         this.cameraPerspective.getWorldDirection(rotationAxis);
         this.cameraPerspective.rotateOnWorldAxis(rotationAxis, this.roll);
 
+        this.coveredPointsAbove = [];
+
         this.areaCoveredFloor = new THREE.Mesh();
         this.areaCoveredAbove = new THREE.Mesh();
         this.areaCoveredWallX = new THREE.Mesh();
@@ -75,6 +80,7 @@ export class Camera{
         this.raysWallZ = [];
 
         this.overlaps = {}*/
+
         let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.01 } );
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.nameText.position.set(this.XPos - SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + SIZE_TEXT_CAMERA/2.0);
@@ -146,6 +152,7 @@ export class Camera{
         this.cameraPerspectiveHelper.visible = value;
         this.nameText.visible = value;
         let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
+        console.log(iconElem);
         iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         this.areaDisplay.visible = value;
         /*for(let i = 0; i < this.id; i++)
@@ -228,6 +235,12 @@ export function addCamera(typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CA
 
 function addCameraGUI(cam)
 {
+    let cameraTypesOptions = ``;
+    camerasTypes.forEach(type => {
+        let optionElement = `<option value="` + type.name + `" ` + (cam.type.name === type.name ? `selected` : ``) + `>` + type.name;
+        cameraTypesOptions += optionElement;
+    });
+
     let cameraUIdiv = document.createElement('div');
     cameraUIdiv.dataset.camera = cam.id;
     cameraUIdiv.classList.add("active");
@@ -247,8 +260,7 @@ function addCameraGUI(cam)
         <div id="select-camera" class="row s-p">
             <div class="column-2 row ">
                 <select id="cam-type-` + (cam.id) + `" class="select" name="camType">
-                    <option value="plus"` + (cam.type.name === "OrbbecAstraPlus" ? "selected" : "") +`>Orbbec Astra +</option>
-                    <option value="pro"` + (cam.type.name === "OrbbecAstraPro" ? "selected" : "") +`>Orbbec Astra Pro</option>
+                ` + cameraTypesOptions + `
                 </select>
             </div>
             <div class="row s-p column-2">
@@ -293,7 +305,7 @@ function addCameraGUI(cam)
     }
 
     document.getElementById('cam-type-' + cam.id).onchange = function(){
-            switch(document.getElementById('cam-type-' + cam.id).value)
+            /*switch(document.getElementById('cam-type-' + cam.id).value)
             {
                 case "plus":
                     cam.type = camerasTypes.find(t => t.name === "OrbbecAstraPlus");
@@ -303,7 +315,8 @@ function addCameraGUI(cam)
                     break;
                 default:
                     cam.type = camerasTypes.find(t => t.name === "OrbbecAstraPlus");
-            }
+            }*/
+            cam.type = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + cam.id).value)
             
             document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H: ' + cam.type.HFov + '°';
             document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V: ' + cam.type.VFov + '°';
@@ -448,7 +461,7 @@ function displayFrustums()
 
 /* RESET CAMERAS */
 document.getElementById('delete-cameras').onclick = resetCams;
-function resetCams()
+export function resetCams()
 {
     let camerasUIdivs = document.getElementsByClassName("cameraUI");
     for(let i = camerasUIdivs.length - 1; i >= 0; i--)

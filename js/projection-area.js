@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
-import { cameras } from './Camera.js';
+import { cameras, camerasTypes } from './Camera.js';
+import { resetCams, addCamera } from './Camera.js'
+
+import * as POLYBOOL from 'polybool';
 
 export let scene = new THREE.Scene();
 
@@ -283,10 +286,12 @@ export function drawProjection(cam)
     sortByAngle(coveredPointsWallX, wallXNormal);
     sortByAngle(coveredPointsWallZ, wallZNormal);
 
+    cam.coveredPointsAbove = coveredPointsAbove;
+
     coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
     coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
-    coveredPointsWallX.forEach((p) => p.y += 0.01*cam.id / cameras.length);
-    coveredPointsWallZ.forEach((p) => p.y += 0.01*cam.id / cameras.length);
+    coveredPointsWallX.forEach((p) => p.x += 0.01*cam.id / cameras.length);
+    coveredPointsWallZ.forEach((p) => p.z += 0.01*cam.id / cameras.length);
 
     //DEBUG SPHERES
     /*
@@ -556,3 +561,118 @@ function totalAreaCovered()
     });
     return totalAreaCovered;
 }*/
+
+/* GIVEN AREA */
+//calculates and display the area
+let line = new THREE.LineSegments(new THREE.EdgesGeometry(), new THREE.LineBasicMaterial( { color: 0x000000 }));
+scene.add( line );
+
+let inputAreaWidth = document.getElementById("areaWantedWidth");
+let inputAreaHeight = document.getElementById("areaWantedHeight");
+
+//reset values after reloading page
+inputAreaWidth.value = 0;
+inputAreaHeight.value = 0;
+document.getElementById('roof-height').value = 0;
+
+inputAreaWidth.onchange = createBorder;
+inputAreaHeight.onchange = createBorder;
+
+let givenAreaPolygon = { regions: [[]], inverted: true};
+function createBorder()
+{
+    let givenWidth = document.getElementById('areaWantedWidth').value
+    let givenHeight = document.getElementById('areaWantedHeight').value
+
+    if(givenWidth !== "" && givenHeight !=="")
+    {
+        const geometry = new THREE.BoxGeometry( Math.round(parseFloat(givenWidth)*10) / 10.0, 0.001, Math.round(parseFloat(givenHeight)*10) / 10.0 );
+        line.geometry = new THREE.EdgesGeometry( geometry );
+        line.position.y = 0.02;
+    }
+
+    //Calculate area polygon
+    givenAreaPolygon.regions[0] = [];
+    givenAreaPolygon.regions[0].push([-givenWidth/2.0, -givenHeight/2.0]);
+    givenAreaPolygon.regions[0].push([givenWidth/2.0, -givenHeight/2.0]);
+    givenAreaPolygon.regions[0].push([givenWidth/2.0, givenHeight/2.0]);
+    givenAreaPolygon.regions[0].push([-givenWidth/2.0, givenHeight/2.0]);
+}
+
+//verifies if cameras cover the given area
+export function doesCoverArea()
+{
+    let union = givenAreaPolygon;
+    cameras.forEach(c => {
+        let polyCam = {
+            regions: [[]],
+            inverted: false
+        }
+        c.coveredPointsAbove.forEach(p => {
+            polyCam.regions[0].push([p.x, p.z]);
+        });
+        union = PolyBool.union(union, polyCam);
+    });
+
+    let coversUI = document.getElementById('covers-check');
+    coversUI.dataset.icon = union.regions.length === 0 ? "ion:checkmark-circle-sharp" : "ion:close-circle";
+    coversUI.style = union.regions.length === 0 ? "color: #2b2;" : "color: #b22;";
+}
+
+//creates scene according to form
+document.getElementById('generate-scene').onclick = createSceneFromForm;
+function createSceneFromForm()
+{
+    let givenWidth = document.getElementById('areaWantedWidth').value;
+    let givenHeight = document.getElementById('areaWantedHeight').value;
+    let camsHeight = document.getElementById('roof-height').value - 0.1;
+
+    let configs = [];
+
+    camerasTypes.forEach(type => {
+        if(camsHeight < type.rangeFar)
+        {
+            let widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
+            let heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
+
+            let nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
+            let nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
+            console.log(type.name + ":");
+            console.log(nbCamsNoRot);
+            console.log(nbCamsRot);
+
+            nbCamsRot < nbCamsNoRot
+                ?
+                configs.push({ typeID: type.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true })
+                :
+                configs.push({ typeID: type.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenHeight / heightAreaCovered), rot: false });
+        }
+    });
+    if(configs.length === 0)
+    {
+        alert("Aucune camera n'est adaptée pour cette configuration. \nNo camera is adapted for this roof height");
+    }
+    else
+    {
+        /*
+        configs.sort((A,B) => A.id < B.id);
+        let chosenConfig = configs[0];
+        resetCams();
+
+        let offsetX = -givenWidth/2.0 + (chosenConfig.nbW > 1 ? chosenConfig.w / 2.0 - (chosenConfig.nbW*chosenConfig.w - givenWidth)/(chosenConfig.nbW - 1) : 0);
+        let offsetY = - givenHeight/2.0 + (chosenConfig.nbH > 1 ? chosenConfig.h / 2.0 - (chosenConfig.nbH*chosenConfig.h - givenHeight)/(chosenConfig.nbH - 1) : 0);
+        for(let i = 1; i < chosenConfig.nbW + 1; i++)
+        {
+            for(let j = 1; j < chosenConfig.nbH + 1; j++)
+            {
+                chosenConfig.rot 
+                    ?
+                    addCamera(chosenConfig.typeID, offsetX + i*givenWidth/chosenConfig.nbW, offsetY + i*givenHeight/chosenConfig.nbH, camsHeight)
+                    :
+                    addCamera(chosenConfig.typeID, offsetX + i*givenWidth/chosenConfig.nbW, offsetY + i*givenHeight/chosenConfig.nbH, camsHeight, 0, 90);
+
+            }
+        }*/
+    }
+    console.log(configs);
+}

@@ -92,6 +92,16 @@
               <p>Height</p>
               <input class="inputArea" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
             </div>
+            <div class="row">
+              <p>Roof</p>
+              <input class="inputArea" id="roof-height" type="number" placeholder="r" min="0" max="50" step = "0.1">
+            </div>
+          </div>
+            <div class="active" data-button>
+              <p id="generate-scene">Generate Scene</p>
+            </div>
+          <div class="row">
+            <p>Area fuly covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
           </div>
         </div>
         <div id="cameras-buttons" class="row">
@@ -117,7 +127,8 @@
 					"three-libs/": "https://unpkg.com/three@0.139.2/examples/jsm/libs/",
 					"three-controls/": "https://unpkg.com/three@0.139.2/examples/jsm/controls/",
 					"three-loaders/": "https://unpkg.com/three@0.139.2/examples/jsm/loaders/",
-					"three-text-geometry": "https://unpkg.com/three@0.139.2/examples/jsm/geometries/TextGeometry.js"
+					"three-text-geometry": "https://unpkg.com/three@0.139.2/examples/jsm/geometries/TextGeometry.js",
+          "polybool": "https://unpkg.com/polybooljs@1.2.0/dist/polybool.min.js"
 				}
 			}
 		</script> 
