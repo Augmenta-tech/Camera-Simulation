@@ -571,9 +571,9 @@ let inputAreaWidth = document.getElementById("areaWantedWidth");
 let inputAreaHeight = document.getElementById("areaWantedHeight");
 
 //reset values after reloading page
-inputAreaWidth.value = 0;
-inputAreaHeight.value = 0;
-document.getElementById('roof-height').value = 0;
+inputAreaWidth.value = 1;
+inputAreaHeight.value = 1;
+document.getElementById('roof-height').value = 5;
 
 inputAreaWidth.onchange = createBorder;
 inputAreaHeight.onchange = createBorder;
@@ -623,6 +623,10 @@ export function doesCoverArea()
 document.getElementById('generate-scene').onclick = createSceneFromForm;
 function createSceneFromForm()
 {
+    //set heightDetected 
+    heightDetected = parseFloat(document.getElementById('given-height-detection').value);
+
+    //place cameras
     let givenWidth = document.getElementById('areaWantedWidth').value;
     let givenHeight = document.getElementById('areaWantedHeight').value;
     let camsHeight = document.getElementById('roof-height').value - 0.1;
@@ -630,49 +634,72 @@ function createSceneFromForm()
     let configs = [];
 
     camerasTypes.forEach(type => {
-        if(camsHeight < type.rangeFar)
+        if(document.getElementById('check-' + type.id).checked && camsHeight <= type.rangeFar && camsHeight >= type.rangeNear + heightDetected)
         {
             let widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
             let heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
 
             let nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
             let nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
-            console.log(type.name + ":");
-            console.log(nbCamsNoRot);
-            console.log(nbCamsRot);
 
             nbCamsRot < nbCamsNoRot
                 ?
-                configs.push({ typeID: type.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true })
+                configs.push({ typeID: type.id, w: heightAreaCovered, h:widthAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true })
                 :
                 configs.push({ typeID: type.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenHeight / heightAreaCovered), rot: false });
         }
     });
+
     if(configs.length === 0)
     {
         alert("Aucune camera n'est adaptée pour cette configuration. \nNo camera is adapted for this roof height");
     }
     else
     {
-        /*
-        configs.sort((A,B) => A.id < B.id);
+        createBorder();
+
+        configs.sort((A,B) => A.nbW * A.nbH > B.nbW * B.nbH);
+        configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
+        configs.sort((A,B) => A.typeID > B.typeID);
         let chosenConfig = configs[0];
         resetCams();
 
-        let offsetX = -givenWidth/2.0 + (chosenConfig.nbW > 1 ? chosenConfig.w / 2.0 - (chosenConfig.nbW*chosenConfig.w - givenWidth)/(chosenConfig.nbW - 1) : 0);
-        let offsetY = - givenHeight/2.0 + (chosenConfig.nbH > 1 ? chosenConfig.h / 2.0 - (chosenConfig.nbH*chosenConfig.h - givenHeight)/(chosenConfig.nbH - 1) : 0);
-        for(let i = 1; i < chosenConfig.nbW + 1; i++)
+        let offsetX = - givenWidth/2.0 + chosenConfig.w / 2.0;
+        let offsetY = - givenHeight/2.0 + chosenConfig.h / 2.0;
+        if(chosenConfig.nbW === 1) offsetX -= (chosenConfig.nbW*chosenConfig.w - givenWidth)/2.0;
+        if(chosenConfig.nbH === 1) offsetY -= (chosenConfig.nbH*chosenConfig.h - givenHeight)/2.0;
+        let oX = chosenConfig.nbW > 1 ? (chosenConfig.nbW*chosenConfig.w - givenWidth)/(chosenConfig.nbW - 1) : 0;
+        let oY = chosenConfig.nbH > 1 ? (chosenConfig.nbH*chosenConfig.h - givenHeight)/(chosenConfig.nbH - 1) : 0;
+
+        for(let i = 0; i < chosenConfig.nbW; i++)
         {
-            for(let j = 1; j < chosenConfig.nbH + 1; j++)
+            for(let j = 0; j < chosenConfig.nbH; j++)
             {
                 chosenConfig.rot 
                     ?
-                    addCamera(chosenConfig.typeID, offsetX + i*givenWidth/chosenConfig.nbW, offsetY + i*givenHeight/chosenConfig.nbH, camsHeight)
+                    addCamera(chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, Math.PI/2.0)
                     :
-                    addCamera(chosenConfig.typeID, offsetX + i*givenWidth/chosenConfig.nbW, offsetY + i*givenHeight/chosenConfig.nbH, camsHeight, 0, 90);
+                    addCamera(chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
 
             }
-        }*/
+        }
+        formModal.style.display = "none";
     }
-    console.log(configs);
 }
+
+// OPEN FORM
+var formModal = document.getElementById("generate-scene-modal");
+var openFormButton = document.getElementById("open-scene-form");
+var closeFormElem = document.getElementById("close-form");
+openFormButton.onclick = function() {
+    formModal.style.display = "block";
+}
+closeFormElem.onclick = function() {
+    formModal.style.display = "none";
+}
+window.onclick = function(event) {
+    if (event.target == formModal) {
+        formModal.style.display = "none";
+    }
+}
+

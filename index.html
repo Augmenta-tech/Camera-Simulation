@@ -20,7 +20,6 @@
           <div class="row">
             <div id="generate-link" data-button class="active">
               <p> Share </p>
-
             </div>
             <p>Help ?</p>
           </div>
@@ -28,9 +27,9 @@
         <div id="viewport">
           <!-- The Modal -->
           <div id="link-modal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content link">
               <button id="copy-link" data-button>Get the link of your scene</button>
-              <span class="close">&times;</span>
+              <span id="close-link" class="close">&times;</span>
             </div>
           </div>
           <div id="gizmo"></div> <!-- REPLACE BY INTERACTIVE GIZMO THREE JS -->
@@ -69,8 +68,8 @@
 
       <div id="inspector">
         <div id="scene-info">
-          <h1>Tracking data</h1>
-          <!-- REPLACE BY DATA -->
+          <!--<h1>Tracking data</h1>
+           <!- REPLACE BY DATA ->
           <div class="row">
             <div>
               <p>Centroid (x,y)</p>
@@ -81,25 +80,42 @@
               <p>Boundingbox</p>
             </div>
           </div>
-            <br>
-          <h1>Surface cover</h1>
-          <div class="row">
-            <div class="row">
-              <p>Width</p>
-              <input class="inputArea" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
-            </div>
-            <div class="row">
-              <p>Height</p>
-              <input class="inputArea" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
-            </div>
-            <div class="row">
-              <p>Roof</p>
-              <input class="inputArea" id="roof-height" type="number" placeholder="r" min="0" max="50" step = "0.1">
+            <br>-->
+          <!-- The Modal -->
+          <div id="open-scene-form" class="active" data-button>
+            <p >Generate My Scene</p>
+          </div>
+          <div id="generate-scene-modal" class="modal">
+            <div id="scene-form-content" class="modal-content scene-form">
+              <span id="close-form" class="close">&times;</span>
+              <div>
+                <h1>Tracking surface</h1>
+                <div class="">
+                  <p>Width</p>
+                  <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                </div>
+                <div class="">
+                  <p>Height</p>
+                  <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                </div>
+                <div class="">
+                  <p>Roof</p>
+                  <input class="" id="roof-height" type="number" placeholder="r" min="0" max="50" step = "0.1">
+                </div>
+                <div class="">
+                  <p>Height Detection</p>
+                  <input class="" id="given-height-detection" type="number" placeholder="d" min="0" max="3" step = "0.1">
+                </div>
+                <div id="cam-types-checkboxes">
+                  <h1>Choose the type.s of camera.s you want to use</h1>
+                </div>
+              </div>
+              <div id="form-button" class="active" data-button>
+                <p id="generate-scene">Generate Scene</p>
+              </div>
             </div>
           </div>
-            <div class="active" data-button>
-              <p id="generate-scene">Generate Scene</p>
-            </div>
+          
           <div class="row">
             <p>Area fuly covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
           </div>
