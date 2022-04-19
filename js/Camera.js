@@ -5,15 +5,12 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { transformControl } from './main.js';
 
-import { scene } from './projection-area.js'
+import { scene } from './projection-area.js';
 import { drawProjection } from './projection-area.js';
 
-export const camerasTypes = [
-    {id:0, name:"Orbbec Astra +", HFov:55, VFov:45, rangeNear: 0.6,rangeFar: 8},
-    {id:1, name:"Orbbec Astra Pro", HFov:60, VFov:49.5, rangeNear: 0.6,rangeFar: 8},
-    {id:2, name:"Azure Kinect", HFov:75, VFov:65, rangeNear: 0.5,rangeFar: 3.96},
-    {id:3, name:"Orbbec Femto", HFov:64.6, VFov:50.8, rangeNear: 0.25,rangeFar: 5}
-];
+import * as data from './cameras.json';
+
+export const camerasTypes = data.default;
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
 const DEFAULT_CAMERA_TYPE_ID = 0;
@@ -152,7 +149,6 @@ export class Camera{
         this.cameraPerspectiveHelper.visible = value;
         this.nameText.visible = value;
         let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
-        console.log(iconElem);
         iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         this.areaDisplay.visible = value;
         /*for(let i = 0; i < this.id; i++)
@@ -239,6 +235,7 @@ function addCameraGUI(cam)
     camerasTypes.forEach(type => {
         let optionElement = `<option value="` + type.name + `" ` + (cam.type.name === type.name ? `selected` : ``) + `>` + type.name;
         cameraTypesOptions += optionElement;
+        cameraTypesOptions += "</option>"
     });
 
     let cameraUIdiv = document.createElement('div');
@@ -259,7 +256,7 @@ function addCameraGUI(cam)
         </div>
         <div id="select-camera" class="row s-p">
             <div class="column-2 row ">
-                <select id="cam-type-` + (cam.id) + `" class="select" name="camType">
+                <select id="cam-type-` + (cam.id) + `" class="select camera-type" name="camType">
                 ` + cameraTypesOptions + `
                 </select>
             </div>
@@ -280,7 +277,7 @@ function addCameraGUI(cam)
             </div>
             <div class="row s-p column-2">
                 <p id="x-pos-`+ cam.id +`" class="draggable">X <strong>` + Math.round(cam.XPos*10) /10.0 + `</strong>m</p>
-                <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>` + Math.round(cam.ZPos*10) /10.0 + `</strong>m</p>
+                <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>` + Math.round(-cam.ZPos*10) /10.0 + `</strong>m</p>
                 <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>` + Math.round(cam.YPos*10) /10.0 + `</strong>m</p>
             </div>
         </div>

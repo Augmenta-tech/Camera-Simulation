@@ -249,14 +249,22 @@ canvas{
 .select{
   transition: .2s all ease;
   cursor: pointer;
-  font-weight: bold;
-  background-color: white;
   border: none;
   border-radius: 2px;
   /* padding-left: 5px;
   margin-left: -5px; */
-  margin-top: 4%;
   height: 70%;
+}
+
+.camera-type{
+  background-color: white;
+  font-weight: bold;
+  margin-top: 4%;
+}
+
+.select-form{
+  background-color: #eee;
+  margin-bottom: 4%;
 }
 
 .select:hover{

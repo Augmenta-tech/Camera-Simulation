@@ -573,7 +573,7 @@ let inputAreaHeight = document.getElementById("areaWantedHeight");
 //reset values after reloading page
 inputAreaWidth.value = 1;
 inputAreaHeight.value = 1;
-document.getElementById('roof-height').value = 5;
+document.getElementById('hook-cam').value = 5;
 
 inputAreaWidth.onchange = createBorder;
 inputAreaHeight.onchange = createBorder;
@@ -629,12 +629,12 @@ function createSceneFromForm()
     //place cameras
     let givenWidth = document.getElementById('areaWantedWidth').value;
     let givenHeight = document.getElementById('areaWantedHeight').value;
-    let camsHeight = document.getElementById('roof-height').value - 0.1;
+    let camsHeight = document.getElementById('hook-cam').value;
 
     let configs = [];
 
     camerasTypes.forEach(type => {
-        if(document.getElementById('check-' + type.id).checked && camsHeight <= type.rangeFar && camsHeight >= type.rangeNear + heightDetected)
+        if(document.getElementById('check-' + type.id)) if(document.getElementById('check-' + type.id).checked && camsHeight <= type.rangeFar && camsHeight >= type.rangeNear + heightDetected)
         {
             let widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
             let heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
@@ -652,7 +652,7 @@ function createSceneFromForm()
 
     if(configs.length === 0)
     {
-        alert("Aucune camera n'est adaptée pour cette configuration. \nNo camera is adapted for this roof height");
+        alert("Aucune camera n'est adaptée pour cette configuration. \nNo camera is adapted to your demand");
     }
     else
     {
