@@ -262,19 +262,35 @@ function copyLink() {
 }
 
 /* COMPLETE SCENE FORM WITH CAMRAS TYPES */
-const camTypesForm = document.getElementById("cam-types-checkboxes");
-camerasTypes.forEach(c => {
-    const camTypeChoice = document.createElement("div");
-    const camTypeCheckbox = document.createElement("input");
-    camTypeCheckbox.setAttribute("type", "checkbox");
-    camTypeCheckbox.id = "check-" + c.id;
-    const label = document.createElement("label");
-    label.setAttribute("for", "check-" + c.id)
-    label.innerHTML = c.name;
-    camTypeChoice.appendChild(camTypeCheckbox);
-    camTypeChoice.appendChild(label);
-    camTypesForm.appendChild(camTypeChoice);
-});
+document.getElementById("hook-cam").onchange = createCamTypeForm;
+document.getElementById("tracking-mode").onchange = createCamTypeForm;
+createCamTypeForm()
+function createCamTypeForm(){
+    const camTypesForm = document.getElementById("cam-types-checkboxes");
+    while (camTypesForm.firstChild) {
+        camTypesForm.removeChild(camTypesForm.firstChild);
+    }
+    let title = document.createElement('h1');
+    title.innerHTML = "Choose the type.s of camera.s you want to use";
+    camTypesForm.appendChild(title);
+    camerasTypes.forEach(c => {
+        const hookHeight = parseFloat(document.getElementById("hook-cam").value);
+        if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById("tracking-mode").value))
+        {
+            const camTypeChoice = document.createElement("div");
+            const camTypeCheckbox = document.createElement("input");
+            camTypeCheckbox.setAttribute("type", "checkbox");
+            camTypeCheckbox.setAttribute("checked","true");
+            camTypeCheckbox.id = "check-" + c.id;
+            const label = document.createElement("label");
+            label.setAttribute("for", "check-" + c.id)
+            label.innerHTML = c.name;
+            camTypeChoice.appendChild(camTypeCheckbox);
+            camTypeChoice.appendChild(label);
+            camTypesForm.appendChild(camTypeChoice);
+        }
+    });
+}
 
 
 /* DEBUG */
