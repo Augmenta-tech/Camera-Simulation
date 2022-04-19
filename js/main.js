@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three-controls/OrbitControls.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
 
+import { camerasTypes } from './Camera.js';
 import { cameras, camMeshes } from './Camera.js';
 import { dummies, dummiesMeshes } from './Dummy.js';
 
@@ -242,7 +243,7 @@ function createSceneFromURL()
 // COPY URL 
 var copyUrlModal = document.getElementById("link-modal");
 var shareButton = document.getElementById("generate-link");
-var closeElem = document.getElementsByClassName("close")[0];
+var closeElem = document.getElementById("close-link");
 shareButton.onclick = function() {
     copyUrlModal.style.display = "block";
 }
@@ -260,6 +261,21 @@ function copyLink() {
     navigator.clipboard.writeText(generateLink());
 }
 
+/* COMPLETE SCENE FORM WITH CAMRAS TYPES */
+const camTypesForm = document.getElementById("cam-types-checkboxes");
+camerasTypes.forEach(c => {
+    const camTypeChoice = document.createElement("div");
+    const camTypeCheckbox = document.createElement("input");
+    camTypeCheckbox.setAttribute("type", "checkbox");
+    camTypeCheckbox.id = "check-" + c.id;
+    const label = document.createElement("label");
+    label.setAttribute("for", "check-" + c.id)
+    label.innerHTML = c.name;
+    camTypeChoice.appendChild(camTypeCheckbox);
+    camTypeChoice.appendChild(label);
+    camTypesForm.appendChild(camTypeChoice);
+});
+
 
 /* DEBUG */
 function onKeyDown( event ) {
@@ -270,7 +286,6 @@ function onKeyDown( event ) {
             break;
 
     }
-
 }
 
 /* RENDER */

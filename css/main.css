@@ -222,9 +222,9 @@ canvas{
 }
 
 .inputArea{
-  margin-left: 25%;
-  margin-top: -3%;
-  width:25%;
+  margin-left: 10%;
+  margin-top: -4%;
+  width: 40%;
 }
 
 [data-button].active p{
@@ -307,12 +307,18 @@ strong
   margin: auto;
   padding: 20px;
   border: 2px solid #fefefe;
-  width: 12%;
   justify-content: space-between;
-  display:flex;
 }
 
-/* The Close Button */
+.scene-form{
+  width: 50%;
+}
+
+.link {
+  width: 12%;
+  display: flex;
+}
+
 .close {
   color: #aaaaaa;
   float: right;
