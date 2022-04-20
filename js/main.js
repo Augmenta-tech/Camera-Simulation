@@ -261,7 +261,7 @@ function copyLink() {
     navigator.clipboard.writeText(generateLink());
 }
 
-/* COMPLETE SCENE FORM WITH CAMRAS TYPES */
+/* COMPLETE SCENE FORM WITH CAMERAS TYPES */
 document.getElementById("hook-cam").onchange = createCamTypeForm;
 document.getElementById("tracking-mode").onchange = createCamTypeForm;
 createCamTypeForm()
@@ -273,7 +273,7 @@ function createCamTypeForm(){
     let title = document.createElement('h1');
     title.innerHTML = "Choose the type.s of camera.s you want to use";
     camTypesForm.appendChild(title);
-    camerasTypes.forEach(c => {
+    camerasTypes.filter(c => c.recommanded).forEach(c => {
         const hookHeight = parseFloat(document.getElementById("hook-cam").value);
         if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById("tracking-mode").value))
         {
