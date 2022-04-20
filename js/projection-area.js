@@ -627,9 +627,9 @@ function createSceneFromForm()
     heightDetected = parseFloat(document.getElementById('given-height-detection').value);
 
     //place cameras
-    let givenWidth = document.getElementById('areaWantedWidth').value;
-    let givenHeight = document.getElementById('areaWantedHeight').value;
-    let camsHeight = document.getElementById('hook-cam').value;
+    let givenWidth = parseFloat(document.getElementById('areaWantedWidth').value);
+    let givenHeight = parseFloat(document.getElementById('areaWantedHeight').value);
+    let camsHeight = parseFloat(document.getElementById('hook-cam').value);
 
     let configs = [];
 
