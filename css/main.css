@@ -148,17 +148,6 @@ strong{
   flex:1;
 }
 
-#gizmo{
-  position: absolute;
-  top : 30px;
-  right: 30px;
-  width: 75px;
-  height : 75px;
-  background-image: url(../img/gizmo.png);
-  background-repeat: no-repeat;
-
-}
-
 #toolbar{
   position: absolute;
   height: 100%;
@@ -169,8 +158,8 @@ strong{
 }
 
 canvas{
-  width: 100% !important;
-  height: 100% !important;
+  /*width: 100% !important;
+  height: 100% !important;*/
   position: absolute;
 }
 
@@ -339,4 +328,26 @@ strong
   color: #000;
   text-decoration: none;
   cursor: pointer;
+}
+
+/* GIZMO */ 
+.orbit-controls-gizmo {
+  position: absolute;
+  top: 2em;
+  right: 2em;
+  z-index: 1000;
+  background-color: #FFF0;
+  border-radius: 100%;
+  transition: background-color .15s  linear;
+  cursor: pointer;
+}
+
+.orbit-controls-gizmo.dragging, 
+.orbit-controls-gizmo:hover {
+  background-color: #FFF3;
+}
+
+.orbit-controls-gizmo.inactive {
+  pointer-events: none;
+  background-color: #FFF0  !important;
 }

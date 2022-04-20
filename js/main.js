@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
-import { OrbitControls } from 'three-controls/OrbitControls.js';
+import { OrbitControls } from './lib/OrbitControls.js';
+import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
 
 import { camerasTypes } from './Camera.js';
@@ -12,15 +13,19 @@ import { initScene } from './projection-area.js';
 import { addCamera } from './Camera.js';
 
 import { doesCoverArea } from './projection-area.js';
+import { OrthographicCamera } from 'three';
 
-let SCREEN_WIDTH = window.innerWidth;
-let SCREEN_HEIGHT = window.innerHeight;
+let SCREEN_WIDTH = document.getElementById('viewport').offsetWidth;
+let SCREEN_HEIGHT = document.getElementById('viewport').offsetHeight;
 let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
 let container;
 let renderer;
 
-let camera;
+let activeCamera, perspCam, orthoCam;
+let controls, controlsGizmo;
+
+const frustumSize = 20;
 
 export let transformControl;
 const raycaster = new THREE.Raycaster();
@@ -69,15 +74,25 @@ function init() {
 
 
     // Creation of user's camera
-    camera = new THREE.PerspectiveCamera( 70, aspect, 1, 10000 );
-    camera.position.set(6,6,6); //height and retreat
+    perspCam = new THREE.PerspectiveCamera( 70, aspect, 1, 10000 );
+    perspCam.position.set(6,6,6); //height and retreat
+
+    orthoCam = new THREE.OrthographicCamera( -frustumSize, frustumSize, frustumSize / aspect, -frustumSize / aspect, 1, 10000);
+    orthoCam.position.set(0,0,10);
+
+    activeCamera = perspCam;
 
     // Controls
-    const controls = new OrbitControls( camera, renderer.domElement );
+    controls = new OrbitControls( activeCamera, renderer.domElement );
     controls.damping = 0.2;
+    // Add the Orbit Controls Gizmo
+    controlsGizmo = new  OrbitControlsGizmo(controls, { size:  100, padding:  8 });
+    // Add the Gizmo domElement to the dom 
+    viewport.appendChild(controlsGizmo.domElement);
+    //controls.enableRotate = false;
     controls.addEventListener( 'change', render );
 
-    transformControl = new TransformControls( camera, renderer.domElement );
+    transformControl = new TransformControls( activeCamera, renderer.domElement );
     transformControl.addEventListener( 'change', render );
     transformControl.addEventListener( 'dragging-changed', function ( event ) {
 
@@ -108,7 +123,6 @@ function init() {
 function onPointerDown( event ) {
     onDownPosition.x = event.clientX;
     onDownPosition.y = event.clientY;
-
 }
 
 function onPointerUp() {
@@ -118,12 +132,12 @@ function onPointerUp() {
     if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) transformControl.detach();
 }
 
+
 function onPointerMove( event ) {
 
     pointer.x = (event.clientX / document.getElementById('viewport').offsetWidth) * 2 - 1;
     pointer.y = - ((event.clientY - document.getElementById('header').offsetHeight) / document.getElementById('viewport').offsetHeight) * 2 + 1;
-    
-    raycaster.setFromCamera( pointer, camera );
+    raycaster.setFromCamera( pointer, activeCamera );
 
     const meshes = camMeshes.concat(dummiesMeshes);
 
@@ -141,14 +155,45 @@ function onPointerMove( event ) {
 
 function onWindowResize() {
 
-    SCREEN_WIDTH = window.innerWidth;
-    SCREEN_HEIGHT = window.innerHeight;
+    SCREEN_WIDTH = document.getElementById('viewport').offsetWidth;;
+    SCREEN_HEIGHT = document.getElementById('viewport').offsetHeight;
     aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
     renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
-    camera.aspect = aspect;
-    camera.updateProjectionMatrix();
+    perspCam.aspect = aspect;
+    perspCam.updateProjectionMatrix();
+
+    orthoCam.left = - frustumSize/ 2.0;
+    orthoCam.right = frustumSize / 2.0;
+    orthoCam.top = frustumSize / (2.0 * aspect);
+    orthoCam.bottom = - frustumSize / (2.0 * aspect);
+    orthoCam.updateProjectionMatrix();
+}
+
+/* Change vue from perspective to orthographic */
+export function changeCamera()
+{
+    activeCamera = activeCamera.isOrthographicCamera ? perspCam : orthoCam;
+
+    transformControl.camera = activeCamera;
+}
+
+export function placeCamera(newPos)
+{
+    activeCamera.position.set(newPos.x, newPos.y, newPos.z);
+
+    controls.dispose();
+    controls = new OrbitControls( activeCamera, renderer.domElement );
+    controls.damping = 0.2;
+    controls.enableRotate = activeCamera.isOrthographicCamera ? false : true;
+
+    // Add the Orbit Controls Gizmo
+    controlsGizmo.dispose();
+    controlsGizmo = new OrbitControlsGizmo(controls);
+    viewport.appendChild(controlsGizmo.domElement);
+
+    activeCamera.lookAt(0,0,0);
 }
 
 /* Manage URLs */
@@ -299,6 +344,8 @@ function onKeyDown( event ) {
     switch ( event.keyCode ) {
 
         case 80: /*P*/
+            //changeCamera()
+            console.log(activeCamera.position);
             break;
 
     }
@@ -322,7 +369,7 @@ function render() {
     renderer.clear();
 
     renderer.setViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
-    renderer.render( scene, camera )
+    renderer.render( scene, activeCamera )
 }
 
 
