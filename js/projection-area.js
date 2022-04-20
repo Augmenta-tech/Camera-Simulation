@@ -34,7 +34,8 @@ export function initScene()
     // Floor
     let materialFloor = new THREE.MeshPhongMaterial( {color: 0x555555});//{ color: 0x8DAA9D, dithering: true } ); // green-blue
 
-    let geometryFloor = new THREE.PlaneGeometry( 2000, 2000 );
+    const size = 2000;
+    let geometryFloor = new THREE.PlaneGeometry( size, size );
 
     floor = new THREE.Mesh(geometryFloor, materialFloor);
     floor.position.set( 0, DEFAULT_FLOOR_HEIGHT - 0.01, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
@@ -42,10 +43,7 @@ export function initScene()
     scene.add(floor);
 
     // Grid
-    const size = 50;
-    const divisions = 50
-
-    const gridHelper = new THREE.GridHelper( size, divisions, 0x444444 , 0x444444 );
+    const gridHelper = new THREE.GridHelper( size, size, 0x444444 , 0x444444 );
     gridHelper.position.y = - 0.005;
     scene.add( gridHelper );
 
@@ -318,6 +316,7 @@ export function drawProjection(cam)
     //Place text 
     if(coveredPointsAbove.length > 2)
     {
+        //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
         let barycentre = getBarycentre(coveredPointsAbove);
         cam.changeTextPosition(barycentre);
         if(previousValue != cam.areaValue) cam.changeAreaDisplayed(barycentre);
@@ -633,7 +632,23 @@ function createSceneFromForm()
 
     let configs = [];
 
-    camerasTypes.forEach(type => {
+    camerasTypes.filter(c => c.recommanded).forEach(type => {
+        /*
+        let augmentaFar = 0;
+        switch(document.getElementById("tracking-mode").value)
+        {
+            case "human-tracking":
+                augmentaFar = 6;
+                break;
+            case "hand-tracking":
+                augmentaFar = 2;
+                break;
+            default:
+                augmentaFar = 6;
+                break;
+        }
+        if(type.rangeFar > augmentaFar) type.rangeFar = augmentaFar;
+        */
         if(document.getElementById('check-' + type.id)) if(document.getElementById('check-' + type.id).checked && camsHeight <= type.rangeFar && camsHeight >= type.rangeNear + heightDetected)
         {
             let widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - heightDetected) * 2;
