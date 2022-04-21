@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 import { cameras, camerasTypes } from './Camera.js';
 import { resetCams, addCamera } from './Camera.js'
+import { Grid } from './Grid.js';
 
 import * as POLYBOOL from 'polybool';
 
@@ -34,7 +35,7 @@ export function initScene()
     // Floor
     let materialFloor = new THREE.MeshPhongMaterial( {color: 0x555555});//{ color: 0x8DAA9D, dithering: true } ); // green-blue
 
-    const size = 2000;
+    const size = 60;
     let geometryFloor = new THREE.PlaneGeometry( size, size );
 
     floor = new THREE.Mesh(geometryFloor, materialFloor);
@@ -43,9 +44,11 @@ export function initScene()
     scene.add(floor);
 
     // Grid
-    const gridHelper = new THREE.GridHelper( size, size, 0x444444 , 0x444444 );
-    gridHelper.position.y = - 0.005;
-    scene.add( gridHelper );
+    // const gridHelper = new THREE.GridHelper( size, size, 0x444444 , 0x444444 );
+    // gridHelper.position.y = - 0.005;
+    // scene.add( gridHelper );
+    const grid = new Grid(size);
+    grid.planes.forEach(p => scene.add(p));
 
     // WallX
     let materialWallX = new THREE.MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
@@ -65,6 +68,17 @@ export function initScene()
     wallZ = new THREE.Mesh(geometryWallZ, materialWallZ);
     wallZ.position.set( 0, 0, DEFAULT_WALLZ_DEPTH - 0.01 ); //to avoid noise with area covered by cam (y = 0 for area covered)
     scene.add(wallZ);
+
+    //Close scene
+    const wallRight = new THREE.Mesh(new THREE.PlaneGeometry( 2000, 2000 ), materialWallX);
+    wallRight.position.set( size/2.0 , 0, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallRight.rotation.y = - Math.PI / 2.0;
+    scene.add(wallRight);
+
+    const wallBack = new THREE.Mesh(new THREE.PlaneGeometry( 2000, 2000 ), materialWallZ);
+    wallBack.position.set( 0, 0, size/2.0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallBack.rotation.y = Math.PI;
+    scene.add(wallBack);
 }
 
 /* Calculate area covered by the camera cam to draw it and display it*/ 

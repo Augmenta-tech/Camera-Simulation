@@ -94,8 +94,8 @@ class OrbitControlsGizmo {
       }
       return [
         { axis: "x", direction: new Vector3(1, 0, 0), size: size.primary, color: colors.x, line, label: "X", position: new Vector3(0, 0, 0)  },
-        { axis: "y", direction: new Vector3(0, 1, 0), size: size.primary, color: colors.y, line, label: "Y", position: new Vector3(0, 0, 0)  },
-        { axis: "z", direction: new Vector3(0, 0, 1), size: size.primary, color: colors.z, line, label: "Z", position: new Vector3(0, 0, 0)  },
+        { axis: "y", direction: new Vector3(0, 1, 0), size: size.primary, color: colors.y, line, label: "Z", position: new Vector3(0, 0, 0)  },
+        { axis: "z", direction: new Vector3(0, 0, 1), size: size.primary, color: colors.z, line, label: "Y", position: new Vector3(0, 0, 0)  },
         { axis: "-x", direction: new Vector3(-1, 0, 0), size: size.secondary, color: colors.x, position: new Vector3(0, 0, 0) },
         { axis: "-y", direction: new Vector3(0, -1, 0), size: size.secondary, color: colors.y, position: new Vector3(0, 0, 0) },
         { axis: "-z", direction: new Vector3(0, 0, -1), size: size.secondary, color: colors.z, position: new Vector3(0, 0, 0) },
@@ -122,8 +122,11 @@ class OrbitControlsGizmo {
       rotateStart.set( e.clientX, e.clientY );
       orbitState = orbit.enabled;
       orbit.enabled = false;
-      window.addEventListener('pointermove', onDrag, false);
-      window.addEventListener('pointerup', onPointerUp, false);
+      if(camera.isPerspectiveCamera)
+      {
+        window.addEventListener('pointermove', onDrag, false);
+        window.addEventListener('pointerup', onPointerUp, false);
+      }
     }
   
     function onPointerUp () {
@@ -213,6 +216,7 @@ class OrbitControlsGizmo {
       }
       
       loop();*/
+      console.log(camera);
       if(camera.isPerspectiveCamera) changeCamera();
       placeCamera(vec)
       
@@ -250,13 +254,17 @@ class OrbitControlsGizmo {
         const color = (axis.position.z >= -0.01)
           ? axis.color[0]
           : axis.color[1];
+
+        const highlightColor = (axis.position.z >= -0.01)
+          ? axis.color[1]
+          : axis.color[0];
   
         // Draw the line that connects it to the center if enabled
         if (axis.line)
         drawLine(center, axis.position, axis.line, color);
   
         // Draw the circle for the axis
-        drawCircle(axis.position, axis.size, highlight ? "#FFFFFF" : color);
+        drawCircle(axis.position, axis.size, highlight ? highlightColor : color);
   
         // Write the axis label (X,Y,Z) if provided
         if (axis.label) {

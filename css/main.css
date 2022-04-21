@@ -287,7 +287,7 @@ strong
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 100; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -335,7 +335,7 @@ strong
   position: absolute;
   top: 2em;
   right: 2em;
-  z-index: 1000;
+  z-index: 50;
   background-color: #FFF0;
   border-radius: 100%;
   transition: background-color .15s  linear;
