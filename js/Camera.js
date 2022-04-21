@@ -5,12 +5,67 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { transformControl } from './main.js';
 
+import { currentUnit, units } from './projection-area.js';
 import { scene } from './projection-area.js';
 import { drawProjection } from './projection-area.js';
 
-import * as data from './cameras.json';
+//import * as data from './cameras.json';
+const data = [
+    {
+        "id":0, 
+        "name":"Orbbec Astra +", 
+        "HFov":55, 
+        "VFov":45, 
+        "rangeNear": 0.6,
+        "rangeFar": 6,
+        "suitable": [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        "recommanded": true
+    },
+    {
+        "id":1, 
+        "name":"Orbbec Astra Pro", 
+        "HFov":60, 
+        "VFov":49.5, 
+        "rangeNear": 0.6,
+        "rangeFar": 6,
+        "suitable": [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        "recommanded": true
+    },
+    {
+        "id":2, 
+        "name":"Azure Kinect", 
+        "HFov":75, 
+        "VFov":65, 
+        "rangeNear": 0.5,
+        "rangeFar": 5.46,
+        "suitable": [
+            "hand-tracking" 
+        ],
+        "recommanded": false
+    },
+    {
+        "id":3, 
+        "name":"Orbbec Femto", 
+        "HFov":64.6, 
+        "VFov":50.8, 
+        "rangeNear": 0.25,
+        "rangeFar": 5,
+        "suitable": [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        "recommanded": true
+    }
+];
 
-export const camerasTypes = data.default;
+//export const camerasTypes = data.default;
+export const camerasTypes = data;
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
 const DEFAULT_CAMERA_TYPE_ID = 0;
@@ -27,7 +82,7 @@ const fontLoader = new FontLoader();
 const SIZE_TEXT_CAMERA = 0.4
 
 export class Camera{
-    constructor(id, typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+    constructor(id, construct = false, typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
     {
         this.id = id;
         this.type = camerasTypes.find(t => t.id === typeID);
@@ -37,6 +92,22 @@ export class Camera{
         this.pitch = p;
         this.yaw = a;
         this.roll = r;
+
+        if(!construct)
+        {
+            for(let i = 0; i < cameras.length; i++)
+            {
+                console.log(i + '/' + cameras.length);
+                console.log(new THREE.Vector3(this.XPos, this.YPos, this.ZPos));
+                console.log(cameras[i].mesh.position);
+                console.log(new THREE.Vector3(this.XPos, this.YPos, this.ZPos).distanceTo(cameras[i].mesh.position));
+                if(new THREE.Vector3(this.XPos, this.YPos, this.ZPos).distanceTo(cameras[i].mesh.position) < 0.5)
+                {
+                    this.XPos += 0.6 - new THREE.Vector3(this.XPos, this.YPos, this.ZPos).distanceTo(cameras[i].mesh.position);
+                    i = 0;
+                }
+            }
+        }
 
         this.cameraPerspective = new THREE.PerspectiveCamera( this.type.VFov, this.type.aspectRatio, this.type.rangeNear, this.type.rangeFar );
         this.cameraPerspectiveHelper = new THREE.CameraHelper( this.cameraPerspective );
@@ -143,7 +214,7 @@ export class Camera{
 
     changeAreaDisplayed()
     {
-        let newTextGeometry = new TextGeometry( Math.round(this.areaValue*100)/100 + 'm²', { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
+        let newTextGeometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         this.areaDisplay.geometry = newTextGeometry;
     }
 
@@ -184,9 +255,9 @@ export class Camera{
         this.ZPos = this.mesh.position.z;
         this.cameraPerspective.position.set(this.XPos, this.YPos, this.ZPos);
 
-        document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.XPos*10)/10.0;
-        document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.ZPos*10)/10.0;
-        document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.YPos*10)/10.0;
+        document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.XPos * currentUnit * 10)/10.0;
+        document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.ZPos * currentUnit * 10)/10.0;
+        document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.YPos * currentUnit * 10)/10.0;
         
     }
 
@@ -228,7 +299,7 @@ function addCameraButton()
     addCamera();
 }
 
-export function addCamera(typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+export function addCamera(construct = false, typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
 {
     if(font === undefined)
     {
@@ -243,7 +314,7 @@ export function addCamera(typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CA
 
     function addCam()
     {
-        let newCamera = new Camera(cameras.length, typeID, x, y, z, p, a, r)
+        let newCamera = new Camera(cameras.length, construct, typeID, x, y, z, p, a, r)
         newCamera.addCameraToScene();
         addCameraGUI(newCamera);
         cameras.push(newCamera);
@@ -263,6 +334,7 @@ function addCameraGUI(cam)
     cameraUIdiv.dataset.camera = cam.id;
     cameraUIdiv.classList.add("active");
     cameraUIdiv.classList.add("cameraUI");
+    
     cameraUIdiv.id = 'cam-' + (cam.id) + '-UI';
     cameraUIdiv.innerHTML = `
         <div id="cam-` + (cam.id) + `-UI-header" class="row s-p">
@@ -286,12 +358,12 @@ function addCameraGUI(cam)
                 </div>
                 <div class="row s-p column-2">
                     <div>
-                        <p id="hfov` + cam.id + `">FOV H: ` + cam.type.HFov + `°</p>
-                        <p id="near` + cam.id + `">NEAR: ` + cam.type.rangeNear + `m</p>
+                        <p id="hfov` + cam.id + `">FOV H: <span>` + cam.type.HFov + `°</p>
+                        <p id="near` + cam.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(cam.type.rangeNear*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                     </div>
                     <div>
-                        <p id="vfov` + cam.id + `">FOV V: ` + cam.type.VFov + `°</p>
-                        <p id="far` + cam.id + `">FAR: ` + cam.type.rangeFar + `m</p>
+                        <p id="vfov` + cam.id + `">FOV V: <span>` + cam.type.VFov + `°</p>
+                        <p id="far` + cam.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(cam.type.rangeFar*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                     </div>
                 </div>
             </div>
@@ -301,9 +373,9 @@ function addCameraGUI(cam)
                         <p>  Position </p>
                     </div>
                     <div class="row s-p column-2">
-                        <p id="x-pos-`+ cam.id +`" class="draggable">X <strong>` + Math.round(cam.XPos*10) /10.0 + `</strong>m</p>
-                        <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>` + Math.round(-cam.ZPos*10) /10.0 + `</strong>m</p>
-                        <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>` + Math.round(cam.YPos*10) /10.0 + `</strong>m</p>
+                        <p id="x-pos-`+ cam.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(cam.XPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                        <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-cam.ZPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                        <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(cam.YPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
                     </div>
                 </div>
                 <div  class="row s-p">
@@ -350,7 +422,7 @@ function addCameraGUI(cam)
             camHeight.classList.add("row");
             camHeight.classList.add("s-p");
             camHeight.id = "cam-solo-height";
-            camHeight.innerHTML = `<p> Camera height: ` + Math.round(cam.YPos*10) /10.0 + `m</p>`
+            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(cam.YPos * currentUnit * 10) /10.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
             camUI.appendChild(camHeight);
         }
         else
@@ -385,8 +457,8 @@ function addCameraGUI(cam)
             
             document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H: ' + cam.type.HFov + '°';
             document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V: ' + cam.type.VFov + '°';
-            document.getElementById('near' + cam.id + '').innerHTML = 'NEAR: ' + cam.type.rangeNear + 'm';
-            document.getElementById('far' + cam.id + '').innerHTML = 'FAR: ' + cam.type.rangeFar + 'm';
+            document.getElementById('near' + cam.id + '').innerHTML = 'NEAR: ' + (Math.round(cam.type.rangeNear*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
+            document.getElementById('far' + cam.id + '').innerHTML = 'FAR: ' + (Math.round(cam.type.rangeFar*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
          
             
             cam.cameraPerspective.fov = cam.type.VFov;
@@ -456,17 +528,17 @@ function dragElement(element) {
         switch(element.id.split('-')[0])
         {
             case "x":
-                cam.XPos = value;
+                cam.XPos = value / currentUnit;
                 cam.cameraPerspective.position.x = cam.XPos;
                 cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
                 break;
             case "y":
-                cam.ZPos = - value;
+                cam.ZPos = - value / currentUnit;
                 cam.cameraPerspective.position.z = cam.ZPos;
                 cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
                 break;
             case "z":
-                cam.YPos = value;
+                cam.YPos = value / currentUnit;
                 cam.cameraPerspective.position.y = cam.YPos;
                 cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
                 break;

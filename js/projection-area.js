@@ -8,6 +8,9 @@ import * as POLYBOOL from 'polybool';
 
 export let scene = new THREE.Scene();
 
+export const units = {meters: 1, feets: 3.28084}
+export let currentUnit = units.meters;
+
 let floor, wallX, wallZ;
 const floorNormal = new THREE.Vector3(0,1,0);
 const DEFAULT_FLOOR_HEIGHT = 0;
@@ -18,6 +21,8 @@ let wallXDepth = DEFAULT_WALLX_DEPTH;
 const wallZNormal = new THREE.Vector3(0,0,1);
 const DEFAULT_WALLZ_DEPTH = -10;
 let wallZDepth = DEFAULT_WALLZ_DEPTH;
+
+let grid;
 
 //DEBUG
 
@@ -35,7 +40,7 @@ export function initScene()
     // Floor
     let materialFloor = new THREE.MeshPhongMaterial( {color: 0x555555});//{ color: 0x8DAA9D, dithering: true } ); // green-blue
 
-    const size = 60;
+    const size = 70;
     let geometryFloor = new THREE.PlaneGeometry( size, size );
 
     floor = new THREE.Mesh(geometryFloor, materialFloor);
@@ -47,7 +52,7 @@ export function initScene()
     // const gridHelper = new THREE.GridHelper( size, size, 0x444444 , 0x444444 );
     // gridHelper.position.y = - 0.005;
     // scene.add( gridHelper );
-    const grid = new Grid(size);
+    grid = new Grid(size, units.meters);
     grid.planes.forEach(p => scene.add(p));
 
     // WallX
@@ -79,6 +84,24 @@ export function initScene()
     wallBack.position.set( 0, 0, size/2.0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
     wallBack.rotation.y = Math.PI;
     scene.add(wallBack);
+}
+
+document.getElementById('toggle-unit').onclick = toggleUnit;
+function toggleUnit()
+{
+    const previousUnit = currentUnit;
+    currentUnit = currentUnit === units.meters ? units.feets : units.meters;
+    grid.updateUnit(currentUnit);
+    let unitNumberElements = document.querySelectorAll('[data-unit]');
+    unitNumberElements.forEach(e => {
+        e.dataset.unit = currentUnit;
+        e.innerHTML = currentUnit === units.meters ? Math.round(e.innerHTML / previousUnit * 10) / 10.0 : Math.round(e.innerHTML * currentUnit * 10) / 10.0;
+    })
+    let unitCharElements = document.querySelectorAll('[data-unittext]');
+    unitCharElements.forEach(e => {
+        e.dataset.unittext = currentUnit;
+        e.innerHTML = currentUnit === units.meters ? 'm' : 'ft';
+    })
 }
 
 /* Calculate area covered by the camera cam to draw it and display it*/ 
@@ -325,7 +348,7 @@ export function drawProjection(cam)
 
     //display area value 
     let previousValue = cam.areaValue;
-    cam.areaValue = calculateArea(coveredPointsAbove);
+    cam.areaValue = calculateArea(coveredPointsAbove) * (currentUnit * currentUnit);
 
     //Place text 
     if(coveredPointsAbove.length > 2)
@@ -706,9 +729,9 @@ function createSceneFromForm()
             {
                 chosenConfig.rot 
                     ?
-                    addCamera(chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, Math.PI/2.0)
+                    addCamera(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, Math.PI/2.0)
                     :
-                    addCamera(chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
+                    addCamera(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
 
             }
         }
