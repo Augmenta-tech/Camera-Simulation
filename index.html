@@ -14,17 +14,24 @@
     <div class="row full-height">
       <div id="main">
         <div id="header" class="row s-p">
-          <img src="img/augmenta-logo.png" alt="">
-          <div id="project-name"> <p> Unsaved Draft</p></div>
+          <a href="https://augmenta.tech/fr/accueil-2/">
+            <img src="img/augmenta-logo.png" alt="">
+          </a>
           <div class="row">
-            <div data-button class="active">
+            <div id="generate-link" data-button class="active">
               <p> Share </p>
             </div>
             <p>Help ?</p>
           </div>
         </div>
         <div id="viewport">
-          <div id="gizmo"></div> <!-- REPLACE BY INTERACTIVE GIZMO THREE JS -->
+          <!-- The Modal -->
+          <div id="link-modal" class="modal">
+            <div class="modal-content link">
+              <button id="copy-link" data-button>Get the link of your scene</button>
+              <span id="close-link" class="close">&times;</span>
+            </div>
+          </div>
           <div id="toolbar" class="row">
             <div data-tool="1" class="active">
               <span class="iconify" data-icon="fluent:cursor-20-filled"></span><!-- REPLACE BY TOOL BUTTON -->
@@ -40,7 +47,7 @@
             </div>
           </div>
           <div id="viewport-button" class="row center">
-            <div data-button  class="active">
+            <div id="display-frustums-button" data-button  class="active">
               <p id="display-frustums">Frustums</p>
             </div>
             <div data-button  class="active">
@@ -60,8 +67,8 @@
 
       <div id="inspector">
         <div id="scene-info">
-          <h1>Tracking data</h1>
-          <!-- REPLACE BY DATA -->
+          <!--<h1>Tracking data</h1>
+           <!- REPLACE BY DATA ->
           <div class="row">
             <div>
               <p>Centroid (x,y)</p>
@@ -72,15 +79,57 @@
               <p>Boundingbox</p>
             </div>
           </div>
-            <br>
-          <h1>Surface cover</h1>
+            <br>-->
+          <!-- The Modal -->
+          <div id="open-scene-form" class="active" data-button>
+            <p >Generate My Scene</p>
+          </div>
+          <div id="generate-scene-modal" class="modal">
+            <div id="scene-form-content" class="modal-content scene-form">
+              <span id="close-form" class="close">&times;</span>
+              <div>
+                <h1>Tracking surface</h1>
+                <div class="">
+                  <p>Width</p>
+                  <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                </div>
+                <div class="">
+                  <p>Height</p>
+                  <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                </div>
+                <div class="">
+                  <p>Camera hook height</p>
+                  <input class="" id="hook-cam" type="number" placeholder="r" min="0" max="15" step = "0.1">
+                </div>
+                <div class="">
+                  <p>Height Detection</p>
+                  <select id="given-height-detection" class="select select-form" name="camType">
+                    <option value="0.2">Feets</option>
+                    <option value="0.6">Knees</option>
+                    <option value="1" selected>Hips</option>
+                    <option value="1.6">Shoulders</option>
+                    <option value="2">Entire body</option>
+                  </select>
+                </div>
+                <div id="tracking-choice">
+                  <h1>What do you want to track ?</h1>
+                  <select id="tracking-mode" class="select select-form" name="camType">
+                    <option value="human-tracking" selected>Human tracking</option>
+                    <option value="hand-tracking">Hand tracking</option>
+                  </select>
+                </div>
+                <div id="cam-types-checkboxes">
+                  <h1>Choose the type.s of camera.s you want to use</h1>
+                </div>
+              </div>
+              <div id="form-button" class="active" data-button>
+                <p id="generate-scene">Generate Scene</p>
+              </div>
+            </div>
+          </div>
+          
           <div class="row">
-            <div>
-              <p>Width</p>
-            </div>
-            <div>
-              <p>Height</p>
-            </div>
+            <p>Area fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
           </div>
         </div>
         <div id="cameras-buttons" class="row">
@@ -97,6 +146,7 @@
 
 		<!-- Import maps polyfill -->
 		<!-- Remove this when import maps will be widely supported -->
+    <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>
 		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
     
 		<script type="importmap">
@@ -106,7 +156,8 @@
 					"three-libs/": "https://unpkg.com/three@0.139.2/examples/jsm/libs/",
 					"three-controls/": "https://unpkg.com/three@0.139.2/examples/jsm/controls/",
 					"three-loaders/": "https://unpkg.com/three@0.139.2/examples/jsm/loaders/",
-					"three-text-geometry": "https://unpkg.com/three@0.139.2/examples/jsm/geometries/TextGeometry.js"
+					"three-text-geometry": "https://unpkg.com/three@0.139.2/examples/jsm/geometries/TextGeometry.js",
+          "polybool": "https://unpkg.com/polybooljs@1.2.0/dist/polybool.min.js"
 				}
 			}
 		</script> 

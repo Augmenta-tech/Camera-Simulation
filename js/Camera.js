@@ -3,17 +3,17 @@ import * as THREE from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
 import { TextGeometry } from 'three-text-geometry';
 
-import { scene } from './main.js';
 import { transformControl } from './main.js';
 
+import { scene } from './projection-area.js';
 import { drawProjection } from './projection-area.js';
 
-export const camerasTypes = {
-    OrbbecAstraPlus: {HFov:55, VFov:45, aspectRatio: 1920.0/1080.0, rangeNear: 0.6,rangeFar: 8},
-    OrbbecAstraPro: {HFov:60, VFov:49.5, aspectRatio: 1920.0/1080.0, rangeNear: 0.6,rangeFar: 8}
-}
+import * as data from './cameras.json';
 
-const DEFAULT_CAMERA_TYPE = camerasTypes.OrbbecAstraPlus
+export const camerasTypes = data.default;
+camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
+
+const DEFAULT_CAMERA_TYPE_ID = 0;
 
 const DEFAULT_CAMERA_HEIGHT = 4.5
 const DEFAULT_CAMERA_PITCH = - Math.PI / 2.0;
@@ -27,20 +27,18 @@ const fontLoader = new FontLoader();
 const SIZE_TEXT_CAMERA = 0.4
 
 export class Camera{
-    constructor(id, scene)
+    constructor(id, typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
     {
         this.id = id;
-        this.type = DEFAULT_CAMERA_TYPE;
-        this.XPos = 0;
-        this.YPos = DEFAULT_CAMERA_HEIGHT;
-        this.ZPos = 0;
-        this.pitch = DEFAULT_CAMERA_PITCH;
-        this.yaw = 0;
-        this.roll = 0;
+        this.type = camerasTypes.find(t => t.id === typeID);
+        this.XPos = x;
+        this.YPos = y;
+        this.ZPos = z;
+        this.pitch = p;
+        this.yaw = a;
+        this.roll = r;
 
-        this.xRotationAxis = new THREE.Vector3(1, 0, 0);
-
-        this.cameraPerspective = new THREE.PerspectiveCamera( DEFAULT_CAMERA_TYPE.VFov, DEFAULT_CAMERA_TYPE.aspectRatio, DEFAULT_CAMERA_TYPE.rangeNear, DEFAULT_CAMERA_TYPE.rangeFar );
+        this.cameraPerspective = new THREE.PerspectiveCamera( this.type.VFov, this.type.aspectRatio, this.type.rangeNear, this.type.rangeFar );
         this.cameraPerspectiveHelper = new THREE.CameraHelper( this.cameraPerspective );
     
         this.color = new THREE.Color(Math.random(), Math.random(), Math.random());
@@ -48,12 +46,22 @@ export class Camera{
         const geometry = new THREE.BoxGeometry( 0.2,0.2,0.2 );
         this.mesh = new THREE.Mesh( geometry, material );
         this.mesh.name = 'Camera';
-        camMeshes.push(this.mesh);
 
-        this.cameraPerspective.position.y = this.YPos;
-        this.mesh.position.y = this.YPos;
-        this.cameraPerspective.rotateX(this.pitch);
-        
+        this.cameraPerspective.position.set(this.XPos, this.YPos, this.ZPos);
+        this.mesh.position.set(this.XPos, this.YPos, this.ZPos);
+
+        this.cameraPerspective.rotateX(DEFAULT_CAMERA_PITCH);
+        this.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), this.yaw);
+        this.xRotationAxis = new THREE.Vector3(1, 0, 0);
+        this.xRotationAxis.applyAxisAngle(new THREE.Vector3(0,1,0), this.yaw);
+        this.xRotationAxis.normalize();
+        this.cameraPerspective.rotateOnWorldAxis(this.xRotationAxis, this.pitch);
+        let rotationAxis = new THREE.Vector3();
+        this.cameraPerspective.getWorldDirection(rotationAxis);
+        this.cameraPerspective.rotateOnWorldAxis(rotationAxis, this.roll);
+
+        this.coveredPointsAbove = [];
+
         this.areaCoveredFloor = new THREE.Mesh();
         this.areaCoveredAbove = new THREE.Mesh();
         this.areaCoveredWallX = new THREE.Mesh();
@@ -62,12 +70,12 @@ export class Camera{
         this.areaAppear = true;
         this.areaValue = 0;
 
-        this.raysFloor = [];
+        /*this.raysFloor = [];
         this.raysAbove = [];
         this.raysWallX = [];
         this.raysWallZ = [];
 
-        this.overlaps = {}
+        this.overlaps = {}*/
 
         let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.01 } );
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
@@ -92,17 +100,38 @@ export class Camera{
 
     addCameraToScene()
     {
-        scene.add( this.cameraPerspective );
-        scene.add( this.cameraPerspectiveHelper );
-        scene.add( this.mesh );
-        scene.add( this.nameText );
-        scene.add( this.areaDisplay );
+        scene.add(this.cameraPerspective);
+        scene.add(this.cameraPerspectiveHelper);
+        scene.add(this.mesh);
+        camMeshes.push(this.mesh);
+        // scene.add(this.areaCoveredFloor);
+        // scene.add(this.areaCoveredAbove);
+        // scene.add(this.areaCoveredWallX);
+        // scene.add(this.areaCoveredWallZ);
+        scene.add(this.nameText);
+        scene.add(this.areaDisplay);
+        this.areaAppear = true;
         /*for(let i = 0; i < this.id; i++)
         {
             scene.add(this.areaOverlaps[i]);
         }*/
 
-        addCameraGUI(this);
+    }
+
+    removeCameraFromScene()
+    {
+        if ( transformControl.object === this.mesh ) transformControl.detach();
+        scene.remove(this.cameraPerspective);
+        scene.remove(this.cameraPerspectiveHelper);
+        scene.remove(this.mesh);
+        camMeshes.splice(camMeshes.indexOf(this.mesh), 1);
+        // scene.remove(this.areaCoveredFloor);
+        // scene.remove(this.areaCoveredAbove);
+        // scene.remove(this.areaCoveredWallX);
+        // scene.remove(this.areaCoveredWallZ);
+        scene.remove(this.nameText);
+        scene.remove(this.areaDisplay);
+        this.areaAppear = false;
     }
 
     changeTextPosition(barycentre)
@@ -192,79 +221,157 @@ export class Camera{
 
 
 /* ADDING  CAMERA */
-fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
-    font = response;
-    document.getElementById('new-camera').onclick = addCamera;
-} );
+document.getElementById('new-camera').onclick = addCameraButton;
 
-function addCamera()
+function addCameraButton()
 {
-    let newCamera = new Camera(cameras.length)
-    newCamera.addCameraToScene();
-    cameras.push(newCamera);
+    addCamera();
+}
+
+export function addCamera(typeID = DEFAULT_CAMERA_TYPE_ID, x = 0, y = DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+{
+    if(font === undefined)
+    {
+        fontLoader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+            font = response;
+            addCam();
+        });
+    }
+    else{
+        addCam();
+    }
+
+    function addCam()
+    {
+        let newCamera = new Camera(cameras.length, typeID, x, y, z, p, a, r)
+        newCamera.addCameraToScene();
+        addCameraGUI(newCamera);
+        cameras.push(newCamera);
+    }
 }
 
 function addCameraGUI(cam)
 {
-    const CamPresets = { "Orbbec Astra +" : camerasTypes.OrbbecAstraPlus, "Orbbec Astra Pro" : camerasTypes.OrbbecAstraPro };
-    let cameraUIdiv = document.createElement( 'div');
+    let cameraTypesOptions = ``;
+    camerasTypes.filter(c => c.recommanded).forEach(type => {
+        let optionElement = `<option value="` + type.name + `" ` + (cam.type.name === type.name ? `selected` : ``) + `>` + type.name;
+        cameraTypesOptions += optionElement;
+        cameraTypesOptions += "</option>"
+    });
+
+    let cameraUIdiv = document.createElement('div');
     cameraUIdiv.dataset.camera = cam.id;
     cameraUIdiv.classList.add("active");
     cameraUIdiv.classList.add("cameraUI");
+    cameraUIdiv.id = 'cam-' + (cam.id) + '-UI';
     cameraUIdiv.innerHTML = `
-        <div class="row s-p">
+        <div id="cam-` + (cam.id) + `-UI-header" class="row s-p">
             <div class="row">
                 <div class="camera-color" style="background-color: #`+ cam.color.getHexString() + `;"></div>
                 <h1>Camera ` + (cam.id + 1) + `</h1>
             </div>
             <div class="row">
+                <div id="cam-` + (cam.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div>
+                <div id="cam-` + (cam.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                 <div id="cam-` + (cam.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
-                <!-- <div><span class="iconify" data-icon="gg:border-style-solid"></span></div> -->
                 <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
             </div>
         </div>
-        <div id="select-camera" class="row s-p">
-            <div class="column-2 row ">
-                <select id="cam-type-` + (cam.id) + `" class="select" name="camType">
-                    <option value="plus" selected">Orbbec Astra +</option>
-                    <option value="pro">Orbbec Astra Pro</option>
-                </select>
-                <!-- <p class="select">  Astra plus </p> <span class="iconify" data-icon="gg:chevron-down"></span> -->
-            </div>
-            <div class="row s-p column-2">
-                <div>
-                    <p id="hfov` + cam.id + `">FOV H: ` + cam.type.HFov + `°</p>
-                    <p id="near` + cam.id + `">NEAR: ` + cam.type.rangeNear + `m</p>
+        <div id="cam-infos-` + (cam.id) + `-UI">
+            <div id="select-camera" class="row s-p">
+                <div class="column-2 row ">
+                    <select id="cam-type-` + (cam.id) + `" class="select camera-type" name="camType">
+                    ` + cameraTypesOptions + `
+                    </select>
                 </div>
-                <div>
-                    <p id="vfov` + cam.id + `">FOV V: ` + cam.type.VFov + `°</p>
-                    <p id="far` + cam.id + `">FAR: ` + cam.type.rangeFar + `m</p>
+                <div class="row s-p column-2">
+                    <div>
+                        <p id="hfov` + cam.id + `">FOV H: ` + cam.type.HFov + `°</p>
+                        <p id="near` + cam.id + `">NEAR: ` + cam.type.rangeNear + `m</p>
+                    </div>
+                    <div>
+                        <p id="vfov` + cam.id + `">FOV V: ` + cam.type.VFov + `°</p>
+                        <p id="far` + cam.id + `">FAR: ` + cam.type.rangeFar + `m</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row s-p">
-            <div class="2-column ">
-                <p>  Position </p>
-            </div>
-            <div class="row s-p column-2">
-                <p id="x-pos-`+ cam.id +`" class="draggable">X <strong>0</strong>m</p>
-                <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>0</strong>m</p>
-                <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>` + DEFAULT_CAMERA_HEIGHT + `</strong>m</p>
-            </div>
-        </div>
-        <div  class="row s-p">
-            <div class="2-column ">
-                <p>  Rotation </p>
-            </div>
-            <div class="row s-p column-2">
-                <p id="pitch-rot-`+ cam.id +`" class="draggable">PITCH <strong>0</strong>°</p>
-                <p id="yaw-rot-`+ cam.id +`" class="draggable">YAW <strong>0</strong>°</p>
-                <p id="roll-rot-`+ cam.id +`" class="draggable">ROLL <strong>0</strong>° </p>
+            <div id = "cam-` + (cam.id) + `-transformations">
+                <div class="row s-p">
+                    <div class="2-column ">
+                        <p>  Position </p>
+                    </div>
+                    <div class="row s-p column-2">
+                        <p id="x-pos-`+ cam.id +`" class="draggable">X <strong>` + Math.round(cam.XPos*10) /10.0 + `</strong>m</p>
+                        <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong>` + Math.round(-cam.ZPos*10) /10.0 + `</strong>m</p>
+                        <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong>` + Math.round(cam.YPos*10) /10.0 + `</strong>m</p>
+                    </div>
+                </div>
+                <div  class="row s-p">
+                    <div class="2-column ">
+                        <p>  Rotation </p>
+                    </div>
+                    <div class="row s-p column-2">
+                        <p id="pitch-rot-`+ cam.id +`" class="draggable">PITCH <strong>` + Math.round(cam.pitch*180/Math.PI) + `</strong>°</p>
+                        <p id="yaw-rot-`+ cam.id +`" class="draggable">YAW <strong>` + Math.round(cam.yaw*180/Math.PI) + `</strong>°</p>
+                        <p id="roll-rot-`+ cam.id +`" class="draggable">ROLL <strong>` + Math.round(cam.roll*180/Math.PI) + `</strong>° </p>
+                    </div>
+                </div>
             </div>
         </div>`;
 
     let inspectorDiv = document.getElementById('inspector');
     inspectorDiv.appendChild(cameraUIdiv);
+
+    document.getElementById('cam-' + (cam.id) + '-solo-button').onclick = soloCamView;
+    function soloCamView()
+    {
+        let iconElem = this.firstChild;
+        let solo = iconElem.dataset.icon === "bx:log-out";
+        let frustumsButton = document.getElementById('display-frustums-button');
+
+        let display = solo ? "block" : "none";
+
+        let otherCams = cameras.filter(c => c.id !== cam.id);
+        otherCams.forEach(c => {
+            solo ? c.addCameraToScene() : c.removeCameraFromScene();
+            let camUI = document.getElementById('cam-' + (c.id) + '-UI');
+            camUI.style.display = display;
+        });
+
+        frustumsButton.style.display = display;
+
+        let camTransfoDiv = document.getElementById('cam-' + (cam.id) + '-transformations');
+        camTransfoDiv.style.display = display;
+
+        if(!solo)
+        {
+            let camUI = document.getElementById('cam-' + (cam.id) + '-UI');
+            let camHeight = document.createElement("div");
+            camHeight.classList.add("row");
+            camHeight.classList.add("s-p");
+            camHeight.id = "cam-solo-height";
+            camHeight.innerHTML = `<p> Camera height: ` + Math.round(cam.YPos*10) /10.0 + `m</p>`
+            camUI.appendChild(camHeight);
+        }
+        else
+        {
+            document.getElementById('cam-solo-height').remove();
+        }
+        iconElem.dataset.icon = solo ? "bx:search-alt-2" : "bx:log-out";
+    }
+
+    document.getElementById('cam-' + (cam.id) + '-hide-UI').onclick = hideUICam;
+    function hideUICam()
+    {
+        let camInfosUI = document.getElementById('cam-infos-' + (cam.id) + '-UI');
+        let camUIheader = document.getElementById('cam-' + (cam.id) + '-UI-header');
+        let hidden = camInfosUI.style.display === "none";
+        camInfosUI.style.display = hidden ?  "block" : "none";
+        camUIheader.style.marginBottom = hidden ? "0px" : "-100px"
+        camUIheader.style.marginTop = hidden ? "0px" : "-10px"
+        let iconElem = this.firstChild;
+        iconElem.dataset.icon = hidden ? "bx:minus" : "bx:plus";
+    }
 
     document.getElementById('cam-' + (cam.id) + '-visible').onclick = changeVisibilityofCam;
     function changeVisibilityofCam()
@@ -272,18 +379,9 @@ function addCameraGUI(cam)
         cameras[parseInt(this.id.split('-')[1])].changeVisibility();
     }
 
-    document.getElementById('cam-type-' + cam.id).onchange = function(){
-            switch(document.getElementById('cam-type-' + cam.id).value)
-            {
-                case "plus":
-                    cam.type = camerasTypes.OrbbecAstraPlus;
-                    break;
-                case "pro":
-                    cam.type = camerasTypes.OrbbecAstraPro;
-                    break;
-                default:
-                    cam.type = camerasTypes.OrbbecAstraPlus;
-            }
+    document.getElementById('cam-type-' + cam.id).onchange = function()
+    {
+            cam.type = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + cam.id).value)
             
             document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H: ' + cam.type.HFov + '°';
             document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V: ' + cam.type.VFov + '°';
@@ -373,8 +471,8 @@ function dragElement(element) {
                 cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
                 break;
             case "pitch":
-                cam.cameraPerspective.rotateOnWorldAxis(cam.xRotationAxis, (value-90) * (Math.PI / 180.0) - cam.pitch);
-                cam.pitch = (value-90) * (Math.PI / 180.0);
+                cam.cameraPerspective.rotateOnWorldAxis(cam.xRotationAxis, value * (Math.PI / 180.0) - cam.pitch);
+                cam.pitch = value * (Math.PI / 180.0);
                 break;
             case "yaw":
                 cam.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
@@ -424,4 +522,18 @@ function displayFrustums()
 {
     let visibles = cameras.filter(c => c.areaAppear);
     cameras.forEach(c => c.changeVisibility(visibles.length != cameras.length));
+}
+
+/* RESET CAMERAS */
+document.getElementById('delete-cameras').onclick = resetCams;
+export function resetCams()
+{
+    let camerasUIdivs = document.getElementsByClassName("cameraUI");
+    for(let i = camerasUIdivs.length - 1; i >= 0; i--)
+    {
+        camerasUIdivs[i].remove();
+    }
+    cameras.forEach(c => c.remove());
+    cameras.splice(0, cameras.length);
+    camMeshes.splice(0, camMeshes.length);
 }

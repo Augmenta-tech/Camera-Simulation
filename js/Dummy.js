@@ -3,8 +3,9 @@ import * as THREE from 'three';
 import { MTLLoader } from 'three-loaders/MTLLoader.js';
 import { OBJLoader } from 'three-loaders/OBJLoader.js';
 
-import { scene } from './main.js';
+import { scene } from './projection-area.js'
 import { transformControl } from './main.js';
+
 
 export let dummiesMeshes = [];
 export let dummies = [];
@@ -40,7 +41,6 @@ class Dummy {
         loadDummy(this)
         scene.add(this.mesh);
         this.model.position.clone(this.mesh.position); 
-        //addDummyGUI(this);
     }
 
     updatePosition()
@@ -66,7 +66,6 @@ function addDummy()
 {
     let newDummy = new Dummy(dummies.length);
     newDummy.addDummyToScene();
-    //loadDummy(newDummy);
     dummies.push(newDummy);
 }
 

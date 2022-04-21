@@ -1,29 +1,36 @@
 import * as THREE from 'three';
 
-import { OrbitControls } from 'three-controls/OrbitControls.js';
+import { OrbitControls } from './lib/OrbitControls.js';
+import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
 
+import { camerasTypes } from './Camera.js';
 import { cameras, camMeshes } from './Camera.js';
 import { dummies, dummiesMeshes } from './Dummy.js';
+
+import { scene } from './projection-area.js'
 import { initScene } from './projection-area.js';
+import { addCamera } from './Camera.js';
 
+import { doesCoverArea } from './projection-area.js';
 
-let SCREEN_WIDTH = window.innerWidth;
-let SCREEN_HEIGHT = window.innerHeight;
+let SCREEN_WIDTH = document.getElementById('viewport').offsetWidth;
+let SCREEN_HEIGHT = document.getElementById('viewport').offsetHeight;
 let aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
 let container;
-export let scene = new THREE.Scene();
 let renderer;
 
-let camera;
+let activeCamera, perspCam, orthoCam;
+let controls, controlsGizmo;
+
+const frustumSize = 20;
 
 export let transformControl;
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const onUpPosition = new THREE.Vector2();
 const onDownPosition = new THREE.Vector2();
-
 
 init();
 animate();
@@ -36,7 +43,8 @@ function init() {
     let viewport = document.getElementById('viewport');
     viewport.insertBefore(container, viewport.firstChild);
 
-    initScene(scene);
+    initScene();
+    createSceneFromURL();
 
     /*
     //CHANGE HEIGHT DETECTED
@@ -65,40 +73,48 @@ function init() {
 
 
     // Creation of user's camera
-    camera = new THREE.PerspectiveCamera( 70, aspect, 1, 10000 );
-    camera.position.set(6,6,6); //height and retreat
+    perspCam = new THREE.PerspectiveCamera( 70, aspect, 1, 10000 );
+    perspCam.position.set(6,6,6); //height and retreat
+
+    orthoCam = new THREE.OrthographicCamera( -frustumSize, frustumSize, frustumSize / aspect, -frustumSize / aspect, 1, 10000);
+    orthoCam.position.set(0,0,10);
+
+    activeCamera = perspCam;
 
     // Controls
-    const controls = new OrbitControls( camera, renderer.domElement );
+    controls = new OrbitControls( activeCamera, renderer.domElement );
     controls.damping = 0.2;
+    // Add the Orbit Controls Gizmo
+    controlsGizmo = new  OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff" });
+    // Add the Gizmo domElement to the dom 
+    viewport.appendChild(controlsGizmo.domElement);
+    //controls.enableRotate = false;
     controls.addEventListener( 'change', render );
 
-    transformControl = new TransformControls( camera, renderer.domElement );
+    transformControl = new TransformControls( activeCamera, renderer.domElement );
     transformControl.addEventListener( 'change', render );
     transformControl.addEventListener( 'dragging-changed', function ( event ) {
-
         controls.enabled = ! event.value;
 
     } );
     scene.add( transformControl );
 
     transformControl.addEventListener( 'objectChange', function (obj) {
+        renderer.domElement.removeEventListener( 'pointermove', onDrag);
 
         cameras.forEach(c => c.updatePosition());
         dummies.forEach(d => d.updatePosition());
 
     } );
 
-    
-    document.addEventListener( 'pointerdown', onPointerDown );
-    document.addEventListener( 'pointerup', onPointerUp );
-    document.addEventListener( 'pointermove', onPointerMove );
+    renderer.domElement.addEventListener( 'pointerdown', onPointerDown );
+    renderer.domElement.addEventListener( 'pointerup', onPointerUp );
+    renderer.domElement.addEventListener( 'pointermove', onPointerMove );
     
     window.addEventListener( 'resize', onWindowResize );
 
     //DEBUG
     document.addEventListener( 'keydown', onKeyDown );
-
 }
 
 /* USER'S ACTIONS */
@@ -107,6 +123,18 @@ function onPointerDown( event ) {
     onDownPosition.x = event.clientX;
     onDownPosition.y = event.clientY;
 
+    if(event.button === 0) controls.domElement.addEventListener( 'pointermove', onDrag);
+}
+
+function onDrag()
+{
+    if(activeCamera.isOrthographicCamera)
+    {
+        const camPos = activeCamera.position
+        changeCamera();
+        placeCamera(camPos);
+        controls.domElement.dispatchEvent(new PointerEvent("pointerdown"));
+    }
 }
 
 function onPointerUp() {
@@ -114,14 +142,16 @@ function onPointerUp() {
     onUpPosition.y = event.clientY;
 
     if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) transformControl.detach();
+
+    renderer.domElement.removeEventListener( 'pointermove', onDrag);
 }
+
 
 function onPointerMove( event ) {
 
     pointer.x = (event.clientX / document.getElementById('viewport').offsetWidth) * 2 - 1;
     pointer.y = - ((event.clientY - document.getElementById('header').offsetHeight) / document.getElementById('viewport').offsetHeight) * 2 + 1;
-    
-    raycaster.setFromCamera( pointer, camera );
+    raycaster.setFromCamera( pointer, activeCamera );
 
     const meshes = camMeshes.concat(dummiesMeshes);
 
@@ -131,50 +161,222 @@ function onPointerMove( event ) {
         const object = intersects[ 0 ].object;
         if (object !== transformControl.object) {
             transformControl.attach( object );
-            if(object.name === 'Dummy') transformControl.showY = false;
-            if(object.name === 'Camera') transformControl.showY = true;
+            if(activeCamera.isOrthographicCamera)
+            {
+                let dir = new THREE.Vector3();
+                activeCamera.getWorldDirection(dir);
+                transformControl.showX = 1 - Math.abs(dir.dot(new THREE.Vector3(1, 0, 0))) < 0.001 ? false : true
+                transformControl.showZ = 1 - Math.abs(dir.dot(new THREE.Vector3(0, 0, 1))) < 0.001 ? false : true
+                transformControl.showY = (1 - Math.abs(dir.dot(new THREE.Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true
+            }
+            else
+            {
+                transformControl.showX = true;
+                transformControl.showZ = true;
+                transformControl.showY = object.name === 'Dummy' ? false : true
+            }
         }
     }
 }
 
 function onWindowResize() {
 
-    SCREEN_WIDTH = window.innerWidth;
-    SCREEN_HEIGHT = window.innerHeight;
+    SCREEN_WIDTH = document.getElementById('viewport').offsetWidth;;
+    SCREEN_HEIGHT = document.getElementById('viewport').offsetHeight;
     aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
 
     renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
-    camera.aspect = aspect;
-    camera.updateProjectionMatrix();
+    perspCam.aspect = aspect;
+    perspCam.updateProjectionMatrix();
+
+    orthoCam.left = - frustumSize/ 2.0;
+    orthoCam.right = frustumSize / 2.0;
+    orthoCam.top = frustumSize / (2.0 * aspect);
+    orthoCam.bottom = - frustumSize / (2.0 * aspect);
+    orthoCam.updateProjectionMatrix();
 }
 
-/* RESET CAMERAS */
-document.getElementById('delete-cameras').onclick = resetCams;
-function resetCams()
+/* Change vue from perspective to orthographic */
+export function changeCamera()
 {
-    let camerasUIdivs = document.getElementsByClassName("cameraUI");
-    for(let i = camerasUIdivs.length - 1; i >= 0; i--)
-    {
-        camerasUIdivs[i].remove();
-    }
-    cameras.forEach(c => c.remove());
-    cameras.splice(0, cameras.length);
-    camMeshes.splice(0, camMeshes.length);
+    activeCamera = activeCamera.isOrthographicCamera ? perspCam : orthoCam;
+    transformControl.camera = activeCamera;
 }
 
-//DEBUG
+export function placeCamera(newPos)
+{
+    transformControl.detach();
+
+    activeCamera.position.set(newPos.x, newPos.y, newPos.z);
+
+    controls.dispose();
+    controls = new OrbitControls( activeCamera, renderer.domElement );
+    controls.damping = 0.2;
+    controls.object = activeCamera;
+    controls.enableRotate = activeCamera.isOrthographicCamera ? false : true;
+
+    // Add the Orbit Controls Gizmo
+    controlsGizmo.dispose();
+    controlsGizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff" });
+    viewport.appendChild(controlsGizmo.domElement);
+
+    //activeCamera.lookAt(0,0,0);
+}
+
+/* Manage URLs */
+document.getElementById("generate-link").onclick = generateLink;
+function generateLink()
+{
+    let url = document.location.href
+    let index = url.indexOf('?')
+    if(index !== -1) url = url.substring(0, index);
+    if(url[url.length-1] != '/') url += '/';
+    url += '?';
+    cameras.forEach(c => {
+        url += "id=";
+        url += c.id;
+        url += ",typeID=";
+        url += c.type.id;
+        url += ",x=";
+        url += Math.round(c.XPos*100)/100.0;
+        url += ",y=";
+        url += Math.round(c.YPos*100)/100.0;
+        url += ",z=";
+        url += Math.round(c.ZPos*100)/100.0;
+        url += ",p=";
+        url += c.pitch;
+        url += ",a=";
+        url += c.yaw;
+        url += ",r=";
+        url += c.roll;
+        url += '&';
+    });
+    url = url.slice(0, -1);
+
+    return url;
+}
+
+function createSceneFromURL()
+{
+    let url = document.location.href
+    let index = url.indexOf('?')
+    if(index === -1)
+    {
+        addCamera();
+    }
+    else
+    {
+        url = url.substring(index + 1);
+        let cams = url.split('&');
+        
+        cams.forEach(c => {
+            let props = c.split(',');
+            let id, typeID;
+            let x, y, z, p, a, r;
+            props.forEach(prop => {
+                let keyVal = prop.split('=');
+                let key = keyVal[0];
+                let val = parseFloat(keyVal[1]);
+                switch(key)
+                {
+                    case "id":
+                        id = val
+                        break;
+                    case "typeID":
+                        typeID = val;
+                        break;
+                    case "x":
+                        x = val;
+                        break;
+                    case "y":
+                        y = val;
+                        break;
+                    case "z":
+                        z = val;
+                        break;
+                    case "p":
+                        p = val;
+                        break;
+                    case "a":
+                        a = val;
+                        break;
+                    case "r":
+                        r = val;
+                        break;
+                    default:
+                        break;
+                }
+            });
+            addCamera(typeID, x, y, z, p, a, r)
+        })
+    }
+}
+
+// COPY URL 
+var copyUrlModal = document.getElementById("link-modal");
+var shareButton = document.getElementById("generate-link");
+var closeElem = document.getElementById("close-link");
+shareButton.onclick = function() {
+    copyUrlModal.style.display = "block";
+}
+closeElem.onclick = function() {
+    copyUrlModal.style.display = "none";
+}
+window.onclick = function(event) {
+    if (event.target == copyUrlModal) {
+        copyUrlModal.style.display = "none";
+    }
+}
+
+document.getElementById('copy-link').onclick = copyLink;
+function copyLink() {
+    navigator.clipboard.writeText(generateLink());
+}
+
+/* COMPLETE SCENE FORM WITH CAMERAS TYPES */
+document.getElementById("hook-cam").onchange = createCamTypeForm;
+document.getElementById("tracking-mode").onchange = createCamTypeForm;
+createCamTypeForm()
+function createCamTypeForm(){
+    const camTypesForm = document.getElementById("cam-types-checkboxes");
+    while (camTypesForm.firstChild) {
+        camTypesForm.removeChild(camTypesForm.firstChild);
+    }
+    let title = document.createElement('h1');
+    title.innerHTML = "Choose the type.s of camera.s you want to use";
+    camTypesForm.appendChild(title);
+    camerasTypes.filter(c => c.recommanded).forEach(c => {
+        const hookHeight = parseFloat(document.getElementById("hook-cam").value);
+        if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById("tracking-mode").value))
+        {
+            const camTypeChoice = document.createElement("div");
+            const camTypeCheckbox = document.createElement("input");
+            camTypeCheckbox.setAttribute("type", "checkbox");
+            camTypeCheckbox.setAttribute("checked","true");
+            camTypeCheckbox.id = "check-" + c.id;
+            const label = document.createElement("label");
+            label.setAttribute("for", "check-" + c.id)
+            label.innerHTML = c.name;
+            camTypeChoice.appendChild(camTypeCheckbox);
+            camTypeChoice.appendChild(label);
+            camTypesForm.appendChild(camTypeChoice);
+        }
+    });
+}
+
+
+/* DEBUG */
 function onKeyDown( event ) {
 
     switch ( event.keyCode ) {
 
         case 80: /*P*/
-            
-            console.log(totalAreaCovered());
+            //changeCamera()
+            console.log(controlsGizmo.camera);
             break;
 
     }
-
 }
 
 /* RENDER */
@@ -186,13 +388,17 @@ function animate() {
 
 }
 
+
 function render() {
     cameras.forEach(c => c.render());
     //cameras.forEach(c => c.displayOverlaps());
+    doesCoverArea();
 
     renderer.clear();
 
     renderer.setViewport( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
-    renderer.render( scene, camera )
+    renderer.render( scene, activeCamera )
 }
+
+
 

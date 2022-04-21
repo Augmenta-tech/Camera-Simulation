@@ -114,7 +114,7 @@ strong{
 }
 
 [data-camera]{
-  padding: 29px ;
+  padding: 29px;
   border-bottom: 2px solid var(--color-viewport);
 }
 [data-camera] p{
@@ -148,17 +148,6 @@ strong{
   flex:1;
 }
 
-#gizmo{
-  position: absolute;
-  top : 30px;
-  right: 30px;
-  width: 75px;
-  height : 75px;
-  background-image: url(../img/gizmo.png);
-  background-repeat: no-repeat;
-
-}
-
 #toolbar{
   position: absolute;
   height: 100%;
@@ -169,8 +158,8 @@ strong{
 }
 
 canvas{
-  width: 100% !important;
-  height: 100% !important;
+  /*width: 100% !important;
+  height: 100% !important;*/
   position: absolute;
 }
 
@@ -218,7 +207,13 @@ canvas{
 }
 
 #inspector [data-button]{
-  margin: 30px auto 0 auto;
+  margin: 20px auto 20px auto;
+}
+
+.inputArea{
+  margin-left: 10%;
+  margin-top: -4%;
+  width: 40%;
 }
 
 [data-button].active p{
@@ -243,14 +238,22 @@ canvas{
 .select{
   transition: .2s all ease;
   cursor: pointer;
-  font-weight: bold;
-  background-color: white;
   border: none;
   border-radius: 2px;
   /* padding-left: 5px;
   margin-left: -5px; */
-  margin-top: 4%;
   height: 70%;
+}
+
+.camera-type{
+  background-color: white;
+  font-weight: bold;
+  margin-top: 4%;
+}
+
+.select-form{
+  background-color: #eee;
+  margin-bottom: 4%;
 }
 
 .select:hover{
@@ -272,4 +275,79 @@ strong
 {
   color: var(--color-blue-2);
   font-weight:bold;
+}
+
+/* COPY LINK MODAL */
+#copy-link{
+  width: auto;
+  height: auto;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 100; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 2px solid #fefefe;
+  justify-content: space-between;
+}
+
+.scene-form{
+  width: 50%;
+}
+
+.link {
+  width: 12%;
+  display: flex;
+}
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* GIZMO */ 
+.orbit-controls-gizmo {
+  position: absolute;
+  top: 2em;
+  right: 2em;
+  z-index: 50;
+  background-color: #FFF0;
+  border-radius: 100%;
+  transition: background-color .15s  linear;
+  cursor: pointer;
+}
+
+.orbit-controls-gizmo.dragging, 
+.orbit-controls-gizmo:hover {
+  background-color: #FFF3;
+}
+
+.orbit-controls-gizmo.inactive {
+  pointer-events: none;
+  background-color: #FFF0  !important;
 }
