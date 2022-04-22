@@ -216,7 +216,6 @@ class OrbitControlsGizmo {
       }
       
       loop();*/
-      console.log(camera);
       if(camera.isPerspectiveCamera) changeCamera();
       placeCamera(vec)
       

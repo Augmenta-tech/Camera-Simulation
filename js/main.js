@@ -124,16 +124,17 @@ function onPointerDown( event ) {
     onDownPosition.y = event.clientY;
 
     if(event.button === 0) controls.domElement.addEventListener( 'pointermove', onDrag);
+    renderer.domElement.removeEventListener( 'pointermove', onPointerMove);
 }
 
 function onDrag()
 {
     if(activeCamera.isOrthographicCamera)
     {
-        const camPos = activeCamera.position
+        //const camPos = activeCamera.position;
+        const camPos = new THREE.Vector3(6,6,6);
         changeCamera();
         placeCamera(camPos);
-        controls.domElement.dispatchEvent(new PointerEvent("pointerdown"));
     }
 }
 
@@ -144,6 +145,7 @@ function onPointerUp() {
     if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) transformControl.detach();
 
     renderer.domElement.removeEventListener( 'pointermove', onDrag);
+    renderer.domElement.addEventListener( 'pointermove', onPointerMove);
 }
 
 
@@ -221,7 +223,7 @@ export function placeCamera(newPos)
     controlsGizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff" });
     viewport.appendChild(controlsGizmo.domElement);
 
-    //activeCamera.lookAt(0,0,0);
+    activeCamera.isPerspectiveCamera ? activeCamera.lookAt(0,-1,0) : activeCamera.lookAt(0,0,0);
 }
 
 /* Manage URLs */
@@ -308,7 +310,7 @@ function createSceneFromURL()
                         break;
                 }
             });
-            addCamera(typeID, x, y, z, p, a, r)
+            addCamera(true, typeID, x, y, z, p, a, r)
         })
     }
 }
@@ -372,8 +374,7 @@ function onKeyDown( event ) {
     switch ( event.keyCode ) {
 
         case 80: /*P*/
-            //changeCamera()
-            console.log(controlsGizmo.camera);
+        
             break;
 
     }

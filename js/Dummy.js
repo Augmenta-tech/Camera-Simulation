@@ -21,6 +21,15 @@ class Dummy {
         this.yPos = 0;
         this.zPos = 0;
 
+        for(let i = 0; i < dummies.length; i++)
+        {
+            if(new THREE.Vector3(this.xPos, this.yPos, this.zPos).distanceTo(dummies[i].model.position) < 1.0)
+            {
+                this.xPos++;
+                i = 0;
+            }
+        }
+
         this.height = DEFAULT_DUMMIES_HEIGHT;
 
         this.model = new THREE.Object3D();
@@ -31,7 +40,7 @@ class Dummy {
         material.opacity = 0;
         material.alphaTest = 0.5;
         this.mesh = new THREE.Mesh( geometry, material );
-        this.mesh.position.y = this.height / 2.0;
+        this.mesh.position.set(this.xPos, this.height / 2.0, this.zPos);
         this.mesh.name = 'Dummy';
         dummiesMeshes.push(this.mesh);
     }
