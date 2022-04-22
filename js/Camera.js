@@ -122,11 +122,20 @@ export class Camera{
         this.mesh.position.set(this.XPos, this.YPos, this.ZPos);
 
         this.cameraPerspective.rotateX(DEFAULT_CAMERA_PITCH);
-        this.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), this.yaw);
+        /*this.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), this.yaw);
         this.xRotationAxis = new THREE.Vector3(1, 0, 0);
         this.xRotationAxis.applyAxisAngle(new THREE.Vector3(0,1,0), this.yaw);
         this.xRotationAxis.normalize();
         this.cameraPerspective.rotateOnWorldAxis(this.xRotationAxis, this.pitch);
+
+        this.xRotationAxis = new THREE.Vector3(1, 0, 0);*/
+        //this.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,0,1), this.yaw);
+        //this.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(1,0,0), this.pitch);
+
+        this.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(1,0,0), this.pitch);
+
+        this.cameraPerspective.rotateOnAxis(new THREE.Vector3(0,1,0), this.yaw);
+
         let rotationAxis = new THREE.Vector3();
         this.cameraPerspective.getWorldDirection(rotationAxis);
         this.cameraPerspective.rotateOnWorldAxis(rotationAxis, this.roll);
@@ -148,7 +157,7 @@ export class Camera{
 
         this.overlaps = {}*/
 
-        let textGeometry = new TextGeometry( "Cam " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.01 } );
+        let textGeometry = new TextGeometry( "Node " + (this.id+1), { font: font, size: SIZE_TEXT_CAMERA, height: 0.01 } );
         this.nameText = new THREE.Mesh(textGeometry, new THREE.MeshPhongMaterial( { color: 0xffffff } ))
         this.nameText.position.set(this.XPos - SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + SIZE_TEXT_CAMERA/2.0);
         this.nameText.rotation.x = -Math.PI / 2.0;
@@ -340,7 +349,7 @@ function addCameraGUI(cam)
         <div id="cam-` + (cam.id) + `-UI-header" class="row s-p">
             <div class="row">
                 <div class="camera-color" style="background-color: #`+ cam.color.getHexString() + `;"></div>
-                <h1>Camera ` + (cam.id + 1) + `</h1>
+                <h1>Camera et Node ` + (cam.id + 1) + `</h1>
             </div>
             <div class="row">
                 <div id="cam-` + (cam.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div>
@@ -543,13 +552,18 @@ function dragElement(element) {
                 cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
                 break;
             case "pitch":
-                cam.cameraPerspective.rotateOnWorldAxis(cam.xRotationAxis, value * (Math.PI / 180.0) - cam.pitch);
+                /*cam.cameraPerspective.rotateOnWorldAxis(cam.xRotationAxis, value * (Math.PI / 180.0) - cam.pitch);*/
+                cam.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(1,0,0), value * (Math.PI / 180.0) - cam.pitch);
                 cam.pitch = value * (Math.PI / 180.0);
                 break;
             case "yaw":
-                cam.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
+                /*cam.cameraPerspective.rotateOnWorldAxis(new THREE.Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
                 cam.xRotationAxis.applyAxisAngle(new THREE.Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
                 cam.xRotationAxis.normalize();
+                cam.yaw = value * (Math.PI / 180.0);*/
+                let rotateYawAxis = new THREE.Vector3(0,1,0);
+                rotateYawAxis.applyAxisAngle(new THREE.Vector3(0,0,- 1), - cam.roll);
+                cam.cameraPerspective.rotateOnAxis(rotateYawAxis, value * (Math.PI / 180.0) - cam.yaw);
                 cam.yaw = value * (Math.PI / 180.0);
                 break;
             case "roll":

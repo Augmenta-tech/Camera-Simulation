@@ -247,11 +247,11 @@ function generateLink()
         url += ",z=";
         url += Math.round(c.ZPos*100)/100.0;
         url += ",p=";
-        url += c.pitch;
+        url += Math.round(c.pitch*10000)/10000.0;
         url += ",a=";
-        url += c.yaw;
+        url += Math.round(c.yaw*10000)/10000.0;
         url += ",r=";
-        url += c.roll;
+        url += Math.round(c.roll*10000)/10000.0;
         url += '&';
     });
     url = url.slice(0, -1);
