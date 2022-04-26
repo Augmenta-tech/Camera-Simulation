@@ -5,6 +5,7 @@ import { resetCams, addCamera } from './Camera.js'
 import { Grid } from './Grid.js';
 
 import * as POLYBOOL from 'polybool';
+import { GreaterStencilFunc } from 'three';
 
 export let scene = new THREE.Scene();
 
@@ -16,10 +17,10 @@ const floorNormal = new THREE.Vector3(0,1,0);
 const DEFAULT_FLOOR_HEIGHT = 0;
 let heightDetected = 1;
 const wallXNormal = new THREE.Vector3(1,0,0);
-const DEFAULT_WALLX_DEPTH = -10;
+const DEFAULT_WALLX_DEPTH = -30;
 let wallXDepth = DEFAULT_WALLX_DEPTH;
 const wallZNormal = new THREE.Vector3(0,0,1);
-const DEFAULT_WALLZ_DEPTH = -10;
+const DEFAULT_WALLZ_DEPTH = -30;
 let wallZDepth = DEFAULT_WALLZ_DEPTH;
 
 let grid;
@@ -39,6 +40,7 @@ export function initScene()
 
     // Floor
     let materialFloor = new THREE.MeshPhongMaterial( {color: 0x555555});//{ color: 0x8DAA9D, dithering: true } ); // green-blue
+    materialFloor.side = THREE.DoubleSide;
 
     const size = 70;
     let geometryFloor = new THREE.PlaneGeometry( size, size );
@@ -53,7 +55,8 @@ export function initScene()
     // gridHelper.position.y = - 0.005;
     // scene.add( gridHelper );
     grid = new Grid(size, units.meters);
-    grid.planes.forEach(p => scene.add(p));
+    grid.addPlanesToScene(scene);
+    //grid.planes.forEach(p => scene.add(p));
 
     // WallX
     let materialWallX = new THREE.MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
@@ -76,32 +79,59 @@ export function initScene()
 
     //Close scene
     const wallRight = new THREE.Mesh(new THREE.PlaneGeometry( 2000, 2000 ), materialWallX);
-    wallRight.position.set( size/2.0 , 0, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallRight.position.set( size/2.0 , 0, 0 ); 
     wallRight.rotation.y = - Math.PI / 2.0;
     scene.add(wallRight);
 
     const wallBack = new THREE.Mesh(new THREE.PlaneGeometry( 2000, 2000 ), materialWallZ);
-    wallBack.position.set( 0, 0, size/2.0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallBack.position.set( 0, 0, size/2.0 ); 
     wallBack.rotation.y = Math.PI;
     scene.add(wallBack);
 }
 
-document.getElementById('toggle-unit').onclick = toggleUnit;
-function toggleUnit()
+document.getElementById('toggle-unit').onclick = changeUnit;
+function changeUnit()
 {
-    const previousUnit = currentUnit;
-    currentUnit = currentUnit === units.meters ? units.feets : units.meters;
-    grid.updateUnit(currentUnit);
+    grid.unit === units.meters ? toggleUnit(units.feets) : toggleUnit(units.meters);
+}
+
+function toggleUnit(unit)
+{
+    grid.toggleUnit(unit);
     let unitNumberElements = document.querySelectorAll('[data-unit]');
     unitNumberElements.forEach(e => {
-        e.dataset.unit = currentUnit;
-        e.innerHTML = currentUnit === units.meters ? Math.round(e.innerHTML / previousUnit * 10) / 10.0 : Math.round(e.innerHTML * currentUnit * 10) / 10.0;
-    })
+        e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 10) / 10.0;
+        e.dataset.unit = unit;
+    });
     let unitCharElements = document.querySelectorAll('[data-unittext]');
     unitCharElements.forEach(e => {
-        e.dataset.unittext = currentUnit;
-        e.innerHTML = currentUnit === units.meters ? 'm' : 'ft';
-    })
+        e.dataset.unittext = unit;
+        switch(unit)
+        {
+            case units.feets:
+                e.innerHTML = "ft";
+                break;
+            case units.meters:
+            default:
+                e.innerHTML = 'm';
+                break;
+        }
+    });
+    
+    currentUnit = unit;
+}
+
+/* DEBUG */
+document.addEventListener( 'keydown', onKeyDown );
+function onKeyDown( event ) {
+
+    switch ( event.keyCode ) {
+
+        case 80: /*P*/
+            console.log(grid.planes);
+            break;
+
+    }
 }
 
 /* Calculate area covered by the camera cam to draw it and display it*/ 
@@ -217,19 +247,19 @@ export function drawProjection(cam)
     raysIntersect.push(new THREE.Ray(originAbove, wallZNormal));*/
     
     
-    //floor points
+    //filter rays to get floor points
     let floorRays = raysIntersect.filter(r => Math.abs(r.origin.y < 0.01 && Math.abs(r.direction.y) < 0.01));
     let intersectionPointsFloor = getIntersectionPoints(floorRays);
 
-    //floor points heightDetected m above floor
+    //filter rays to get floor points heightDetected m above floor
     let aboveRays = raysIntersect.filter(r => Math.abs(r.origin.y - heightDetected) < 0.01 && Math.abs(r.direction.y) < 0.01);
     let intersectionPointsAbove = getIntersectionPoints(aboveRays);
 
-    //wallX points
+    //filter rays to get wallX points
     let wallXRays = raysIntersect.filter(r => Math.abs(r.origin.x - wallXDepth) < 0.01  && Math.abs(r.direction.x) < 0.01);
     let intersectionPointsWallX = getIntersectionPoints(wallXRays);
 
-    //wallZ points
+    //filter rays to get wallZ points
     let wallZRays = raysIntersect.filter(r => Math.abs(r.origin.z - wallZDepth) < 0.01 && Math.abs(r.direction.z) < 0.01);
     let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
@@ -262,7 +292,7 @@ export function drawProjection(cam)
     
     //FIN DEBUG
 
-    //filter points
+    //filter points in the camera frustum
     const frustumScaled = new THREE.Frustum();
     frustumScaled.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
 
@@ -278,7 +308,7 @@ export function drawProjection(cam)
     const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
     const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
 
-
+    //filter points above, they must be in the frustum at heightDetected but also on the floor
     if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
     {
         let raysAbove = [...aboveRays];
@@ -288,7 +318,7 @@ export function drawProjection(cam)
         let candidatesPoints = coveredPointsAbove.concat(pointsIntersect);
 
         //delete identical points
-        candidatesPoints.sort((A,B) => A.length() < B.length());
+        candidatesPoints.sort((A,B) => B.length() - A.length() );
         sortByAngle(candidatesPoints, floorNormal);
 
         for(let j = 0; j < candidatesPoints.length - 1; j++)
@@ -348,7 +378,7 @@ export function drawProjection(cam)
 
     //display area value 
     let previousValue = cam.areaValue;
-    cam.areaValue = calculateArea(coveredPointsAbove) * (currentUnit * currentUnit);
+    cam.areaValue = calculateArea(coveredPointsAbove) / (grid.unit * grid.unit);
 
     //Place text 
     if(coveredPointsAbove.length > 2)
@@ -460,7 +490,7 @@ function sortByAngle(coveredPoints, planeNormal)
             let dotProdA = Math.abs(vectorPerp.dot(vectorA)) > 0.001 ? vectorPerp.dot(vectorA) : 1;
             let dotProdB = Math.abs(vectorPerp.dot(vectorB)) > 0.001 ? vectorPerp.dot(vectorB) : 1;
 
-            return Math.abs(dotProdA) / dotProdA * vector.angleTo(vectorA) < Math.abs(dotProdB) / dotProdB * vector.angleTo(vectorB);
+            return Math.abs(dotProdB) / dotProdB * vector.angleTo(vectorB) - Math.abs(dotProdA) / dotProdA * vector.angleTo(vectorA);
         });
     }
 }
@@ -710,9 +740,9 @@ function createSceneFromForm()
     {
         createBorder();
 
-        configs.sort((A,B) => A.nbW * A.nbH > B.nbW * B.nbH);
+        configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
         configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
-        configs.sort((A,B) => A.typeID > B.typeID);
+        configs.sort((A,B) => A.typeID - B.typeID);
         let chosenConfig = configs[0];
         resetCams();
 

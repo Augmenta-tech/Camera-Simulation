@@ -9,62 +9,9 @@ import { currentUnit, units } from './projection-area.js';
 import { scene } from './projection-area.js';
 import { drawProjection } from './projection-area.js';
 
-//import * as data from './cameras.json';
-const data = [
-    {
-        "id":0, 
-        "name":"Orbbec Astra +", 
-        "HFov":55, 
-        "VFov":45, 
-        "rangeNear": 0.6,
-        "rangeFar": 6,
-        "suitable": [
-            "human-tracking",
-            "hand-tracking" 
-        ],
-        "recommanded": true
-    },
-    {
-        "id":1, 
-        "name":"Orbbec Astra Pro", 
-        "HFov":60, 
-        "VFov":49.5, 
-        "rangeNear": 0.6,
-        "rangeFar": 6,
-        "suitable": [
-            "human-tracking",
-            "hand-tracking" 
-        ],
-        "recommanded": true
-    },
-    {
-        "id":2, 
-        "name":"Azure Kinect", 
-        "HFov":75, 
-        "VFov":65, 
-        "rangeNear": 0.5,
-        "rangeFar": 5.46,
-        "suitable": [
-            "hand-tracking" 
-        ],
-        "recommanded": false
-    },
-    {
-        "id":3, 
-        "name":"Orbbec Femto", 
-        "HFov":64.6, 
-        "VFov":50.8, 
-        "rangeNear": 0.25,
-        "rangeFar": 5,
-        "suitable": [
-            "human-tracking",
-            "hand-tracking" 
-        ],
-        "recommanded": true
-    }
-];
+import data from './cameras.js';
 
-//export const camerasTypes = data.default;
+console.log(data);
 export const camerasTypes = data;
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
@@ -279,6 +226,7 @@ export class Camera{
 
     remove()
     {
+        console.log(this);
         scene.remove(this.cameraPerspectiveHelper);
         scene.remove(this.cameraPerspective);
         if ( transformControl.object === this.mesh ) transformControl.detach();
@@ -453,11 +401,11 @@ function addCameraGUI(cam)
         let iconElem = this.firstChild;
         iconElem.dataset.icon = hidden ? "bx:minus" : "bx:plus";
     }
-
+    
     document.getElementById('cam-' + (cam.id) + '-visible').onclick = changeVisibilityofCam;
     function changeVisibilityofCam()
     {
-        cameras[parseInt(this.id.split('-')[1])].changeVisibility();
+        cam.changeVisibility();
     }
 
     document.getElementById('cam-type-' + cam.id).onchange = function()

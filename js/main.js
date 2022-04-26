@@ -402,3 +402,7 @@ function render() {
 
 
 
+/** 
+ * @param {array} p1 The first number to add
+ * @param {int} p2 The second number to add
+ */
