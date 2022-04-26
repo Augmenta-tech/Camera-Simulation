@@ -469,6 +469,154 @@ export function drawProjection(cam)
     }*/
 }
 
+function rayIntersectionOfPlanes(plane1, plane2)
+{
+    if(plane1.normal.length() < 0.001 || plane2.normal.length() < 0.001)
+    {
+        console.error("invalid parameters : one of the plane's normal is zero Vector");
+        return;
+    }
+    const a1 = plane1.normal.x;
+    const b1 = plane1.normal.y;
+    const c1 = plane1.normal.z;
+    const d1 = plane1.constant;
+
+    const a2 = plane2.normal.x;
+    const b2 = plane2.normal.y;
+    const c2 = plane2.normal.z;
+    const d2 = plane2.constant;
+
+    if(Math.abs(a1 * b2 - a2 * b1) < 0.001 && Math.abs(b1 * c2 - b2 * c1) < 0.001)
+    {
+        console.log("Planes are parallel");
+        return;
+    }
+
+    if(Math.abs(a1) > 0.001)
+    {
+        if(Math.abs(a1 * b2 - a2 * b1) > 0.001)
+        {
+            const originZ = 0;
+            const originY = (a2 * d1 - a1 * d2) / (a1 * b2 - a2 * b1);
+            const originX = (-b1 * originY - d1) / a1;
+            const origin = new THREE.Vector3(originX, originY, originZ);
+
+            const directionZ = 1;
+            const directionY = ((a2 * c1 - a1 * c2) + (a2 * d1 - a1 * d2)) / (a1 * b2 - a2 * b1);
+            const directionX = (-b1 * directionY - c1 - d1) / a1;
+            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+
+            const ray = new THREE.Ray(origin, direction);
+            return ray;
+        }
+        else if(Math.abs(a1 * c2 - a2 * c1) > 0.001)
+        {
+            const originY = 0;
+            const originZ = (a2 * d1 - a1 * d2) / (a1 * c2 - a2 * c1);
+            const originX = (-c1 * originZ - d1) / a1;
+            const origin = new THREE.Vector3(originX, originY, originZ);
+
+            const directionY = 1;
+            const directionZ = ((a2 * b1 - a1 * b2) + (a2 * d1 - a1 * d2)) / (a1 * c2 - a2 * c1);
+            const directionX = (-b1 - c1 * directionZ - d1) / a1;
+            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+
+            const ray = new THREE.Ray(origin, direction);
+            return ray;
+        }
+        else
+        {
+            console.error("There is a mathematical incoherence");
+            return;
+        }
+    }
+
+    else if(Math.abs(b1) > 0.001)
+    {
+        if(Math.abs(b1 * c2 - b2 * c1) > 0.001)
+        {
+            const originX = 0;
+            const originZ = (b2 * d1 - b1 * d2) / (b1 * c2 - b2 * c1);
+            const originY = (-c1 * originZ - d1) / b1;
+            const origin = new THREE.Vector3(originX, originY, originZ);
+
+            const directionX = 1;
+            const directionZ = ((b2 * a1 - b1 * a2) + (b2 * d1 - b1 * d2)) / (b1 * c2 - b2 * c1);
+            const directionY = (-c1 * directionZ - a1 - d1) / b1;
+            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+
+            const ray = new THREE.Ray(origin, direction);
+            return ray;
+        }
+        else if(Math.abs(b1 * a2 - b2 * a1) > 0.001)
+        {
+            const originZ = 0;
+            const originX = (b2 * d1 - b1 * d2) / (b1 * a2 - b2 * a1);
+            const originY = (-a1 * originX - d1) / b1;
+            const origin = new THREE.Vector3(originX, originY, originZ);
+
+            const directionZ = 1;
+            const directionX = ((b2 * c1 - b1 * c2) + (b2 * d1 - b1 * d2)) / (b1 * a2 - b2 * a1);
+            const directionY = (-c1 * directionZ - a1 - d1) / b1;
+            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+
+            const ray = new THREE.Ray(origin, direction);
+            return ray;
+        }
+        else
+        {
+            console.error("There is a mathematical incoherence");
+            return;
+        }
+    }
+
+    else if(Math.abs(c1) > 0.001)
+    {
+        if(Math.abs(c1 * a2 - c2 * a1) > 0.001)
+        {
+            const originY = 0;
+            const originX = (c2 * d1 - c1 * d2) / (c1 * a2 - c2 * a1);
+            const originZ = (-a1 * originX - d1) / c1;
+            const origin = new THREE.Vector3(originX, originY, originZ);
+
+            const directionY = 1;
+            const directionX = ((c2 * b1 - c1 * b2) + (c2 * d1 - c1 * d2)) / (c1 * a2 - c2 * a1);
+            const directionZ = (-a1 * directionX - b1 - d1) / c1;
+            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+
+            const ray = new THREE.Ray(origin, direction);
+            return ray;
+        }
+        else if(Math.abs(c1 * b2 - c2 * b1) > 0.001)
+        {
+            const originX = 0;
+            const originY = (c2 * d1 - c1 * d2) / (c1 * b2 - c2 * b1);
+            const originZ = (-b1 * originY - d1) / c1;
+            const origin = new THREE.Vector3(originX, originY, originZ);
+
+            const directionX = 1;
+            const directionY = ((c2 * a1 - c1 * a2) + (c2 * d1 - c1 * d2)) / (c1 * b2 - c2 * b1);
+            const directionZ = (-b1 * directionY - a1 - d1) / c1;
+            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+
+            const ray = new THREE.Ray(origin, direction);
+            return ray;
+        }
+        else
+        {
+            console.error("There is a mathematical incoherence");
+            return;
+        }
+    }
+
+    else
+    {
+        console.error("invalid parameters : one of the plane's normal is zero Vector");
+        return;
+    }
+
+}
+
 function sortByAngle(coveredPoints, planeNormal)
 {
     if(coveredPoints.length > 2)
