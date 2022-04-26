@@ -5,35 +5,47 @@ import { units } from './projection-area.js'
 export class Grid{
     constructor(size, unit = units.meters)
     {
-        this.size = size
+        const gridSize = size
         this.unit = 1 / unit;
-        this.planes = [];
-        const geometry = new THREE.PlaneGeometry( this.unit, this.unit );
-        for(let i = - this.size/2.0; i < this.size/2.0; i++)
+        const planes = new THREE.Group();
+
+        function buildPlanes(unit)
         {
-            for(let j = - this.size/2.0; j < this.size/2.0; j++)
+            const geometry = new THREE.PlaneGeometry( unit, unit );
+            const material = new THREE.MeshBasicMaterial( {color: 0x111111, side: THREE.DoubleSide} );
+            const plane = new THREE.Mesh( geometry, material );
+            for(let i = - Math.ceil(30 / unit); i < Math.ceil(gridSize / 2.0 / unit); i++)
             {
-                const material = new THREE.MeshBasicMaterial( {color: ( (i+j)%2 === 0 ? 0x111111 : 0x333333), side: THREE.DoubleSide} );
-                const plane = new THREE.Mesh( geometry, material );
-                plane.rotation.x = Math.PI / 2.0;
-                plane.position.set(this.unit*(i + 0.5), -0.005, this.unit*(j + 0.5));
-                this.planes.push(plane);
+                for(let j = - Math.ceil(30 / unit); j < Math.ceil(gridSize / 2.0 / unit); j++)
+                {
+                    if((i+j)%2 === 0)
+                    {
+                        let newPlane = plane.clone();
+                        newPlane.rotation.x = Math.PI / 2.0;
+                        newPlane.position.set(unit*(i + 0.5), -0.005, unit*(j + 0.5));
+                        planes.add(newPlane);
+                    }
+                }
             }
         }
-    }
 
-    updateUnit(unit)
-    {
-        this.unit = 1 / unit;
-        const geometry = new THREE.PlaneGeometry( this.unit, this.unit );
-        for(let i = - this.size/2.0; i < this.size/2.0; i++)
+        this.addPlanesToScene = function (scene)
         {
-            for(let j = - this.size/2.0; j < this.size/2.0; j++)
-            {
-                let plane = this.planes[(i + this.size/2.0) * this.size + (j + this.size/2.0)];
-                plane.geometry = geometry;
-                plane.position.set(this.unit*(i + 0.5), -0.005, this.unit*(j + 0.5));
-            }
+            buildPlanes(this.unit);
+            scene.add(planes);
+        }
+
+        this.toggleUnit = function(unit)
+        {
+            planes.clear();
+            this.unit = 1 / unit;
+            buildPlanes(this.unit);
+        }
+
+        this.delete = function (scene)
+        {
+            scene.remove(planes);
+            planes.clear();
         }
     }
 }
