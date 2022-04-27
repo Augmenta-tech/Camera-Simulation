@@ -913,7 +913,7 @@ function createSceneFromForm()
 
             }
         }
-        placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
+        //placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
         formModal.style.display = "none";
     }
 }
