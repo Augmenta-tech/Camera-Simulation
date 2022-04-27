@@ -170,7 +170,9 @@ export class Camera{
 
     changeAreaDisplayed()
     {
-        let newTextGeometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
+        //TEMPORARY
+        // let newTextGeometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
+        let newTextGeometry = new TextGeometry( "X: " + Math.round(this.XPos*100)/100 + (currentUnit === units.meters ? 'm' : 'ft') + ", Y: " + Math.round(this.ZPos*100)/100 + (currentUnit === units.meters ? 'm' : 'ft'), { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         this.areaDisplay.geometry = newTextGeometry;
     }
 

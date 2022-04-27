@@ -14,9 +14,9 @@ export class Grid{
             const geometry = new THREE.PlaneGeometry( unit, unit );
             const material = new THREE.MeshBasicMaterial( {color: 0x111111, side: THREE.DoubleSide} );
             const plane = new THREE.Mesh( geometry, material );
-            for(let i = - Math.ceil(30 / unit); i < Math.ceil(gridSize / 2.0 / unit); i++)
+            for(let i = - Math.ceil(gridSize / 2.0 / unit); i < Math.ceil(gridSize / 2.0 / unit); i++)
             {
-                for(let j = - Math.ceil(30 / unit); j < Math.ceil(gridSize / 2.0 / unit); j++)
+                for(let j = - Math.ceil(gridSize / 2.0 / unit); j < Math.ceil(gridSize / 2.0 / unit); j++)
                 {
                     if((i+j)%2 === 0)
                     {

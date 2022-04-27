@@ -5,7 +5,7 @@ import { resetCams, addCamera } from './Camera.js'
 import { Grid } from './Grid.js';
 
 import * as POLYBOOL from 'polybool';
-import { GreaterStencilFunc } from 'three';
+import { placeCamera } from './main.js';
 
 export let scene = new THREE.Scene();
 
@@ -17,12 +17,10 @@ const floorNormal = new THREE.Vector3(0,1,0);
 const DEFAULT_FLOOR_HEIGHT = 0;
 let heightDetected = 1;
 const wallXNormal = new THREE.Vector3(1,0,0);
-const DEFAULT_WALLX_DEPTH = -30;
-let wallXDepth = DEFAULT_WALLX_DEPTH;
+let wallXDepth;
 const wallZNormal = new THREE.Vector3(0,0,1);
-const DEFAULT_WALLZ_DEPTH = -30;
-let wallZDepth = DEFAULT_WALLZ_DEPTH;
-
+let wallZDepth;
+const DEFAULT_SCENE_SIZE = 70;
 let grid;
 
 //DEBUG
@@ -42,7 +40,7 @@ export function initScene()
     let materialFloor = new THREE.MeshPhongMaterial( {color: 0x555555});//{ color: 0x8DAA9D, dithering: true } ); // green-blue
     materialFloor.side = THREE.DoubleSide;
 
-    const size = 70;
+    const size = DEFAULT_SCENE_SIZE;
     let geometryFloor = new THREE.PlaneGeometry( size, size );
 
     floor = new THREE.Mesh(geometryFloor, materialFloor);
@@ -63,8 +61,9 @@ export function initScene()
 
     let geometryWallX = new THREE.PlaneGeometry( 2000, 2000 );
 
+    wallXDepth = - size / 2.0;
     wallX = new THREE.Mesh(geometryWallX, materialWallX);
-    wallX.position.set( DEFAULT_WALLX_DEPTH - 0.01, 0, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallX.position.set( wallXDepth - 0.01, 0, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
     wallX.rotation.y = Math.PI / 2.0;
     scene.add(wallX);
 
@@ -73,8 +72,9 @@ export function initScene()
 
     let geometryWallZ = new THREE.PlaneGeometry( 2000, 2000 );
 
+    wallZDepth = - size / 2.0;
     wallZ = new THREE.Mesh(geometryWallZ, materialWallZ);
-    wallZ.position.set( 0, 0, DEFAULT_WALLZ_DEPTH - 0.01 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallZ.position.set( 0, 0, - size/2.0 - 0.01 ); //to avoid noise with area covered by cam (y = 0 for area covered)
     scene.add(wallZ);
 
     //Close scene
@@ -802,15 +802,15 @@ function createBorder()
     {
         const geometry = new THREE.BoxGeometry( Math.round(parseFloat(givenWidth)*10) / 10.0, 0.001, Math.round(parseFloat(givenHeight)*10) / 10.0 );
         line.geometry = new THREE.EdgesGeometry( geometry );
-        line.position.y = 0.02;
+        line.position.set(givenWidth / 2.0, 0.02, givenHeight / 2.0)
     }
 
     //Calculate area polygon
     givenAreaPolygon.regions[0] = [];
-    givenAreaPolygon.regions[0].push([-givenWidth/2.0, -givenHeight/2.0]);
-    givenAreaPolygon.regions[0].push([givenWidth/2.0, -givenHeight/2.0]);
-    givenAreaPolygon.regions[0].push([givenWidth/2.0, givenHeight/2.0]);
-    givenAreaPolygon.regions[0].push([-givenWidth/2.0, givenHeight/2.0]);
+    givenAreaPolygon.regions[0].push([0, 0]);
+    givenAreaPolygon.regions[0].push([givenWidth, 0]);
+    givenAreaPolygon.regions[0].push([givenWidth, givenHeight]);
+    givenAreaPolygon.regions[0].push([0, givenHeight]);
 }
 
 //verifies if cameras cover the given area
@@ -894,8 +894,8 @@ function createSceneFromForm()
         let chosenConfig = configs[0];
         resetCams();
 
-        let offsetX = - givenWidth/2.0 + chosenConfig.w / 2.0;
-        let offsetY = - givenHeight/2.0 + chosenConfig.h / 2.0;
+        let offsetX = chosenConfig.w / 2.0;
+        let offsetY = chosenConfig.h / 2.0;
         if(chosenConfig.nbW === 1) offsetX -= (chosenConfig.nbW*chosenConfig.w - givenWidth)/2.0;
         if(chosenConfig.nbH === 1) offsetY -= (chosenConfig.nbH*chosenConfig.h - givenHeight)/2.0;
         let oX = chosenConfig.nbW > 1 ? (chosenConfig.nbW*chosenConfig.w - givenWidth)/(chosenConfig.nbW - 1) : 0;
@@ -913,6 +913,7 @@ function createSceneFromForm()
 
             }
         }
+        placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
         formModal.style.display = "none";
     }
 }
