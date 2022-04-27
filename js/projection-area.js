@@ -149,7 +149,12 @@ export function drawProjection(cam)
     scene.remove(cam.areaCoveredAbove);
     scene.remove(cam.areaCoveredWallX);
     scene.remove(cam.areaCoveredWallZ);
-    let raysIntersect = [];
+
+    //let raysIntersect = [];
+    let floorRays = [];
+    let aboveRays = [];
+    let wallXRays = [];
+    let wallZRays = [];
 
     const frustum = new THREE.Frustum();
     frustum.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
@@ -157,6 +162,28 @@ export function drawProjection(cam)
     for(let i = 0; i < 6; i++) 
     {
         let plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+
+        //crossing the floor
+        let floorPlane = new THREE.Plane(floorNormal, 0);
+        const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
+
+        //crossing a plane heightDetected m above the floor
+        let abovePlane = new THREE.Plane(floorNormal, -heightDetected);
+        const rayIntersectAbove = getIntersectionOfPlanes(plane, abovePlane);
+
+        //crossing the left wall
+        let wallXPlane = new THREE.Plane(wallXNormal, -wallXDepth);
+        const rayIntersectWallX = getIntersectionOfPlanes(plane, wallXPlane);
+
+        //crossing the far wall
+        let wallZPlane = new THREE.Plane(wallZNormal, -wallZDepth);
+        const rayIntersectWallZ = getIntersectionOfPlanes(plane, wallZPlane);
+
+        if(rayIntersectFloor !== -1) floorRays.push(rayIntersectFloor);
+        if(rayIntersectAbove !== -1) aboveRays.push(rayIntersectAbove);
+        if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
+        if(rayIntersectWallZ !== -1) wallZRays.push(rayIntersectWallZ);
+/*
 
         //crossing the floor
         let floorN = new THREE.Vector3();
@@ -242,39 +269,55 @@ export function drawProjection(cam)
                 raysIntersect.push(ray);
             }
         }
+*/ 
     }
 
     //adding rays for walls intersections
     let origin = new THREE.Vector3(wallXDepth, 0, wallZDepth);
-    raysIntersect.push(new THREE.Ray(origin, wallXNormal));
-    raysIntersect.push(new THREE.Ray(origin, floorNormal));
-    raysIntersect.push(new THREE.Ray(origin, wallZNormal));
+    
+    let wallXdir = new THREE.Vector3().copy(floorNormal);
+    wallXdir.cross(wallXNormal);
+    let wallZdir = new THREE.Vector3().copy(floorNormal);
+    wallZdir.cross(wallZNormal);
+
+    const floorWallXRay = new THREE.Ray(origin, wallXdir);
+    const wallXWallZRay = new THREE.Ray(origin, floorNormal);
+    const floorWallZRay = new THREE.Ray(origin, wallZdir);
+
+    floorRays.push(floorWallXRay, floorWallZRay);
+    wallXRays.push(floorWallXRay, wallXWallZRay);
+    wallZRays.push(floorWallZRay, wallXWallZRay);
 
     /*let originAbove = new THREE.Vector3(wallXDepth, heightDetected, wallZDepth);
     raysIntersect.push(new THREE.Ray(originAbove, wallXNormal));
     raysIntersect.push(new THREE.Ray(originAbove, wallZNormal));*/
     
     
-    //filter rays to get floor points
-    let floorRays = raysIntersect.filter(r => Math.abs(r.origin.y < 0.01 && Math.abs(r.direction.y) < 0.01));
+    //get intersection points
     let intersectionPointsFloor = getIntersectionPoints(floorRays);
-
-    //filter rays to get floor points heightDetected m above floor
-    let aboveRays = raysIntersect.filter(r => Math.abs(r.origin.y - heightDetected) < 0.01 && Math.abs(r.direction.y) < 0.01);
     let intersectionPointsAbove = getIntersectionPoints(aboveRays);
-
-    //filter rays to get wallX points
-    let wallXRays = raysIntersect.filter(r => Math.abs(r.origin.x - wallXDepth) < 0.01  && Math.abs(r.direction.x) < 0.01);
     let intersectionPointsWallX = getIntersectionPoints(wallXRays);
-
-    //filter rays to get wallZ points
-    let wallZRays = raysIntersect.filter(r => Math.abs(r.origin.z - wallZDepth) < 0.01 && Math.abs(r.direction.z) < 0.01);
     let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
-    /*cam.raysFloor = floorRays;
-    cam.raysAbove = aboveRays;
-    cam.raysWallX = wallXRays;
-    cam.raysWallZ = wallZRays;*/
+
+    
+    //DEBUG SPHERES
+    /*
+    for(let i = 0; i < spheres.length; i++)
+    {
+        scene.remove(spheres[i]);
+    }
+    for(let i = 0; i < intersectionPointsAbove.length; i++)
+    {
+        const geometry = new THREE.SphereGeometry( 0.4, 32, 16 );
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff22 });
+        const sphere = new THREE.Mesh( geometry, material );
+        scene.add( sphere );
+        sphere.translateOnAxis(intersectionPointsAbove[i],1);
+        spheres.push(sphere);
+    }
+    */
+    //FIN DEBUG
 
     //DEBUG RAYS
     /*
@@ -282,7 +325,7 @@ export function drawProjection(cam)
     {
         scene.remove(rays[i]);
     }
-    for(let i = 0; i < floorRays.length; i++)
+    for(let i = 0; i < aboveRays.length; i++)
     {
         for(let t = -2; t < 5; t++)
         {
@@ -291,13 +334,12 @@ export function drawProjection(cam)
             const cube = new THREE.Mesh( geometry, material );
             scene.add( cube );
             let translation = new THREE.Vector3();
-            floorRays[i].at(t, translation);
+            aboveRays[i].at(t, translation);
             cube.translateOnAxis(translation, 1);
             rays.push(cube);
         }
     }
     */
-    
     //FIN DEBUG
 
     //filter points in the camera frustum
@@ -374,14 +416,14 @@ export function drawProjection(cam)
     }
     for(let i = 0; i < coveredPointsAbove.length; i++)
     {
-        const geometry = new THREE.SphereGeometry( 0.7, 32, 16 );
+        const geometry = new THREE.SphereGeometry( 0.4, 32, 16 );
         const material = new THREE.MeshBasicMaterial(frustumScaled.containsPoint(coveredPointsAbove[i]) ? { color: 0x00ffff } : { color: 0xff0000 } );
         const sphere = new THREE.Mesh( geometry, material );
         scene.add( sphere );
         sphere.translateOnAxis(coveredPointsAbove[i],1);
         spheres.push(sphere);
-    }*/
-    
+    }
+    */
     //FIN DEBUG
 
     //display area value 
@@ -477,12 +519,20 @@ export function drawProjection(cam)
     }*/
 }
 
-function rayIntersectionOfPlanes(plane1, plane2)
+/**
+ * Returns the ray intersection of plane1 and plane2
+ * 
+ * @param {THREE.Plane} plane1 
+ * @param {THREE.Plane} plane2 
+ * @returns {THREE.Ray} the intersection of the planes or -1 if planes are coincident or parrallel
+ */
+
+function getIntersectionOfPlanes(plane1, plane2)
 {
     if(plane1.normal.length() < 0.001 || plane2.normal.length() < 0.001)
     {
         console.error("invalid parameters : one of the plane's normal is zero Vector");
-        return;
+        return -1;
     }
     const a1 = plane1.normal.x;
     const b1 = plane1.normal.y;
@@ -494,50 +544,69 @@ function rayIntersectionOfPlanes(plane1, plane2)
     const c2 = plane2.normal.z;
     const d2 = plane2.constant;
 
-    if(Math.abs(a1 * b2 - a2 * b1) < 0.001 && Math.abs(b1 * c2 - b2 * c1) < 0.001)
+    if(Math.abs(a1 * b2 - a2 * b1) < 0.001 && Math.abs(b1 * c2 - b2 * c1) < 0.001) 
     {
-        console.log("Planes are parallel");
-        return;
+        //Coincident or parrallel planes
+        return -1;
     }
 
+    function calculate(m1, m2, s1, s2, t1, t2, param)
+    {
+        const paramVar = param;
+        const firstDeduct = ((m2 * t1 - m1 * t2) * paramVar + (m2 * d1 - m1 * d2)) / (m1 * s2 - m2 * s1);
+        const secondDeduct = (- s1 * firstDeduct - t1 * paramVar - d1) / m1;
 
+        return([paramVar, firstDeduct, secondDeduct]);
+    }
+
+    let intersectionRay = new THREE.Ray();
 
     if(Math.abs(a1) > 0.001)
     {
         if(Math.abs(a1 * b2 - a2 * b1) > 0.001)
         {
+            const originCoordinatesUnordered = calculate(a1, a2, b1, b2, c1, c2, 0);
+            intersectionRay.origin.set(originCoordinatesUnordered[2], originCoordinatesUnordered[1], originCoordinatesUnordered[0]);
+            /*
             const originZ = 0;
             const originY = (a2 * d1 - a1 * d2) / (a1 * b2 - a2 * b1);
             const originX = (-b1 * originY - d1) / a1;
-            const origin = new THREE.Vector3(originX, originY, originZ);
+            origin = new THREE.Vector3(originX, originY, originZ);
+            */
 
+            const directionCoordinatesUnordered = calculate(a1, a2, b1, b2, c1, c2, 1);
+            intersectionRay.direction.set(directionCoordinatesUnordered[2], directionCoordinatesUnordered[1], directionCoordinatesUnordered[0]);
+            /*
             const directionZ = 1;
             const directionY = ((a2 * c1 - a1 * c2) + (a2 * d1 - a1 * d2)) / (a1 * b2 - a2 * b1);
             const directionX = (-b1 * directionY - c1 - d1) / a1;
-            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-
-            const ray = new THREE.Ray(origin, direction);
-            return ray;
+            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+            */
         }
         else if(Math.abs(a1 * c2 - a2 * c1) > 0.001)
         {
+            const originCoordinatesUnordered = calculate(a1, a2, c1, c2, b1, b2, 0);
+            intersectionRay.origin.set(originCoordinatesUnordered[2], originCoordinatesUnordered[0], originCoordinatesUnordered[1]);
+            /*
             const originY = 0;
             const originZ = (a2 * d1 - a1 * d2) / (a1 * c2 - a2 * c1);
             const originX = (-c1 * originZ - d1) / a1;
-            const origin = new THREE.Vector3(originX, originY, originZ);
+            origin = new THREE.Vector3(originX, originY, originZ);
+            */
 
+            const directionCoordinatesUnordered = calculate(a1, a2, c1, c2, b1, b2, 1);
+            intersectionRay.direction.set(directionCoordinatesUnordered[2], directionCoordinatesUnordered[0], directionCoordinatesUnordered[1]);
+            /*
             const directionY = 1;
             const directionZ = ((a2 * b1 - a1 * b2) + (a2 * d1 - a1 * d2)) / (a1 * c2 - a2 * c1);
             const directionX = (-b1 - c1 * directionZ - d1) / a1;
-            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-
-            const ray = new THREE.Ray(origin, direction);
-            return ray;
+            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+            */
         }
         else
         {
             console.error("There is a mathematical incoherence");
-            return;
+            return -1;
         }
     }
 
@@ -545,38 +614,48 @@ function rayIntersectionOfPlanes(plane1, plane2)
     {
         if(Math.abs(b1 * c2 - b2 * c1) > 0.001)
         {
+            const originCoordinatesUnordered = calculate(b1, b2, c1, c2, a1, a2, 0);
+            intersectionRay.origin.set(originCoordinatesUnordered[0], originCoordinatesUnordered[2], originCoordinatesUnordered[1]);
+            /*
             const originX = 0;
             const originZ = (b2 * d1 - b1 * d2) / (b1 * c2 - b2 * c1);
             const originY = (-c1 * originZ - d1) / b1;
-            const origin = new THREE.Vector3(originX, originY, originZ);
+            origin = new THREE.Vector3(originX, originY, originZ);
+            */
 
+            const directionCoordinatesUnordered = calculate(b1, b2, c1, c2, a1, a2, 1);
+            intersectionRay.direction.set(directionCoordinatesUnordered[0], directionCoordinatesUnordered[2], directionCoordinatesUnordered[1]);
+            /*
             const directionX = 1;
             const directionZ = ((b2 * a1 - b1 * a2) + (b2 * d1 - b1 * d2)) / (b1 * c2 - b2 * c1);
             const directionY = (-c1 * directionZ - a1 - d1) / b1;
-            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-
-            const ray = new THREE.Ray(origin, direction);
-            return ray;
+            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+            */
         }
         else if(Math.abs(b1 * a2 - b2 * a1) > 0.001)
         {
+            const originCoordinatesUnordered = calculate(b1, b2, a1, a2, c1, c2, 0);
+            intersectionRay.origin.set(originCoordinatesUnordered[1], originCoordinatesUnordered[2], originCoordinatesUnordered[0]);
+            /*
             const originZ = 0;
             const originX = (b2 * d1 - b1 * d2) / (b1 * a2 - b2 * a1);
             const originY = (-a1 * originX - d1) / b1;
-            const origin = new THREE.Vector3(originX, originY, originZ);
+            origin = new THREE.Vector3(originX, originY, originZ);
+            */
 
+            const directionCoordinatesUnordered = calculate(b1, b2, a1, a2, c1, c2, 1);
+            intersectionRay.direction.set(directionCoordinatesUnordered[1], directionCoordinatesUnordered[2], directionCoordinatesUnordered[0]);
+            /*
             const directionZ = 1;
             const directionX = ((b2 * c1 - b1 * c2) + (b2 * d1 - b1 * d2)) / (b1 * a2 - b2 * a1);
             const directionY = (-c1 * directionZ - a1 - d1) / b1;
-            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-
-            const ray = new THREE.Ray(origin, direction);
-            return ray;
+            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+            */
         }
         else
         {
             console.error("There is a mathematical incoherence");
-            return;
+            return -1;
         }
     }
 
@@ -584,47 +663,60 @@ function rayIntersectionOfPlanes(plane1, plane2)
     {
         if(Math.abs(c1 * a2 - c2 * a1) > 0.001)
         {
+            const originCoordinatesUnordered = calculate(c1, c2, a1, a2, b1, b2, 0);
+            intersectionRay.origin.set(originCoordinatesUnordered[1], originCoordinatesUnordered[0], originCoordinatesUnordered[2]);
+            /*
             const originY = 0;
             const originX = (c2 * d1 - c1 * d2) / (c1 * a2 - c2 * a1);
             const originZ = (-a1 * originX - d1) / c1;
-            const origin = new THREE.Vector3(originX, originY, originZ);
+            origin = new THREE.Vector3(originX, originY, originZ);
+            */
 
+            const directionCoordinatesUnordered = calculate(c1, c2, a1, a2, b1, b2, 1);
+            intersectionRay.direction.set(directionCoordinatesUnordered[1], directionCoordinatesUnordered[0], directionCoordinatesUnordered[2]);
+            /*
             const directionY = 1;
             const directionX = ((c2 * b1 - c1 * b2) + (c2 * d1 - c1 * d2)) / (c1 * a2 - c2 * a1);
             const directionZ = (-a1 * directionX - b1 - d1) / c1;
-            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-
-            const ray = new THREE.Ray(origin, direction);
-            return ray;
+            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+            */
         }
         else if(Math.abs(c1 * b2 - c2 * b1) > 0.001)
         {
+            const originCoordinatesUnordered = calculate(c1, c2, b1, b2, a1, a2, 0);
+            intersectionRay.origin.set(originCoordinatesUnordered[0], originCoordinatesUnordered[1], originCoordinatesUnordered[2]);
+            /*
             const originX = 0;
             const originY = (c2 * d1 - c1 * d2) / (c1 * b2 - c2 * b1);
             const originZ = (-b1 * originY - d1) / c1;
-            const origin = new THREE.Vector3(originX, originY, originZ);
+            origin = new THREE.Vector3(originX, originY, originZ);
+            */
 
+            const directionCoordinatesUnordered = calculate(c1, c2, b1, b2, a1, a2, 1);
+            intersectionRay.direction.set(directionCoordinatesUnordered[0], directionCoordinatesUnordered[1], directionCoordinatesUnordered[2]);
+            /*
             const directionX = 1;
             const directionY = ((c2 * a1 - c1 * a2) + (c2 * d1 - c1 * d2)) / (c1 * b2 - c2 * b1);
             const directionZ = (-b1 * directionY - a1 - d1) / c1;
-            const direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-
-            const ray = new THREE.Ray(origin, direction);
-            return ray;
+            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
+            */
         }
         else
         {
             console.error("There is a mathematical incoherence");
-            return;
+            return -1;
         }
     }
 
     else
     {
         console.error("invalid parameters : one of the plane's normal is zero Vector");
-        return;
+        return -1;
     }
 
+    intersectionRay.direction.sub(intersectionRay.origin).normalize()
+
+    return intersectionRay;
 }
 
 function sortByAngle(coveredPoints, planeNormal)
@@ -674,26 +766,38 @@ function getIntersectionPoints(raysCrossing)
             normal.copy(u);
             normal.cross(v);
 
-            let dirX = new THREE.Vector3(1, 0, 0);
-            let dirY = new THREE.Vector3(0, 1, 0);
-            let dirZ = new THREE.Vector3(0, 0, 1);
+            //no intersection points if lines are parrallel or coincident
+            if(normal.length() < 0.001) continue;
+
+            //no intersection points if lines are not coplanar
+            const plane = new THREE.Plane().setFromCoplanarPoints(A, new THREE.Vector3().addVectors(A, u), new THREE.Vector3().addVectors(B, v))
+            if(Math.abs(plane.distanceToPoint(B)) > 0.001) continue;
+
+
+            let dirWallX = new THREE.Vector3().copy(wallXNormal);
+            let dirFloor = new THREE.Vector3().copy(floorNormal);
+            let dirWallZ = new THREE.Vector3().copy(wallZNormal);
 
             let qy = 0;
             let sy = 0;
-            if(dirY.cross(normal).length() < 0.01)
+            if(dirFloor.cross(normal).length() < 0.01)
             {
                 qy = (A.z - B.z) * u.x + (B.x - A.x) * u.z ;
                 sy = u.x * v.z - v.x * u.z;
             }
-            else if(dirX.cross(normal).length() < 0.01)
+            else if(dirWallX.cross(normal).length() < 0.01)
             {
                 qy = (A.z - B.z) * u.y + (B.y - A.y) * u.z ;
                 sy = u.y * v.z - v.y * u.z;
             }
-            else if(dirZ.cross(normal).length() < 0.01)
+            else if(dirWallZ.cross(normal).length() < 0.01)
             {
                 qy = (A.x - B.x) * u.y + (B.y - A.y) * u.x ;
                 sy = u.y * v.x - v.y * u.x;
+            }
+            else
+            {
+                console.error("Mathematical incoherence");
             }
 
             // if lines are identical or do not cross
@@ -705,11 +809,15 @@ function getIntersectionPoints(raysCrossing)
                 ray2.at(param, point);
                 intersectionPoints.push(point);
             }
+
         }
     }
 
     return intersectionPoints;
 }
+
+const raysTest = [new THREE.Ray(new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,1)), new THREE.Ray(new THREE.Vector3(0,0,-1), new THREE.Vector3(1,0,0))]
+console.log(getIntersectionPoints(raysTest));
 
 function calculateArea(borderPoints)
 {
@@ -823,7 +931,6 @@ function createBorder()
         givenAreaPolygon.regions[0].push([givenWidth, 0]);
         givenAreaPolygon.regions[0].push([givenWidth, givenHeight]);
         givenAreaPolygon.regions[0].push([0, givenHeight]);
-        console.log(givenAreaPolygon);
     }
 
 }

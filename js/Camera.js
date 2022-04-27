@@ -44,10 +44,6 @@ export class Camera{
         {
             for(let i = 0; i < cameras.length; i++)
             {
-                console.log(i + '/' + cameras.length);
-                console.log(new THREE.Vector3(this.XPos, this.YPos, this.ZPos));
-                console.log(cameras[i].mesh.position);
-                console.log(new THREE.Vector3(this.XPos, this.YPos, this.ZPos).distanceTo(cameras[i].mesh.position));
                 if(new THREE.Vector3(this.XPos, this.YPos, this.ZPos).distanceTo(cameras[i].mesh.position) < 0.5)
                 {
                     this.XPos += 0.6 - new THREE.Vector3(this.XPos, this.YPos, this.ZPos).distanceTo(cameras[i].mesh.position);
