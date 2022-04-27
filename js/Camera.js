@@ -228,7 +228,6 @@ export class Camera{
 
     remove()
     {
-        console.log(this);
         scene.remove(this.cameraPerspectiveHelper);
         scene.remove(this.cameraPerspective);
         if ( transformControl.object === this.mesh ) transformControl.detach();

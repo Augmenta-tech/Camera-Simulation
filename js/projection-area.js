@@ -492,6 +492,8 @@ function rayIntersectionOfPlanes(plane1, plane2)
         return;
     }
 
+
+
     if(Math.abs(a1) > 0.001)
     {
         if(Math.abs(a1 * b2 - a2 * b1) > 0.001)
@@ -800,17 +802,22 @@ function createBorder()
 
     if(givenWidth !== "" && givenHeight !=="")
     {
-        const geometry = new THREE.BoxGeometry( Math.round(parseFloat(givenWidth)*10) / 10.0, 0.001, Math.round(parseFloat(givenHeight)*10) / 10.0 );
+        givenWidth = parseFloat(givenWidth);
+        givenHeight = parseFloat(givenHeight);
+
+        const geometry = new THREE.BoxGeometry( Math.round(givenWidth*10) / 10.0, 0.001, Math.round(givenHeight*10) / 10.0 );
         line.geometry = new THREE.EdgesGeometry( geometry );
         line.position.set(givenWidth / 2.0, 0.02, givenHeight / 2.0)
+
+        //Calculate area polygon
+        givenAreaPolygon.regions[0] = [];
+        givenAreaPolygon.regions[0].push([0, 0]);
+        givenAreaPolygon.regions[0].push([givenWidth, 0]);
+        givenAreaPolygon.regions[0].push([givenWidth, givenHeight]);
+        givenAreaPolygon.regions[0].push([0, givenHeight]);
+        console.log(givenAreaPolygon);
     }
 
-    //Calculate area polygon
-    givenAreaPolygon.regions[0] = [];
-    givenAreaPolygon.regions[0].push([0, 0]);
-    givenAreaPolygon.regions[0].push([givenWidth, 0]);
-    givenAreaPolygon.regions[0].push([givenWidth, givenHeight]);
-    givenAreaPolygon.regions[0].push([0, givenHeight]);
 }
 
 //verifies if cameras cover the given area
