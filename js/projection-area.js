@@ -56,6 +56,14 @@ export function initScene()
     grid.addPlanesToScene(scene);
     //grid.planes.forEach(p => scene.add(p));
 
+    const axesHelper = new THREE.AxesHelper( 0.5 );
+    axesHelper.position.y = 0.02;
+    scene.add( axesHelper );
+    //axesHelper.setColors(0xffffff, 0xffffff, 0xffffff);
+    axesHelper.material = new THREE.LineBasicMaterial( {
+        color: 0xffffff,
+        linewidth: 3});
+
     // WallX
     let materialWallX = new THREE.MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
 
@@ -807,7 +815,7 @@ function createBorder()
 
         const geometry = new THREE.BoxGeometry( Math.round(givenWidth*10) / 10.0, 0.001, Math.round(givenHeight*10) / 10.0 );
         line.geometry = new THREE.EdgesGeometry( geometry );
-        line.position.set(givenWidth / 2.0, 0.02, givenHeight / 2.0)
+        line.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0)
 
         //Calculate area polygon
         givenAreaPolygon.regions[0] = [];
