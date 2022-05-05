@@ -150,7 +150,11 @@ export function drawProjection(cam)
     scene.remove(cam.areaCoveredWallX);
     scene.remove(cam.areaCoveredWallZ);
 
-    //let raysIntersect = [];
+    let floorPlane = new THREE.Plane(floorNormal, 0);
+    let abovePlane = new THREE.Plane(floorNormal, -heightDetected);
+    let wallXPlane = new THREE.Plane(wallXNormal, -wallXDepth);
+    let wallZPlane = new THREE.Plane(wallZNormal, -wallZDepth);
+
     let floorRays = [];
     let aboveRays = [];
     let wallXRays = [];
@@ -164,15 +168,12 @@ export function drawProjection(cam)
         let plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
 
         //crossing the floor
-        let floorPlane = new THREE.Plane(floorNormal, 0);
         const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
 
         //crossing a plane heightDetected m above the floor
-        let abovePlane = new THREE.Plane(floorNormal, -heightDetected);
         const rayIntersectAbove = getIntersectionOfPlanes(plane, abovePlane);
 
         //crossing the left wall
-        let wallXPlane = new THREE.Plane(wallXNormal, -wallXDepth);
         const rayIntersectWallX = getIntersectionOfPlanes(plane, wallXPlane);
 
         //crossing the far wall
@@ -183,114 +184,28 @@ export function drawProjection(cam)
         if(rayIntersectAbove !== -1) aboveRays.push(rayIntersectAbove);
         if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
         if(rayIntersectWallZ !== -1) wallZRays.push(rayIntersectWallZ);
-/*
-
-        //crossing the floor
-        let floorN = new THREE.Vector3();
-        floorN.copy(floorNormal);
-        floorN.cross(plane.normal);
-        if(floorN.length() > 0.01)
-        {
-            if(Math.abs(plane.normal.x) > 0.01)
-            {
-                const point = new THREE.Vector3(- plane.constant/plane.normal.x, 0, 0);
-                const direction = new THREE.Vector3(- plane.normal.z/plane.normal.x , 0, 1).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-            else if(Math.abs(plane.normal.z) > 0.01)
-            {
-                const point = new THREE.Vector3(0, 0, - plane.constant/plane.normal.z);
-                const direction = new THREE.Vector3(1, 0, - plane.normal.x/plane.normal.z).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-        }
-
-        //crossing a plane heightDetected m above the floor
-        if(floorN.length() > 0.01)
-        {
-            if(Math.abs(plane.normal.x) > 0.01)
-            {
-                const point = new THREE.Vector3((- heightDetected*plane.normal.y - plane.constant)/plane.normal.x, heightDetected, 0);
-                const direction = new THREE.Vector3((- plane.normal.z)/plane.normal.x , 0, 1).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-            else if(Math.abs(plane.normal.z) > 0.01)
-            {
-                const point = new THREE.Vector3(0, heightDetected, (- heightDetected*plane.normal.y - plane.constant)/plane.normal.z);
-                const direction = new THREE.Vector3(1, 0, (- plane.normal.x)/plane.normal.z).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-        }
-
-        //crossing the left wall
-        let wallXN = new THREE.Vector3();
-        wallXN.copy(wallXNormal);
-        wallXN.cross(plane.normal);
-        if(wallXN.length() > 0.01)
-        {
-            if(Math.abs(plane.normal.y) > 0.01)
-            {
-                const point = new THREE.Vector3(wallXDepth, (- wallXDepth*plane.normal.x - plane.constant)/plane.normal.y, 0);
-                const direction = new THREE.Vector3(0, (- plane.normal.z)/plane.normal.y, 1).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-            else if(Math.abs(plane.normal.z) > 0.01)
-            {
-                const point = new THREE.Vector3(wallXDepth, 0, (- wallXDepth*plane.normal.x - plane.constant)/plane.normal.z);
-                const direction = new THREE.Vector3(0, 1, (- plane.normal.y)/plane.normal.z).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-        }
-
-        //crossing the far wall
-        let wallZN = new THREE.Vector3();
-        wallZN.copy(wallZNormal);
-        wallZN.cross(plane.normal);
-        if(wallZN.length() > 0.01)
-        {
-            if(Math.abs(plane.normal.x) > 0.01)
-            {
-                const point = new THREE.Vector3((- wallZDepth*plane.normal.z - plane.constant)/plane.normal.x, 0, wallZDepth);
-                const direction = new THREE.Vector3((- plane.normal.y)/plane.normal.x, 1, 0).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-            else if(Math.abs(plane.normal.y) > 0.01)
-            {
-                const point = new THREE.Vector3(0, (- wallZDepth*plane.normal.z - plane.constant)/plane.normal.y, wallZDepth);
-                const direction = new THREE.Vector3(1, (- plane.normal.x)/plane.normal.y, 0).normalize();
-                const ray = new THREE.Ray(point, direction);
-                raysIntersect.push(ray);
-            }
-        }
-*/ 
     }
 
     //adding rays for walls intersections
-    let origin = new THREE.Vector3(wallXDepth, 0, wallZDepth);
-    
-    let wallXdir = new THREE.Vector3().copy(floorNormal);
-    wallXdir.cross(wallXNormal);
-    let wallZdir = new THREE.Vector3().copy(floorNormal);
-    wallZdir.cross(wallZNormal);
+    const floorWallXRay = getIntersectionOfPlanes(floorPlane, wallXPlane);
+    const wallXWallZRay = getIntersectionOfPlanes(wallXPlane, wallZPlane);
+    const floorWallZRay = getIntersectionOfPlanes(floorPlane, wallZPlane);
 
-    const floorWallXRay = new THREE.Ray(origin, wallXdir);
-    const wallXWallZRay = new THREE.Ray(origin, floorNormal);
-    const floorWallZRay = new THREE.Ray(origin, wallZdir);
-
-    floorRays.push(floorWallXRay, floorWallZRay);
-    wallXRays.push(floorWallXRay, wallXWallZRay);
-    wallZRays.push(floorWallZRay, wallXWallZRay);
-
-    /*let originAbove = new THREE.Vector3(wallXDepth, heightDetected, wallZDepth);
-    raysIntersect.push(new THREE.Ray(originAbove, wallXNormal));
-    raysIntersect.push(new THREE.Ray(originAbove, wallZNormal));*/
+    if(floorWallXRay !== -1) 
+    {
+        floorRays.push(floorWallXRay);
+        wallXRays.push(floorWallXRay);
+    }
+    if(wallXWallZRay !== -1)
+    {
+        wallXRays.push(wallXWallZRay);
+        wallZRays.push(wallXWallZRay);
+    }
+    if(floorWallZRay !== -1)
+    {
+        floorRays.push(floorWallZRay);
+        wallZRays.push(floorWallZRay);
+    }
     
     
     //get intersection points
@@ -300,20 +215,19 @@ export function drawProjection(cam)
     let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
 
-    
     //DEBUG SPHERES
     /*
     for(let i = 0; i < spheres.length; i++)
     {
         scene.remove(spheres[i]);
     }
-    for(let i = 0; i < intersectionPointsAbove.length; i++)
+    for(let i = 0; i < intersectionPointsWallX.length; i++)
     {
         const geometry = new THREE.SphereGeometry( 0.4, 32, 16 );
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff22 });
         const sphere = new THREE.Mesh( geometry, material );
         scene.add( sphere );
-        sphere.translateOnAxis(intersectionPointsAbove[i],1);
+        sphere.translateOnAxis(intersectionPointsWallX[i],1);
         spheres.push(sphere);
     }
     */
@@ -486,7 +400,8 @@ function getIntersectionOfPlanes(plane1, plane2)
     const c2 = plane2.normal.z;
     const d2 = plane2.constant;
 
-    if(Math.abs(a1 * b2 - a2 * b1) < 0.001 && Math.abs(b1 * c2 - b2 * c1) < 0.001) 
+    const crossProduct = new THREE.Vector3().crossVectors(plane1.normal, plane2.normal);
+    if(crossProduct.length() < 0.001)
     {
         //Coincident or parrallel planes
         return -1;
@@ -696,9 +611,7 @@ function getIntersectionPointOfRays(ray1, ray2)
     let o2 = ray2.origin;
     let d2 = ray2.direction;
     
-    let normal = new THREE.Vector3();
-    normal.copy(d1);
-    normal.cross(d2);
+    let normal = new THREE.Vector3().crossVectors(d1,d2);
 
     //no intersection points if rays are parrallel or coincident
     if(normal.length() < 0.001) return -1;
@@ -889,11 +802,9 @@ function calculateArea(borderPoints)
      */
     for(let i = 1; i < borderPoints.length - 1; i++)
     {
-        let vectorAB = new THREE.Vector3();
-        vectorAB.subVectors(borderPoints[i], borderPoints[0]);
+        let vectorAB = new THREE.Vector3().subVectors(borderPoints[i], borderPoints[0]);
 
-        let vectorAC = new THREE.Vector3();
-        vectorAC.subVectors(borderPoints[i + 1], borderPoints[0]);
+        let vectorAC = new THREE.Vector3().subVectors(borderPoints[i + 1], borderPoints[0]);
 
         let areaOfThisTriangle = 0.5 * vectorAB.cross(vectorAC).length();
         areaValue += areaOfThisTriangle;
