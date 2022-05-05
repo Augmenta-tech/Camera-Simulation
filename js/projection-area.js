@@ -460,63 +460,6 @@ export function drawProjection(cam)
     cam.areaAppear ? scene.add(cam.areaCoveredAbove) : scene.remove(cam.areaCoveredAbove);
     cam.areaAppear ? scene.add(cam.areaCoveredWallX) : scene.remove(cam.areaCoveredWallX);
     cam.areaAppear ? scene.add(cam.areaCoveredWallZ) : scene.remove(cam.areaCoveredWallZ);
-
-
-    //Calculate overlaps
-    /*
-    if(cam.areaValue > 0.01)
-    {
-        for(let i = 0; i < cam.id; i++)
-        {
-            if(cameras[i].areaValue > 0.01)
-            {
-                let raysCamsFloor = floorRays.concat(cameras[i].raysFloor);
-                let pointsSuperposition = getIntersectionPoints(raysCamsFloor);
-
-                //only keep points in both the frustums
-                const frustumOtherCamScaled = new THREE.Frustum();
-                frustumOtherCamScaled.setFromProjectionMatrix(cameras[i].cameraPerspective.projectionMatrix);
-
-                for(let j = 0; j < 6; j++) 
-                {
-                    frustumOtherCamScaled.planes[j].applyMatrix4(cameras[i].cameraPerspective.matrixWorld);
-                    frustumOtherCamScaled.planes[j].constant += 0.01;
-                }
-                pointsSuperposition = pointsSuperposition.filter(p => frustumScaled.containsPoint(p) && frustumOtherCamScaled.containsPoint(p));
-
-                //delete identical points
-                pointsSuperposition.sort((A,B) => A.length() < B.length());
-                for(let j = 0; j < pointsSuperposition.length - 1; j++)
-                {
-                    if(pointsSuperposition[j].distanceTo(pointsSuperposition[j + 1]) < 0.01)
-                    {
-                        pointsSuperposition.splice(j,1);
-                        j--;
-                    }
-                }
-
-                sortByAngle(pointsSuperposition, floorNormal);
-                let superpositionArea = calculateArea(pointsSuperposition);
-                //cameras[i].overlaps[cam.id] = superpositionArea; // / cameras[i].areaValue * 100;
-                if(cam.overlaps[i] != superpositionArea)
-                {
-                    cam.overlaps[i] = superpositionArea; // / cam.areaValue * 100;
-                    let barycentreSuperposition = getBarycentre(pointsSuperposition);
-                    let areaOverlapsGeometry = new TextGeometry(  Math.round(superpositionArea*100)/100 + "m²", { font: font, size: SIZE_TEXT_CAMERA * 2/3.0, height: 0.05 } );
-                    cam.areaOverlaps[i].geometry = areaOverlapsGeometry;
-                    cam.areaOverlaps[i].position.copy(barycentreSuperposition.add(new Vector3( - SIZE_TEXT_CAMERA*2, 0.1, SIZE_TEXT_CAMERA/2.0 )));
-                }
-                if(pointsSuperposition.length > 2)
-                {
-                    cam.areaOverlaps[i].visible = cam.areaAppear && cameras[i].areaAppear;
-                }
-                else
-                {
-                    cam.areaOverlaps[i].visible = false;
-                }
-            }
-        }
-    }*/
 }
 
 /**
@@ -526,7 +469,6 @@ export function drawProjection(cam)
  * @param {THREE.Plane} plane2 
  * @returns {THREE.Ray} the intersection of the planes or -1 if planes are coincident or parrallel
  */
-
 function getIntersectionOfPlanes(plane1, plane2)
 {
     if(plane1.normal.length() < 0.001 || plane2.normal.length() < 0.001)
@@ -550,62 +492,65 @@ function getIntersectionOfPlanes(plane1, plane2)
         return -1;
     }
 
-    function calculate(m1, m2, s1, s2, t1, t2, param)
-    {
-        const paramVar = param;
-        const firstDeduct = ((m2 * t1 - m1 * t2) * paramVar + (m2 * d1 - m1 * d2)) / (m1 * s2 - m2 * s1);
-        const secondDeduct = (- s1 * firstDeduct - t1 * paramVar - d1) / m1;
-
-        return([paramVar, firstDeduct, secondDeduct]);
-    }
-
-    let intersectionRay = new THREE.Ray();
+    /** MATH PARAGRAPH
+     * 
+     * Planes equations are
+     *  a1 * x + b1 * y + c1 * z + d1 = 0
+     *  a2 * x + b2 * y + c2 * z + d2 = 0
+     * 
+     * We want to get the all (x,y,z) triplet respecting both the equation (will be a 3D line)
+     * 
+     * if a1 != 0 :
+     *      // in this case, a1 and a2 are 'main' arguments for calculatePointOnIntersectionRayCoordinates function
+     *      // mode argument is 'abc'
+     * 
+     *      if a1 * b2 - a2 * b1 != 0
+     *          // in this case, b1 and b2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
+     * 
+     *          |                  a1 * x   =   - b1 * y - c1 * t - d1                            // from first plane equation
+     *          |                  b2 * y   =   - a2 * x - c2 * t - d2                            // from second plane equation
+     *          |                       z   =   t                                                 // 2 equations, 3 variables: one variable is a parameter
+     * 
+     *          <=>
+     * 
+     *          |                       x   =   (1/a1) * (- b1 * y - c1 * t - d1)                 // second coordinate that can be deduct
+     *          | (a1 * b2 - a2 * b1) * y   =   (a2 * c1 - a1 * c2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
+     *          |                       z   =   t                                                 // param Variable 
+     * 
+     * 
+     *      if a1 * c2 - a2 * c1 != 0
+     *          // in this case, c1 and c2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
+     *          // mode argument is 'acb'
+     * 
+     *          |                  a1 * x   =   - b1 * t - c1 * z - d1                            // from first plane equation
+     *          |                       y   =   t                                                 // 2 equations, 3 variables: one variable is a parameter
+     *          |                  c2 * z   =   - a2 * x - b2 * t - d2                            // from second plane equation
+     * 
+     *          <=>
+     * 
+     *          |                       x   =   (1/a1) * (- b1 * t - c1 * z - d1)                 // second coordinate that can be deduct
+     *          |                       y   =   t                                                 // param Variable
+     *          | (a1 * c2 - a2 * c1) * z   =   (a2 * b1 - a1 * b2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
+     * 
+     *      else means a1 * b2 - a2 * b1 = 0 AND a1 * c2 - a2 * c1 = 0 which means normals are colinear, and planes are parrallel or coincident.
+     *      This case must have been avoided earlier
+     * 
+     * Same for b1 != 0 and c1 != 0 (Normals of planes cannot be zero vectors. This case must have been avoided earlier)
+     */
 
     if(Math.abs(a1) > 0.001)
     {
         if(Math.abs(a1 * b2 - a2 * b1) > 0.001)
         {
-            const originCoordinatesUnordered = calculate(a1, a2, b1, b2, c1, c2, 0);
-            intersectionRay.origin.set(originCoordinatesUnordered[2], originCoordinatesUnordered[1], originCoordinatesUnordered[0]);
-            /*
-            const originZ = 0;
-            const originY = (a2 * d1 - a1 * d2) / (a1 * b2 - a2 * b1);
-            const originX = (-b1 * originY - d1) / a1;
-            origin = new THREE.Vector3(originX, originY, originZ);
-            */
-
-            const directionCoordinatesUnordered = calculate(a1, a2, b1, b2, c1, c2, 1);
-            intersectionRay.direction.set(directionCoordinatesUnordered[2], directionCoordinatesUnordered[1], directionCoordinatesUnordered[0]);
-            /*
-            const directionZ = 1;
-            const directionY = ((a2 * c1 - a1 * c2) + (a2 * d1 - a1 * d2)) / (a1 * b2 - a2 * b1);
-            const directionX = (-b1 * directionY - c1 - d1) / a1;
-            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-            */
+            return getIntersectionRay('abc');
         }
         else if(Math.abs(a1 * c2 - a2 * c1) > 0.001)
         {
-            const originCoordinatesUnordered = calculate(a1, a2, c1, c2, b1, b2, 0);
-            intersectionRay.origin.set(originCoordinatesUnordered[2], originCoordinatesUnordered[0], originCoordinatesUnordered[1]);
-            /*
-            const originY = 0;
-            const originZ = (a2 * d1 - a1 * d2) / (a1 * c2 - a2 * c1);
-            const originX = (-c1 * originZ - d1) / a1;
-            origin = new THREE.Vector3(originX, originY, originZ);
-            */
-
-            const directionCoordinatesUnordered = calculate(a1, a2, c1, c2, b1, b2, 1);
-            intersectionRay.direction.set(directionCoordinatesUnordered[2], directionCoordinatesUnordered[0], directionCoordinatesUnordered[1]);
-            /*
-            const directionY = 1;
-            const directionZ = ((a2 * b1 - a1 * b2) + (a2 * d1 - a1 * d2)) / (a1 * c2 - a2 * c1);
-            const directionX = (-b1 - c1 * directionZ - d1) / a1;
-            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-            */
+            return getIntersectionRay('acb');
         }
         else
         {
-            console.error("There is a mathematical incoherence");
+            console.error("There is a mathematical incoherence in the code");
             return -1;
         }
     }
@@ -614,111 +559,288 @@ function getIntersectionOfPlanes(plane1, plane2)
     {
         if(Math.abs(b1 * c2 - b2 * c1) > 0.001)
         {
-            const originCoordinatesUnordered = calculate(b1, b2, c1, c2, a1, a2, 0);
-            intersectionRay.origin.set(originCoordinatesUnordered[0], originCoordinatesUnordered[2], originCoordinatesUnordered[1]);
-            /*
-            const originX = 0;
-            const originZ = (b2 * d1 - b1 * d2) / (b1 * c2 - b2 * c1);
-            const originY = (-c1 * originZ - d1) / b1;
-            origin = new THREE.Vector3(originX, originY, originZ);
-            */
-
-            const directionCoordinatesUnordered = calculate(b1, b2, c1, c2, a1, a2, 1);
-            intersectionRay.direction.set(directionCoordinatesUnordered[0], directionCoordinatesUnordered[2], directionCoordinatesUnordered[1]);
-            /*
-            const directionX = 1;
-            const directionZ = ((b2 * a1 - b1 * a2) + (b2 * d1 - b1 * d2)) / (b1 * c2 - b2 * c1);
-            const directionY = (-c1 * directionZ - a1 - d1) / b1;
-            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-            */
+            return getIntersectionRay('bca');
         }
         else if(Math.abs(b1 * a2 - b2 * a1) > 0.001)
         {
-            const originCoordinatesUnordered = calculate(b1, b2, a1, a2, c1, c2, 0);
-            intersectionRay.origin.set(originCoordinatesUnordered[1], originCoordinatesUnordered[2], originCoordinatesUnordered[0]);
-            /*
-            const originZ = 0;
-            const originX = (b2 * d1 - b1 * d2) / (b1 * a2 - b2 * a1);
-            const originY = (-a1 * originX - d1) / b1;
-            origin = new THREE.Vector3(originX, originY, originZ);
-            */
-
-            const directionCoordinatesUnordered = calculate(b1, b2, a1, a2, c1, c2, 1);
-            intersectionRay.direction.set(directionCoordinatesUnordered[1], directionCoordinatesUnordered[2], directionCoordinatesUnordered[0]);
-            /*
-            const directionZ = 1;
-            const directionX = ((b2 * c1 - b1 * c2) + (b2 * d1 - b1 * d2)) / (b1 * a2 - b2 * a1);
-            const directionY = (-c1 * directionZ - a1 - d1) / b1;
-            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-            */
+            return getIntersectionRay('bac');
         }
         else
         {
-            console.error("There is a mathematical incoherence");
+            console.error("There is a mathematical incoherence in the code");
             return -1;
         }
     }
-
+    
     else if(Math.abs(c1) > 0.001)
     {
         if(Math.abs(c1 * a2 - c2 * a1) > 0.001)
         {
-            const originCoordinatesUnordered = calculate(c1, c2, a1, a2, b1, b2, 0);
-            intersectionRay.origin.set(originCoordinatesUnordered[1], originCoordinatesUnordered[0], originCoordinatesUnordered[2]);
-            /*
-            const originY = 0;
-            const originX = (c2 * d1 - c1 * d2) / (c1 * a2 - c2 * a1);
-            const originZ = (-a1 * originX - d1) / c1;
-            origin = new THREE.Vector3(originX, originY, originZ);
-            */
-
-            const directionCoordinatesUnordered = calculate(c1, c2, a1, a2, b1, b2, 1);
-            intersectionRay.direction.set(directionCoordinatesUnordered[1], directionCoordinatesUnordered[0], directionCoordinatesUnordered[2]);
-            /*
-            const directionY = 1;
-            const directionX = ((c2 * b1 - c1 * b2) + (c2 * d1 - c1 * d2)) / (c1 * a2 - c2 * a1);
-            const directionZ = (-a1 * directionX - b1 - d1) / c1;
-            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-            */
+            return getIntersectionRay('cab');
         }
         else if(Math.abs(c1 * b2 - c2 * b1) > 0.001)
         {
-            const originCoordinatesUnordered = calculate(c1, c2, b1, b2, a1, a2, 0);
-            intersectionRay.origin.set(originCoordinatesUnordered[0], originCoordinatesUnordered[1], originCoordinatesUnordered[2]);
-            /*
-            const originX = 0;
-            const originY = (c2 * d1 - c1 * d2) / (c1 * b2 - c2 * b1);
-            const originZ = (-b1 * originY - d1) / c1;
-            origin = new THREE.Vector3(originX, originY, originZ);
-            */
-
-            const directionCoordinatesUnordered = calculate(c1, c2, b1, b2, a1, a2, 1);
-            intersectionRay.direction.set(directionCoordinatesUnordered[0], directionCoordinatesUnordered[1], directionCoordinatesUnordered[2]);
-            /*
-            const directionX = 1;
-            const directionY = ((c2 * a1 - c1 * a2) + (c2 * d1 - c1 * d2)) / (c1 * b2 - c2 * b1);
-            const directionZ = (-b1 * directionY - a1 - d1) / c1;
-            direction = new THREE.Vector3(directionX, directionY, directionZ).sub(origin);
-            */
+            return getIntersectionRay('cba');
         }
         else
         {
-            console.error("There is a mathematical incoherence");
+            console.error("There is a mathematical incoherence in the code");
             return -1;
         }
     }
 
     else
     {
-        console.error("invalid parameters : one of the plane's normal is zero Vector");
+        console.error("invalid parameters : one of the plane's normal is zero vector");
         return -1;
     }
+    
+    /**
+     * get a THREE.Ray object which represents the intersection of planes.
+     * @param {string} mode Can be {'abc', 'acb', 'bca', 'bac', 'cab', 'cba'} depending on 'main', 'secondary' and third parameter. See math paragraph above.
+     * @returns {THREE.Ray} intersection ray of the planes. -1 if 'order' argument is not valid
+     */
+    function getIntersectionRay(mode){
+        switch(mode){
+            case 'abc':
+            {
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, b1, b2, c1, c2, 0, mode);
+                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, b1, b2, c1, c2, 1, mode).sub(originCoordinates);
+                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+            }
+            case 'acb':
+            {
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, c1, c2, b1, b2, 0, mode);
+                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, c1, c2, b1, b2, 1, mode).sub(originCoordinates);
+                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+            }
+            case 'bca':
+            {
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, c1, c2, a1, a2, 0, mode);
+                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, c1, c2, a1, a2, 1, mode).sub(originCoordinates);
+                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+            }
+            case 'bac':
+            {
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, a1, a2, c1, c2, 0, mode);
+                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, a1, a2, c1, c2, 1, mode).sub(originCoordinates);
+                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+            }
+            case 'cab':
+            {
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, a1, a2, b1, b2, 0, mode);
+                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, a1, a2, b1, b2, 1, mode).sub(originCoordinates);
+                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+            }
+            case 'cba':
+            {
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, b1, b2, a1, a2, 0, mode);
+                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, b1, b2, a1, a2, 1, mode).sub(originCoordinates);
+                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+            }
+            default:
+                console.error("getInteresectionRay: the 'mode' argument is not valid");
+                return -1;
+        }
+    }
 
-    intersectionRay.direction.sub(intersectionRay.origin).normalize()
+    /**
+     * See math paragraph to well understand this function. Calculate a point on the ray intersection depending on param argument
+     * @param {float} m1 "main" coordinate of the normal 1 (first letter of 'mode')
+     * @param {float} m2 "main" coordinate of the normal 2 (first letter of 'mode')
+     * @param {float} s1 "secondary" coordinate of the normal 1 (second letter of 'mode')
+     * @param {float} s2 "secondary" coordinate of the normal 2 (second letter of 'mode')
+     * @param {float} t1 "third" coordinate of the normal 1 (thirs letter of 'mode')
+     * @param {float} t2 "third" coordinate of the normal 2 (thirs letter of 'mode')
+     * @param {float} param parameter of the line
+     * @param {string} mode Can be {'abc', 'acb', 'bca', 'bac', 'cab', 'cba'}
+     * @returns {THREE.Vector3} a point on the intersection line of the planes at the parameter param.
+     */
+    function calculatePointOnIntersectionRayCoordinates(m1, m2, s1, s2, t1, t2, param, mode)
+    {
+        const paramVar = param;
+        const firstDeduct = ((m2 * t1 - m1 * t2) * paramVar + (m2 * d1 - m1 * d2)) / (m1 * s2 - m2 * s1);
+        const secondDeduct = (- s1 * firstDeduct - t1 * paramVar - d1) / m1;
 
-    return intersectionRay;
+        switch(mode){
+            case 'abc':
+                return new THREE.Vector3(secondDeduct, firstDeduct, paramVar);
+            case 'acb': 
+                return new THREE.Vector3(secondDeduct, paramVar, firstDeduct);
+            case 'bca':
+                return new THREE.Vector3(paramVar, secondDeduct, firstDeduct);
+            case 'bac': 
+                return new THREE.Vector3(firstDeduct, secondDeduct, paramVar);
+            case 'cab':
+                return new THREE.Vector3(firstDeduct, paramVar, secondDeduct);
+            case 'cba': 
+                return new THREE.Vector3(paramVar, firstDeduct, secondDeduct);
+            default:
+                console.error("calculatePointsOnIntersectionRayCoordinates: the 'mode' argument is not valid");
+                return -1;
+        }
+    }
 }
 
+/**
+ * Returns the intersection point of ray1 and ray2
+ * 
+ * @param {THREE.Ray} ray1 
+ * @param {THREE.Ray} ray2 
+ * @returns {THREE.Vector3} the intersection of the rays or -1 if rays do not cross or are coincident
+ */
+function getIntersectionPointOfRays(ray1, ray2)
+{
+    let o1 = ray1.origin;
+    let d1 = ray1.direction;
+    let o2 = ray2.origin;
+    let d2 = ray2.direction;
+    
+    let normal = new THREE.Vector3();
+    normal.copy(d1);
+    normal.cross(d2);
+
+    //no intersection points if rays are parrallel or coincident
+    if(normal.length() < 0.001) return -1;
+
+    //no intersection points if rays are not coplanar
+    const plane = new THREE.Plane().setFromCoplanarPoints(o1, new THREE.Vector3().addVectors(o1, d1), new THREE.Vector3().addVectors(o2, d2))
+    if(Math.abs(plane.distanceToPoint(o2)) > 0.001) return -1;
+
+    /** MATH PARAGRAPH
+     * 
+     * Every points of rays can be written as :
+     *  o1 + d1 * t     for ray1
+     *  o2 + d2 * t'    for ray2
+     * 
+     * We want to get t as 
+     *  o1 + d1 * t = o2 + d2 * t'
+     * so we can calclate the intersection point of the rays: I = o1 + d1 * t 
+     * 
+     * We have those three equations:
+     *  | o1.x + d1.x * t = o2.x + d2.x * t'
+     *  | o1.x + d1.x * t = o2.x + d2.x * t'
+     *  | o1.x + d1.x * t = o2.x + d2.x * t'
+     * 
+     * if d2.x != 0:
+     * 
+     *      t' = (1 / d2.x) * (d1.x * t + o1.x - o2.x)
+     *  
+     *      if d2.x * d1.y - d2.y * d1.x != 0:
+     *          
+     *          (d2.x * d1.y - d2.y * d1.x) * t = d2.y * (o1.x - o2.x) + d2.x * (o2.y - o1.y)
+     * 
+     *      if d2.x * d1.z - d2.z * d1.x != 0:
+     *          
+     *          (d2.x * d1.z - d2.z * d1.x) * t = d2.z * (o1.x - o2.x) + d2.x * (o2.z - o1.z)
+     * 
+     *      else means d2.x * d1.y - d2.y * d1.x = 0 AND d2.x * d1.z - d2.z * d1.x = 0 which means rays are parrallel or coincident.
+     *      This case must have been avoided earlier
+     * 
+     * Same for d2.y != 0 and d2.z != 0 (Direction of lines cannot be zero vectors. This case must have been avoided earlier)
+     */
+
+    let intersectionPoint = new THREE.Vector3();
+    if(Math.abs(d2.x) > 0.001)
+    {
+        if(Math.abs(d2.x * d1.y - d2.y * d1.x) > 0.001)
+        {
+            const param = (1/ (d2.x * d1.y - d2.y * d1.x)) * (d2.y * (o1.x - o2.x) + d2.x * (o2.y - o1.y))
+            ray1.at(param, intersectionPoint);
+            return intersectionPoint;
+        }
+        else if(Math.abs(d2.x * d1.z - d2.z * d1.x) > 0.001)
+        {
+            const param = (1/ (d2.x * d1.z - d2.z * d1.x)) * (d2.z * (o1.x - o2.x) + d2.x * (o2.z - o1.z))
+            ray1.at(param, intersectionPoint);
+            return intersectionPoint;
+        }
+        else
+        {
+            console.error("There is a mathematical incoherence in the code");
+            return -1;
+        }
+    }
+
+    else if(d2.y != 0)
+    {
+        if(Math.abs(d2.y * d1.z - d2.z * d1.y) > 0.001)
+        {
+            const param = (1/ (d2.y * d1.z - d2.z * d1.y)) * (d2.z * (o1.y - o2.y) + d2.y * (o2.z - o1.z))
+            ray1.at(param, intersectionPoint);
+            return intersectionPoint;
+        }
+        else if(Math.abs(d2.y * d1.x - d2.x * d1.y) > 0.001)
+        {
+            const param = (1/ (d2.y * d1.x - d2.x * d1.y)) * (d2.x * (o1.y - o2.y) + d2.y * (o2.x - o1.x))
+            ray1.at(param, intersectionPoint);
+            return intersectionPoint;
+        }
+        else
+        {
+            console.error("There is a mathematical incoherence in the code");
+            return -1;
+        }
+    }
+
+    else if(d2.z != 0)
+    {
+        if(Math.abs(d2.z * d1.x - d2.x * d1.z) > 0.001)
+        {
+            const param = (1/ (d2.z * d1.x - d2.x * d1.z)) * (d2.x * (o1.z - o2.z) + d2.z * (o2.x - o1.x))
+            ray1.at(param, intersectionPoint);
+            return intersectionPoint;
+        }
+        else if(Math.abs(d2.z * d1.y - d2.y * d1.z) > 0.001)
+        {
+            const param = (1/ (d2.z * d1.y - d2.y * d1.z)) * (d2.y * (o1.z - o2.z) + d2.z * (o2.y - o1.y))
+            ray1.at(param, intersectionPoint);
+            return intersectionPoint;
+        }
+        else
+        {
+            console.error("There is a mathematical incoherence in the code");
+            return -1;
+        }
+    }
+
+    else
+    {
+        console.error("invalid parameters : one of the rays direction is zero vector");
+        return -1;
+    }
+}
+
+/**
+ * Get every intersection points of multiple rays
+ * 
+ * @param {Array} raysCrossing an array filled with THREE.Ray objects
+ * @returns {Array} an array of points which are all the intersection poins of the rays in raysCrossing array
+ */
+function getIntersectionPoints(raysCrossing)
+{
+    let intersectionPoints = [];
+    for(let i = 0; i < raysCrossing.length - 1; i++)
+    {
+        let ray1 = raysCrossing[i];
+        for(let j = i+1; j < raysCrossing.length; j++)
+        {
+            let ray2 = raysCrossing[j]
+
+            let point = getIntersectionPointOfRays(ray1, ray2);
+            if(point != -1) intersectionPoints.push(point);
+        }
+    }
+
+    return intersectionPoints;
+}
+
+/**
+ * Sort the array passed as an argument so the vertices are ordered
+ * 
+ * @param {Array} coveredPoints array of vertices of a convex shape
+ * @param {THREE.Vector3} planeNormal normal of the plane in which the shape is inscribed
+ */
 function sortByAngle(coveredPoints, planeNormal)
 {
     if(coveredPoints.length > 2)
@@ -745,84 +867,26 @@ function sortByAngle(coveredPoints, planeNormal)
     }
 }
 
-function getIntersectionPoints(raysCrossing)
-{
-
-    let intersectionPoints = [];
-    for(let i = 0; i < raysCrossing.length - 1; i++)
-    {
-        let ray1 = raysCrossing[i];
-        for(let j = i+1; j < raysCrossing.length; j++)
-        {
-            let ray2 = raysCrossing[j]
-
-            //intersection point
-            let A = ray1.origin;
-            let u = ray1.direction;
-            let B = ray2.origin;
-            let v = ray2.direction;
-            
-            let normal = new THREE.Vector3();
-            normal.copy(u);
-            normal.cross(v);
-
-            //no intersection points if lines are parrallel or coincident
-            if(normal.length() < 0.001) continue;
-
-            //no intersection points if lines are not coplanar
-            const plane = new THREE.Plane().setFromCoplanarPoints(A, new THREE.Vector3().addVectors(A, u), new THREE.Vector3().addVectors(B, v))
-            if(Math.abs(plane.distanceToPoint(B)) > 0.001) continue;
-
-
-            let dirWallX = new THREE.Vector3().copy(wallXNormal);
-            let dirFloor = new THREE.Vector3().copy(floorNormal);
-            let dirWallZ = new THREE.Vector3().copy(wallZNormal);
-
-            let qy = 0;
-            let sy = 0;
-            if(dirFloor.cross(normal).length() < 0.01)
-            {
-                qy = (A.z - B.z) * u.x + (B.x - A.x) * u.z ;
-                sy = u.x * v.z - v.x * u.z;
-            }
-            else if(dirWallX.cross(normal).length() < 0.01)
-            {
-                qy = (A.z - B.z) * u.y + (B.y - A.y) * u.z ;
-                sy = u.y * v.z - v.y * u.z;
-            }
-            else if(dirWallZ.cross(normal).length() < 0.01)
-            {
-                qy = (A.x - B.x) * u.y + (B.y - A.y) * u.x ;
-                sy = u.y * v.x - v.y * u.x;
-            }
-            else
-            {
-                console.error("Mathematical incoherence");
-            }
-
-            // if lines are identical or do not cross
-            if (Math.abs(sy) > 0.01)
-            {
-                let param = qy/ sy;
-
-                let point = new THREE.Vector3();
-                ray2.at(param, point);
-                intersectionPoints.push(point);
-            }
-
-        }
-    }
-
-    return intersectionPoints;
-}
-
-const raysTest = [new THREE.Ray(new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,1)), new THREE.Ray(new THREE.Vector3(0,0,-1), new THREE.Vector3(1,0,0))]
-console.log(getIntersectionPoints(raysTest));
-
+/**
+ * Calculate the area of a convex shape
+ * 
+ * @param {Array} borderPoints array of THREE.Vector3 vertices of a convex shape. They must be ordered
+ * @returns {float} value of area of the shape delimited by borderPoints
+ */
 function calculateArea(borderPoints)
 {
     let areaValue = 0;
-    
+    /** MATH PARAGRAPH
+     * 
+     * If ABC is a triangle
+     * vAB is the vector from A to B
+     * vAC is the vector from A to C
+     * A is the area value of the triangle
+     *  A = (1/2) * || vAB ^ vAC ||
+     * 
+     * In three js, a shape is drawn thanks to the triangles it is composed of
+     * The sum of the areas of those triangles gives the total area of the shape 
+     */
     for(let i = 1; i < borderPoints.length - 1; i++)
     {
         let vectorAB = new THREE.Vector3();
@@ -879,20 +943,6 @@ function drawAreaWithPoints(coveredPoints, color = 0x008888)
     const areaCovered = new THREE.Mesh( geometryArea, materialArea );
     return(areaCovered);
 }
-
-/* WIP
-function totalAreaCovered()
-{
-    let totalAreaCovered = 0;
-    cameras.forEach(c => {
-        totalAreaCovered += c.areaValue;
-        for(let i = 0; i < c.id; i++)
-        {
-            totalAreaCovered -= c.overlaps[i];
-        }
-    });
-    return totalAreaCovered;
-}*/
 
 /* GIVEN AREA */
 //calculates and display the area
