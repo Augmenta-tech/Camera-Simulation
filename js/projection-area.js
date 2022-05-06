@@ -142,9 +142,22 @@ function onKeyDown( event ) {
     }
 }
 
-/* Calculate area covered by the camera cam to draw it and display it*/ 
+/**
+ * Calculate area covered by the camera cam to draw it and display it
+ * 
+ * @param {Camera} cam the camera to draw the projection 
+ */
 export function drawProjection(cam)
 {
+    /** GLOBAL OPERATING PHILOSPHY
+     * 
+     * 1/ remove all drawn projections
+     * 2/ for each plane of the scene (floor, walls ...), calculates the intersection rays
+     * 3/ for each plane of the scene, calculates the intersection points of those rays
+     * 4/ keeps only points into the frustum of the camera cam
+     * 5/ calculate area covered by the camera and display it
+     * 6/ draw surfaces covered using its vertices (points previously calculated)
+     */
     scene.remove(cam.areaCoveredFloor);
     scene.remove(cam.areaCoveredAbove);
     scene.remove(cam.areaCoveredWallX);
@@ -169,20 +182,19 @@ export function drawProjection(cam)
 
         //crossing the floor
         const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
+        if(rayIntersectFloor !== -1) floorRays.push(rayIntersectFloor);
 
         //crossing a plane heightDetected m above the floor
         const rayIntersectAbove = getIntersectionOfPlanes(plane, abovePlane);
+        if(rayIntersectAbove !== -1) aboveRays.push(rayIntersectAbove);
 
         //crossing the left wall
         const rayIntersectWallX = getIntersectionOfPlanes(plane, wallXPlane);
+        if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
 
         //crossing the far wall
         let wallZPlane = new THREE.Plane(wallZNormal, -wallZDepth);
         const rayIntersectWallZ = getIntersectionOfPlanes(plane, wallZPlane);
-
-        if(rayIntersectFloor !== -1) floorRays.push(rayIntersectFloor);
-        if(rayIntersectAbove !== -1) aboveRays.push(rayIntersectAbove);
-        if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
         if(rayIntersectWallZ !== -1) wallZRays.push(rayIntersectWallZ);
     }
 
@@ -214,6 +226,101 @@ export function drawProjection(cam)
     let intersectionPointsWallX = getIntersectionPoints(wallXRays);
     let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
+
+    //filter points in the camera frustum
+    const frustumScaled = new THREE.Frustum();
+    frustumScaled.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
+
+    for(let i = 0; i < 6; i++) 
+    {
+        frustumScaled.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+        frustumScaled.planes[i].constant += 0.01;
+    }
+
+    const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
+    const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
+    const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
+
+    //filter points above, they must be in the frustum at heightDetected but also on the floor
+    let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
+    coveredPointsAbove.forEach((p) => p.y -= heightDetected);
+    if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
+    {
+        let raysAbove = [...aboveRays];
+        raysAbove.forEach(r => r.origin.y -= heightDetected);
+        let raysAroundArea = floorRays.concat(raysAbove);
+        let pointsIntersect = getIntersectionPoints(raysAroundArea).filter(p => frustumScaled.containsPoint(p));
+        let candidatesPoints = coveredPointsAbove.concat(pointsIntersect);
+
+        //delete identical points
+        candidatesPoints.sort((A,B) => B.length() - A.length() );
+        sortByAngle(candidatesPoints, floorNormal);
+
+        for(let j = 0; j < candidatesPoints.length - 1; j++)
+        {
+            if(candidatesPoints[j].distanceTo(candidatesPoints[j + 1]) < 0.01)
+            {
+                candidatesPoints.splice(j,1);
+                j--;
+            }
+        }
+
+        coveredPointsAbove = candidatesPoints.filter(p => {
+            let abovePoint = new THREE.Vector3().copy(p);
+            abovePoint.y += heightDetected;
+            return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01;
+        })
+    }
+    else{
+        coveredPointsAbove = [];
+    }
+
+    sortByAngle(coveredPointsFloor, floorNormal);
+    sortByAngle(coveredPointsAbove, floorNormal);
+    sortByAngle(coveredPointsWallX, wallXNormal);
+    sortByAngle(coveredPointsWallZ, wallZNormal);
+
+    cam.coveredPointsAbove = coveredPointsAbove;
+
+    coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
+    coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
+    coveredPointsWallX.forEach((p) => p.x += 0.01*cam.id / cameras.length);
+    coveredPointsWallZ.forEach((p) => p.z += 0.01*cam.id / cameras.length);
+
+    //display area value 
+    let previousValue = cam.areaValue;
+    cam.areaValue = calculateArea(coveredPointsAbove);
+
+    //Place text 
+    if(coveredPointsAbove.length > 2)
+    {
+        //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
+        let barycentre = getBarycentre(coveredPointsAbove);
+        cam.changeTextPosition(barycentre);
+        if(previousValue != cam.areaValue) cam.changeAreaDisplayed(barycentre);
+    }
+    else
+    {
+        cam.nameText.position.copy(cam.cameraPerspective.position);
+        cam.areaDisplay.visible = false;
+    }
+
+    //draw area
+
+    cam.areaCoveredFloor.geometry.dispose();
+    cam.areaCoveredAbove.geometry.dispose();
+    cam.areaCoveredWallX.geometry.dispose();
+    cam.areaCoveredWallZ.geometry.dispose();
+
+    cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
+    cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
+    cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
+    cam.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
+
+    cam.areaAppear ? scene.add(cam.areaCoveredFloor) : scene.remove(cam.areaCoveredFloor);
+    cam.areaAppear ? scene.add(cam.areaCoveredAbove) : scene.remove(cam.areaCoveredAbove);
+    cam.areaAppear ? scene.add(cam.areaCoveredWallX) : scene.remove(cam.areaCoveredWallX);
+    cam.areaAppear ? scene.add(cam.areaCoveredWallZ) : scene.remove(cam.areaCoveredWallZ);
 
     //DEBUG SPHERES
     /*
@@ -255,125 +362,6 @@ export function drawProjection(cam)
     }
     */
     //FIN DEBUG
-
-    //filter points in the camera frustum
-    const frustumScaled = new THREE.Frustum();
-    frustumScaled.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
-
-    for(let i = 0; i < 6; i++) 
-    {
-        frustumScaled.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
-        frustumScaled.planes[i].constant += 0.01;
-    }
-
-    const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
-    let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
-    coveredPointsAbove.forEach((p) => p.y -= heightDetected);
-    const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
-    const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01);
-
-    //filter points above, they must be in the frustum at heightDetected but also on the floor
-    if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
-    {
-        let raysAbove = [...aboveRays];
-        raysAbove.forEach(r => r.origin.y -= heightDetected);
-        let raysAroundArea = floorRays.concat(raysAbove);
-        let pointsIntersect = getIntersectionPoints(raysAroundArea).filter(p => frustumScaled.containsPoint(p));
-        let candidatesPoints = coveredPointsAbove.concat(pointsIntersect);
-
-        //delete identical points
-        candidatesPoints.sort((A,B) => B.length() - A.length() );
-        sortByAngle(candidatesPoints, floorNormal);
-
-        for(let j = 0; j < candidatesPoints.length - 1; j++)
-        {
-            if(candidatesPoints[j].distanceTo(candidatesPoints[j + 1]) < 0.01)
-            {
-                candidatesPoints.splice(j,1);
-                j--;
-            }
-        }
-
-        coveredPointsAbove = candidatesPoints.filter(p => {
-            let abovePoint = new THREE.Vector3();
-            abovePoint.copy(p);
-            abovePoint.y += heightDetected;
-            return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > wallXDepth - 0.01 && p.y > - 0.01 && p.z > wallZDepth - 0.01;
-        })
-    }
-    else{
-        coveredPointsAbove = [];
-    }
-
-    // coveredPointsFloor.sort((A, B) => sortByAngle(A, B, coveredPointsFloor));
-    // coveredPointsAbove.sort((A, B) => sortByAngle(A, B, coveredPointsAbove));
-    // coveredPointsWallX.sort((A, B) => sortByAngle(A, B, coveredPointsWallX));
-    // coveredPointsWallZ.sort((A, B) => sortByAngle(A, B, coveredPointsWallZ));
-
-    sortByAngle(coveredPointsFloor, floorNormal);
-    sortByAngle(coveredPointsAbove, floorNormal);
-    sortByAngle(coveredPointsWallX, wallXNormal);
-    sortByAngle(coveredPointsWallZ, wallZNormal);
-
-    cam.coveredPointsAbove = coveredPointsAbove;
-
-    coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
-    coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
-    coveredPointsWallX.forEach((p) => p.x += 0.01*cam.id / cameras.length);
-    coveredPointsWallZ.forEach((p) => p.z += 0.01*cam.id / cameras.length);
-
-    //DEBUG SPHERES
-    /*
-    for(let i = 0; i < spheres.length; i++)
-    {
-        scene.remove(spheres[i]);
-    }
-    for(let i = 0; i < coveredPointsAbove.length; i++)
-    {
-        const geometry = new THREE.SphereGeometry( 0.4, 32, 16 );
-        const material = new THREE.MeshBasicMaterial(frustumScaled.containsPoint(coveredPointsAbove[i]) ? { color: 0x00ffff } : { color: 0xff0000 } );
-        const sphere = new THREE.Mesh( geometry, material );
-        scene.add( sphere );
-        sphere.translateOnAxis(coveredPointsAbove[i],1);
-        spheres.push(sphere);
-    }
-    */
-    //FIN DEBUG
-
-    //display area value 
-    let previousValue = cam.areaValue;
-    cam.areaValue = calculateArea(coveredPointsAbove) / (grid.unit * grid.unit);
-
-    //Place text 
-    if(coveredPointsAbove.length > 2)
-    {
-        //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
-        let barycentre = getBarycentre(coveredPointsAbove);
-        cam.changeTextPosition(barycentre);
-        if(previousValue != cam.areaValue) cam.changeAreaDisplayed(barycentre);
-    }
-    else
-    {
-        cam.nameText.position.copy(cam.cameraPerspective.position);
-        cam.areaDisplay.visible = false;
-    }
-
-    //draw area
-
-    cam.areaCoveredFloor.geometry.dispose();
-    cam.areaCoveredAbove.geometry.dispose();
-    cam.areaCoveredWallX.geometry.dispose();
-    cam.areaCoveredWallZ.geometry.dispose();
-
-    cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
-    cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
-    cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
-    cam.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
-
-    cam.areaAppear ? scene.add(cam.areaCoveredFloor) : scene.remove(cam.areaCoveredFloor);
-    cam.areaAppear ? scene.add(cam.areaCoveredAbove) : scene.remove(cam.areaCoveredAbove);
-    cam.areaAppear ? scene.add(cam.areaCoveredWallX) : scene.remove(cam.areaCoveredWallX);
-    cam.areaAppear ? scene.add(cam.areaCoveredWallZ) : scene.remove(cam.areaCoveredWallZ);
 }
 
 /**
@@ -400,8 +388,8 @@ function getIntersectionOfPlanes(plane1, plane2)
     const c2 = plane2.normal.z;
     const d2 = plane2.constant;
 
-    const crossProduct = new THREE.Vector3().crossVectors(plane1.normal, plane2.normal);
-    if(crossProduct.length() < 0.001)
+    const intersectionRayDirection = new THREE.Vector3().crossVectors(plane1.normal, plane2.normal);
+    if(intersectionRayDirection.length() < 0.001)
     {
         //Coincident or parrallel planes
         return -1;
@@ -432,6 +420,8 @@ function getIntersectionOfPlanes(plane1, plane2)
      *          | (a1 * b2 - a2 * b1) * y   =   (a2 * c1 - a1 * c2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
      *          |                       z   =   t                                                 // param Variable 
      * 
+     *          t = 0 gives the origin of the ray, and normal1 ^ normal2 gives its direction
+     * 
      * 
      *      if a1 * c2 - a2 * c1 != 0
      *          // in this case, c1 and c2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
@@ -446,6 +436,9 @@ function getIntersectionOfPlanes(plane1, plane2)
      *          |                       x   =   (1/a1) * (- b1 * t - c1 * z - d1)                 // second coordinate that can be deduct
      *          |                       y   =   t                                                 // param Variable
      *          | (a1 * c2 - a2 * c1) * z   =   (a2 * b1 - a1 * b2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
+     * 
+     *          t = 0 gives the origin of the ray, and normal1 ^ normal2 gives its direction
+     * 
      * 
      *      else means a1 * b2 - a2 * b1 = 0 AND a1 * c2 - a2 * c1 = 0 which means normals are colinear, and planes are parrallel or coincident.
      *      This case must have been avoided earlier
@@ -519,39 +512,33 @@ function getIntersectionOfPlanes(plane1, plane2)
         switch(mode){
             case 'abc':
             {
-                const originCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, b1, b2, c1, c2, 0, mode);
-                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, b1, b2, c1, c2, 1, mode).sub(originCoordinates);
-                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, b1, b2, c1, c2, mode);
+                return new THREE.Ray(originCoordinates, intersectionRayDirection.normalize());
             }
             case 'acb':
             {
-                const originCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, c1, c2, b1, b2, 0, mode);
-                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, c1, c2, b1, b2, 1, mode).sub(originCoordinates);
-                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(a1, a2, c1, c2, b1, b2, mode);
+                return new THREE.Ray(originCoordinates, intersectionRayDirection.normalize());
             }
             case 'bca':
             {
-                const originCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, c1, c2, a1, a2, 0, mode);
-                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, c1, c2, a1, a2, 1, mode).sub(originCoordinates);
-                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, c1, c2, a1, a2, mode);
+                return new THREE.Ray(originCoordinates, intersectionRayDirection.normalize());
             }
             case 'bac':
             {
-                const originCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, a1, a2, c1, c2, 0, mode);
-                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, a1, a2, c1, c2, 1, mode).sub(originCoordinates);
-                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(b1, b2, a1, a2, c1, c2, mode);
+                return new THREE.Ray(originCoordinates, intersectionRayDirection.normalize());
             }
             case 'cab':
             {
-                const originCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, a1, a2, b1, b2, 0, mode);
-                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, a1, a2, b1, b2, 1, mode).sub(originCoordinates);
-                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, a1, a2, b1, b2, mode);
+                return new THREE.Ray(originCoordinates, intersectionRayDirection.normalize());
             }
             case 'cba':
             {
-                const originCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, b1, b2, a1, a2, 0, mode);
-                const directionCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, b1, b2, a1, a2, 1, mode).sub(originCoordinates);
-                return new THREE.Ray(originCoordinates, directionCoordinates.normalize());
+                const originCoordinates = calculatePointOnIntersectionRayCoordinates(c1, c2, b1, b2, a1, a2, mode);
+                return new THREE.Ray(originCoordinates, intersectionRayDirection.normalize());
             }
             default:
                 console.error("getInteresectionRay: the 'mode' argument is not valid");
@@ -565,13 +552,13 @@ function getIntersectionOfPlanes(plane1, plane2)
      * @param {float} m2 "main" coordinate of the normal 2 (first letter of 'mode')
      * @param {float} s1 "secondary" coordinate of the normal 1 (second letter of 'mode')
      * @param {float} s2 "secondary" coordinate of the normal 2 (second letter of 'mode')
-     * @param {float} t1 "third" coordinate of the normal 1 (thirs letter of 'mode')
-     * @param {float} t2 "third" coordinate of the normal 2 (thirs letter of 'mode')
-     * @param {float} param parameter of the line
+     * @param {float} t1 "third" coordinate of the normal 1 (third letter of 'mode')
+     * @param {float} t2 "third" coordinate of the normal 2 (third letter of 'mode')
      * @param {string} mode Can be {'abc', 'acb', 'bca', 'bac', 'cab', 'cba'}
+     * @param {float} param parameter of the line, default is 0
      * @returns {THREE.Vector3} a point on the intersection line of the planes at the parameter param.
      */
-    function calculatePointOnIntersectionRayCoordinates(m1, m2, s1, s2, t1, t2, param, mode)
+    function calculatePointOnIntersectionRayCoordinates(m1, m2, s1, s2, t1, t2, mode, param = 0)
     {
         const paramVar = param;
         const firstDeduct = ((m2 * t1 - m1 * t2) * paramVar + (m2 * d1 - m1 * d2)) / (m1 * s2 - m2 * s1);
@@ -761,8 +748,7 @@ function sortByAngle(coveredPoints, planeNormal)
         let center = getBarycentre(coveredPoints);
         let vector = new THREE.Vector3();
         vector.subVectors(coveredPoints[0], center);
-        let vectorPerp = new THREE.Vector3();
-        vectorPerp.copy(vector);
+        let vectorPerp = new THREE.Vector3().copy(vector);
         vectorPerp.applyAxisAngle(planeNormal, Math.PI/2.0);
 
         coveredPoints.sort((A,B) => {
@@ -810,14 +796,17 @@ function calculateArea(borderPoints)
         areaValue += areaOfThisTriangle;
     }
 
-    return areaValue;
+    return areaValue / (grid.unit * grid.unit);
 }
 
 function getBarycentre(points)
 {
     let barycentre = new THREE.Vector3();
-    points.forEach(p => barycentre.add(p));
-    barycentre.divideScalar(points.length);
+    if (points.length !== 0)
+    {
+        points.forEach(p => barycentre.add(p));
+        barycentre.divideScalar(points.length);
+    }
     return barycentre;
 }
 
