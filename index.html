@@ -15,7 +15,7 @@
       <div id="main">
         <div id="header" class="row s-p">
           <a href="https://augmenta.tech/fr/accueil-2/">
-            <img src="img/augmenta-logo.png" alt="">
+            <img src="img/augmenta-logo.png" alt="Augmenta">
           </a>
           <div class="row">
             <p>Unsaved Draft</p>
@@ -108,13 +108,13 @@
                   <input class="" id="hook-cam" type="number" placeholder="r" min="0" max="15" step = "0.1">
                 </div>
                 <div class="">
-                  <p>Height Detection</p>
+                  <p>Target overlap height detection</p>
                   <select id="given-height-detection" class="select select-form" name="camType">
                     <option value="0.2">Feets</option>
-                    <option value="0.6">Knees</option>
+                    <option value="0.6">Knees (recommended)</option>
                     <option value="1" selected>Hips</option>
                     <option value="1.6">Shoulders</option>
-                    <option value="2">Entire body</option>
+                    <option id="height-reference" value="2">Entire body</option>
                   </select>
                 </div>
                 <div id="tracking-choice">
@@ -168,5 +168,5 @@
 			}
 		</script> 
 
-		<script type="module" src="js/main.js"></script>
+		<script type="module" src="js-new/main.js"></script>
 </html>
