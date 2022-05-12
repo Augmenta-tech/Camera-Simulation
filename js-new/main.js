@@ -15,6 +15,8 @@ animate();
 function bindEventListeners()
 {
     window.addEventListener('resize', onWindowResize);
+
+    /* HANDLE BUTTONS */
     document.getElementById('display-frustums').addEventListener('click', () => viewportManager.sceneManager.displayFrustums());
     document.getElementById('toggle-unit').addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
 
@@ -24,9 +26,13 @@ function bindEventListeners()
     document.getElementById('add-dummy').addEventListener('click', () => viewportManager.sceneManager.addDummy());
     document.getElementById('remove-dummies').addEventListener('click', () => viewportManager.sceneManager.removeDummies());
 
-    //DEBUG
-            document.addEventListener( 'keydown', onKeyDown );
 
+document.getElementById("generate-link").addEventListener('click', () => generateLink());
+
+    //DEBUG
+    document.addEventListener( 'keydown', onKeyDown );
+
+    /* HANDLE VIEWPORT ACTIONS */
     viewportManager.element.addEventListener( 'pointerdown', onPointerDown );
     viewportManager.element.addEventListener( 'pointerup', onPointerUp );
     viewportManager.element.addEventListener( 'pointermove', onPointerMove );
@@ -35,7 +41,6 @@ function bindEventListeners()
         viewportManager.element.removeEventListener( 'pointermove', onDrag);
         viewportManager.sceneManager.updateObjectsPosition();
     });
-    
 }
 
 function onWindowResize()
@@ -54,15 +59,6 @@ function animate() {
     isAreaCoveredUI();
 }
 
-function isAreaCoveredUI()
-{
-    const coversArea = viewportManager.sceneManager.doesCoverArea();
-    const coversUI = document.getElementById('covers-check');
-    coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
-    coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
-}
-
-//Générer l'URL avec Share
 
 export function setupCameraChangement(newPos, changeCameraType = true)
 {
@@ -148,3 +144,25 @@ function onKeyDown( event ) {
 
     }
 }
+
+/* TO PUT SOMEWHERE ELSE */
+function isAreaCoveredUI()
+{
+    const coversArea = viewportManager.sceneManager.doesCoverArea();
+    const coversUI = document.getElementById('covers-check');
+    coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
+    coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
+}
+
+
+/**
+ * MANQUE : 
+ * /Du main :
+ *  - la gestion du Share (Bouton Share, Modal, generate link et copy) (l.228-l.258 et l.317-l.335)
+ *  - la création du formulaire (l.340-l.366) (dans index.html directement ?)
+ * 
+ * /De projection area :
+ *  - création de la "scene"/la bordure (l.852 -> l.860)
+ *  - création de la scène à partir du formulaire (createSceneFromForm, l.908-l990)
+ *  - gestion du modal du formulaire (l.993-l.1006)
+ */

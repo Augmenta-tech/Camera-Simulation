@@ -1,4 +1,4 @@
-const data = 
+const camerasTypes = 
 [
     {
         id:0, 
@@ -53,10 +53,12 @@ const data =
     }
 ];
 
+camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
+
 const units = {
     meters: 1,
     feets: 3.28084
 };
 
 export {units}
-export default data;
+export { camerasTypes }

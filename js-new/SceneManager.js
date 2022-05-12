@@ -1,9 +1,11 @@
 import {
     Scene,
+    AxesHelper,
     AmbientLight,
     EdgesGeometry,
     PlaneGeometry,
     BoxGeometry,
+    BufferGeometry,
     LineBasicMaterial,
     MeshBasicMaterial,
     MeshPhongMaterial,
@@ -13,16 +15,15 @@ import {
     Vector3,
     Ray,
     Plane,
-    Frustum,
-    Camera
+    Frustum
 } from 'three';
-import {
-    DoubleSide
-} from 'three';
+import { DoubleSide } from 'three';
+
 import * as POLYBOOL from 'polybool';
 
 import { Dummy } from './Dummy.js';
-//import { Camera } from './Camera.js';
+import { Camera } from './Camera.js';
+import { CameraUI } from './CameraUI.js';
 import { Grid } from './Grid.js';
 
 import { units } from './cameras.js'
@@ -64,8 +65,8 @@ class SceneManager{
         const givenAreaPolygon = { regions: [[]], inverted: true};
 
         //DEBUG
-        let spheres = [];
-        let rays = [];
+        const spheres = [];
+        const rays = [];
     
 
 
@@ -89,6 +90,10 @@ class SceneManager{
             const wallZ = buildWallZMesh(this.size, this.wallZDepth);
             this.#scene.add(wallZ);
 
+            //Origin
+            const axesHelper = buildAxesHelper();
+            this.#scene.add( axesHelper );
+
 
             grid.addPlanesToScene(this.#scene);
             this.#scene.add(this.transformControl);
@@ -99,10 +104,10 @@ class SceneManager{
 
         function buildFloorMesh(size)
         {
-            let materialFloor = new MeshPhongMaterial( {color: 0x555555});
+            const materialFloor = new MeshPhongMaterial( {color: 0x555555});
             materialFloor.side = DoubleSide;
             
-            let geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
+            const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
             floor.position.set( 0, - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
@@ -113,9 +118,9 @@ class SceneManager{
 
         function buildWallXMesh(size, wallXDepth)
         {
-            let materialWallX = new MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
+            const materialWallX = new MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
         
-            let geometryWallX = new PlaneGeometry( size + 0.02, size + 0.02 );
+            const geometryWallX = new PlaneGeometry( size + 0.02, size + 0.02 );
         
             const wallX = new Mesh(geometryWallX, materialWallX);
             wallX.position.set( wallXDepth - 0.01, size / 2.0, 0 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
@@ -126,14 +131,26 @@ class SceneManager{
 
         function buildWallZMesh(size, wallZDepth)
         {
-            let materialWallZ = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
+            const materialWallZ = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
         
-            let geometryWallZ = new PlaneGeometry( size + 0.02, size + 0.02 );
+            const geometryWallZ = new PlaneGeometry( size + 0.02, size + 0.02 );
         
             const wallZ = new Mesh(geometryWallZ, materialWallZ);
             wallZ.position.set( 0, size/2.0, wallZDepth - 0.01 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             
             return wallZ;
+        }
+
+        function buildAxesHelper()
+        {
+            const axesHelper = new AxesHelper( 0.5 );
+            axesHelper.position.y = 0.02;
+
+            axesHelper.material = new LineBasicMaterial( {
+                color: 0xffffff,
+                linewidth: 3});
+
+            return axesHelper;
         }
 
         function createSceneFromURL(sceneManager)
@@ -193,11 +210,11 @@ class SceneManager{
         }
 
 
-        /* USER'S ACTIONS */
+        /* SCENE OBJECTS MANAGEMENT */
 
         this.deleteObject = function(obj)
         {
-            if ( this.transformControl.object === obj.mesh ) this.transformControl.detach();
+            if (this.transformControl.object === obj.mesh) this.transformControl.detach();
             obj.removeFromScene(this.#scene);
             obj.dispose();
         }
@@ -242,12 +259,11 @@ class SceneManager{
         {
             if(!Camera.font)
             {
-                console.log("haha");
                 //TODO: Add UI to inform that button will work in few seconds
                 return;
             }
-            console.log("hihi");
             const newCamera = new Camera(cameras.length, typeID, x, y, z, p, a, r)
+            newCamera.uiElement = new CameraUI(newCamera, this.currentUnit);
             
             //Offset
             if(!autoConstruct)
@@ -261,11 +277,9 @@ class SceneManager{
                     }
                 }
             }
-            newCamera.updatePosition();
+            newCamera.updatePosition(this.currentUnit);
 
-            newCamera.addCameraToScene();
-
-            addCameraGUI(newCamera);
+            newCamera.addToScene(this.#scene);
 
             cameras.push(newCamera);
             this.camMeshes.push(newCamera.mesh);
@@ -290,6 +304,8 @@ class SceneManager{
         }
 
 
+        /* USER'S ACTIONS */
+
         this.toggleUnit = function()
         {
             const unit = grid.unit === units.meters ? units.feets : units.meters;
@@ -300,7 +316,7 @@ class SceneManager{
                 e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 10) / 10.0;
                 e.dataset.unit = unit;
             });
-            let unitCharElements = document.querySelectorAll('[data-unittext]');
+            const unitCharElements = document.querySelectorAll('[data-unittext]');
             unitCharElements.forEach(e => {
                 e.dataset.unittext = unit;
                 switch(unit)
@@ -343,7 +359,7 @@ class SceneManager{
 
         this.updateObjectsPosition = function()
         {
-            cameras.forEach(c => c.updatePosition());
+            cameras.forEach(c => c.updatePosition(this.currentUnit));
             dummies.forEach(d => d.updatePosition());
         }
 
@@ -355,7 +371,7 @@ class SceneManager{
          * 
          * @param {Camera} cam the camera to draw the projection 
          */
-        function drawProjection(cam)
+        this.drawProjection = function(cam)
         {
             /** GLOBAL OPERATING PHILOSPHY
              * 
@@ -366,168 +382,178 @@ class SceneManager{
              * 5/ calculate area covered by the camera and display it
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
+            
             this.#scene.remove(cam.areaCoveredFloor);
             this.#scene.remove(cam.areaCoveredAbove);
             this.#scene.remove(cam.areaCoveredWallX);
             this.#scene.remove(cam.areaCoveredWallZ);
 
-            const floorRays = [];
-            const aboveRays = [];
-            const wallXRays = [];
-            const wallZRays = [];
-
-            const frustum = new Frustum();
-            frustum.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
-            //calculate the rays representing the intersection between frustum's planes and the floor or the walls
-            for(let i = 0; i < 6; i++) 
+            if(cam.areaAppear)
             {
-                const plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+                const floorRays = [];
+                const aboveRays = [];
+                const wallXRays = [];
+                const wallZRays = [];
 
-                //crossing the floor
-                const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
-                if(rayIntersectFloor !== -1) floorRays.push(rayIntersectFloor);
-
-                //crossing a plane heightDetected m above the floor
-                const rayIntersectAbove = getIntersectionOfPlanes(plane, abovePlane);
-                if(rayIntersectAbove !== -1) aboveRays.push(rayIntersectAbove);
-
-                //crossing the left wall
-                const rayIntersectWallX = getIntersectionOfPlanes(plane, wallXPlane);
-                if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
-
-                //crossing the far wall
-                const rayIntersectWallZ = getIntersectionOfPlanes(plane, wallZPlane);
-                if(rayIntersectWallZ !== -1) wallZRays.push(rayIntersectWallZ);
-            }
-
-            //adding rays for walls intersections
-            const floorWallXRay = getIntersectionOfPlanes(floorPlane, wallXPlane);
-            const wallXWallZRay = getIntersectionOfPlanes(wallXPlane, wallZPlane);
-            const floorWallZRay = getIntersectionOfPlanes(floorPlane, wallZPlane);
-
-            if(floorWallXRay !== -1) 
-            {
-                floorRays.push(floorWallXRay);
-                wallXRays.push(floorWallXRay);
-            }
-            if(wallXWallZRay !== -1)
-            {
-                wallXRays.push(wallXWallZRay);
-                wallZRays.push(wallXWallZRay);
-            }
-            if(floorWallZRay !== -1)
-            {
-                floorRays.push(floorWallZRay);
-                wallZRays.push(floorWallZRay);
-            }
-            
-            
-            //get intersection points
-            const intersectionPointsFloor = getIntersectionPoints(floorRays);
-            const intersectionPointsAbove = getIntersectionPoints(aboveRays);
-            const intersectionPointsWallX = getIntersectionPoints(wallXRays);
-            const intersectionPointsWallZ = getIntersectionPoints(wallZRays);
-
-
-            //filter points in the camera frustum
-            const frustumScaled = new Frustum();
-            frustumScaled.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
-
-            for(let i = 0; i < 6; i++) 
-            {
-                frustumScaled.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
-                frustumScaled.planes[i].constant += 0.01;
-            }
-
-            const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-            const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-            const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-
-            //filter points above, they must be in the frustum at heightDetected but also on the floor
-            let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
-            coveredPointsAbove.forEach((p) => p.y -= this.heightDetected);
-            if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
-            {
-                let raysAbove = [...aboveRays];
-                raysAbove.forEach(r => r.origin.y -= this.heightDetected);
-                let raysAroundArea = floorRays.concat(raysAbove);
-                let pointsIntersect = getIntersectionPoints(raysAroundArea).filter(p => frustumScaled.containsPoint(p));
-                let candidatesPoints = coveredPointsAbove.concat(pointsIntersect);
-
-                //delete identical points
-                candidatesPoints.sort((A,B) => B.length() - A.length() );
-                sortByAngle(candidatesPoints, floorNormal);
-
-                for(let j = 0; j < candidatesPoints.length - 1; j++)
+                const frustum = new Frustum();
+                frustum.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
+                //calculate the rays representing the intersection between frustum's planes and the floor or the walls
+                for(let i = 0; i < 6; i++) 
                 {
-                    if(candidatesPoints[j].distanceTo(candidatesPoints[j + 1]) < 0.01)
-                    {
-                        candidatesPoints.splice(j,1);
-                        j--;
-                    }
+                    const plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+
+                    //crossing the floor
+                    const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
+                    if(rayIntersectFloor !== -1) floorRays.push(rayIntersectFloor);
+
+                    //crossing a plane heightDetected m above the floor
+                    const rayIntersectAbove = getIntersectionOfPlanes(plane, abovePlane);
+                    if(rayIntersectAbove !== -1) aboveRays.push(rayIntersectAbove);
+
+                    //crossing the left wall
+                    const rayIntersectWallX = getIntersectionOfPlanes(plane, wallXPlane);
+                    if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
+
+                    //crossing the far wall
+                    const rayIntersectWallZ = getIntersectionOfPlanes(plane, wallZPlane);
+                    if(rayIntersectWallZ !== -1) wallZRays.push(rayIntersectWallZ);
                 }
 
-                coveredPointsAbove = candidatesPoints.filter(p => {
-                    let abovePoint = new Vector3().copy(p);
-                    abovePoint.y += this.heightDetected;
-                    return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01;
-                })
+                //adding rays for walls intersections
+                const floorWallXRay = getIntersectionOfPlanes(floorPlane, wallXPlane);
+                const wallXWallZRay = getIntersectionOfPlanes(wallXPlane, wallZPlane);
+                const floorWallZRay = getIntersectionOfPlanes(floorPlane, wallZPlane);
+
+                if(floorWallXRay !== -1) 
+                {
+                    floorRays.push(floorWallXRay);
+                    wallXRays.push(floorWallXRay);
+                }
+                if(wallXWallZRay !== -1)
+                {
+                    wallXRays.push(wallXWallZRay);
+                    wallZRays.push(wallXWallZRay);
+                }
+                if(floorWallZRay !== -1)
+                {
+                    floorRays.push(floorWallZRay);
+                    wallZRays.push(floorWallZRay);
+                }
+                
+                
+                //get intersection points
+                const intersectionPointsFloor = getIntersectionPoints(floorRays);
+                const intersectionPointsAbove = getIntersectionPoints(aboveRays);
+                const intersectionPointsWallX = getIntersectionPoints(wallXRays);
+                const intersectionPointsWallZ = getIntersectionPoints(wallZRays);
+
+
+                //filter points in the camera frustum
+                const frustumScaled = new Frustum();
+                frustumScaled.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
+
+                for(let i = 0; i < 6; i++) 
+                {
+                    frustumScaled.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+                    frustumScaled.planes[i].constant += 0.01;
+                }
+
+                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
+
+                //filter points above, they must be in the frustum at heightDetected but also on the floor
+                let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
+                coveredPointsAbove.forEach((p) => p.y -= this.heightDetected);
+                if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
+                {
+                    const raysAbove = [...aboveRays];
+                    raysAbove.forEach(r => r.origin.y -= this.heightDetected);
+                    const raysAroundArea = floorRays.concat(raysAbove);
+                    const pointsIntersect = getIntersectionPoints(raysAroundArea).filter(p => frustumScaled.containsPoint(p));
+                    const candidatesPoints = coveredPointsAbove.concat(pointsIntersect);
+
+                    //delete identical points
+                    candidatesPoints.sort((A,B) => B.length() - A.length() );
+                    sortByAngle(candidatesPoints, floorNormal);
+
+                    for(let j = 0; j < candidatesPoints.length - 1; j++)
+                    {
+                        if(candidatesPoints[j].distanceTo(candidatesPoints[j + 1]) < 0.01)
+                        {
+                            candidatesPoints.splice(j,1);
+                            j--;
+                        }
+                    }
+
+                    coveredPointsAbove = candidatesPoints.filter(p => {
+                        const abovePoint = new Vector3().copy(p);
+                        abovePoint.y += this.heightDetected;
+                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01;
+                    })
+                }
+                else{
+                    coveredPointsAbove = [];
+                }
+
+                sortByAngle(coveredPointsFloor, floorNormal);
+                sortByAngle(coveredPointsAbove, floorNormal);
+                sortByAngle(coveredPointsWallX, wallXNormal);
+                sortByAngle(coveredPointsWallZ, wallZNormal);
+
+                cam.coveredPointsAbove = coveredPointsAbove;
+
+                coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
+                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
+                coveredPointsWallX.forEach((p) => p.x += 0.01*cam.id / cameras.length);
+                coveredPointsWallZ.forEach((p) => p.z += 0.01*cam.id / cameras.length);
+
+                //display area value 
+                const previousValue = cam.areaValue;
+                cam.areaValue = calculateArea(coveredPointsAbove);
+
+                //Place text 
+                if(coveredPointsAbove.length > 2)
+                {
+                    //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
+                    const barycentre = getBarycentre(coveredPointsAbove);
+                    cam.changeTextPosition(barycentre);
+                    if(previousValue != cam.areaValue) cam.updateTextArea(this.currentUnit);
+                }
+                else
+                {
+                    cam.nameText.position.copy(cam.cameraPerspective.position);
+                    cam.areaDisplay.visible = false;
+                }
+
+                //draw area
+
+                cam.areaCoveredFloor.geometry.dispose();
+                cam.areaCoveredFloor.material.dispose();
+                cam.areaCoveredAbove.geometry.dispose();
+                cam.areaCoveredAbove.material.dispose();
+                cam.areaCoveredWallX.geometry.dispose();
+                cam.areaCoveredWallX.material.dispose();
+                cam.areaCoveredWallZ.geometry.dispose();
+                cam.areaCoveredWallZ.material.dispose();
+
+                cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
+                cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
+                cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
+                cam.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
+
+                this.#scene.add(cam.areaCoveredFloor);
+                this.#scene.add(cam.areaCoveredAbove);
+                this.#scene.add(cam.areaCoveredWallX);
+                this.#scene.add(cam.areaCoveredWallZ);
             }
-            else{
-                coveredPointsAbove = [];
-            }
-
-            sortByAngle(coveredPointsFloor, floorNormal);
-            sortByAngle(coveredPointsAbove, floorNormal);
-            sortByAngle(coveredPointsWallX, wallXNormal);
-            sortByAngle(coveredPointsWallZ, wallZNormal);
-
-            cam.coveredPointsAbove = coveredPointsAbove;
-
-            coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
-            coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
-            coveredPointsWallX.forEach((p) => p.x += 0.01*cam.id / cameras.length);
-            coveredPointsWallZ.forEach((p) => p.z += 0.01*cam.id / cameras.length);
-
-            //display area value 
-            let previousValue = cam.areaValue;
-            cam.areaValue = calculateArea(coveredPointsAbove);
-
-            //Place text 
-            if(coveredPointsAbove.length > 2)
-            {
-                //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
-                let barycentre = getBarycentre(coveredPointsAbove);
-                cam.changeTextPosition(barycentre);
-                if(previousValue != cam.areaValue) cam.changeAreaDisplayed(barycentre);
-            }
-            else
-            {
-                cam.nameText.position.copy(cam.cameraPerspective.position);
-                cam.areaDisplay.visible = false;
-            }
-
-            //draw area
-
-            cam.areaCoveredFloor.geometry.dispose();
-            cam.areaCoveredAbove.geometry.dispose();
-            cam.areaCoveredWallX.geometry.dispose();
-            cam.areaCoveredWallZ.geometry.dispose();
-
-            cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
-            cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
-            cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
-            cam.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
-
-            cam.areaAppear ? this.#scene.add(cam.areaCoveredFloor) : this.#scene.remove(cam.areaCoveredFloor);
-            cam.areaAppear ? this.#scene.add(cam.areaCoveredAbove) : this.#scene.remove(cam.areaCoveredAbove);
-            cam.areaAppear ? this.#scene.add(cam.areaCoveredWallX) : this.#scene.remove(cam.areaCoveredWallX);
-            cam.areaAppear ? this.#scene.add(cam.areaCoveredWallZ) : this.#scene.remove(cam.areaCoveredWallZ);
 
             //DEBUG SPHERES
             /*
             for(let i = 0; i < spheres.length; i++)
             {
+                sphere[i].geometry.dispose();
+                sphere[i].material.dispose();
                 scene.remove(spheres[i]);
             }
             for(let i = 0; i < intersectionPointsWallX.length; i++)
@@ -546,6 +572,8 @@ class SceneManager{
             /*
             for(let i = 0; i < rays.length; i++)
             {
+                rays[i].geometry.dispose();
+                rays[i].material.dispose();
                 scene.remove(rays[i]);
             }
             for(let i = 0; i < aboveRays.length; i++)
@@ -556,7 +584,7 @@ class SceneManager{
                     const material = new MeshBasicMaterial(t < 3.9 ? { color: 0xffffff } : { color: 0xffff00 } );
                     const cube = new Mesh( geometry, material );
                     scene.add( cube );
-                    let translation = new Vector3();
+                    const translation = new Vector3();
                     aboveRays[i].at(t, translation);
                     cube.translateOnAxis(translation, 1);
                     rays.push(cube);
@@ -574,15 +602,15 @@ class SceneManager{
          */
         function getIntersectionPoints(raysCrossing)
         {
-            let intersectionPoints = [];
+            const intersectionPoints = [];
             for(let i = 0; i < raysCrossing.length - 1; i++)
             {
-                let ray1 = raysCrossing[i];
+                const ray1 = raysCrossing[i];
                 for(let j = i+1; j < raysCrossing.length; j++)
                 {
-                    let ray2 = raysCrossing[j]
+                    const ray2 = raysCrossing[j]
 
-                    let point = getIntersectionPointOfRays(ray1, ray2);
+                    const point = getIntersectionPointOfRays(ray1, ray2);
                     if(point != -1) intersectionPoints.push(point);
                 }
             }
@@ -600,21 +628,21 @@ class SceneManager{
         {
             if(coveredPoints.length > 2)
             {
-                let center = getBarycentre(coveredPoints);
-                let vector = new Vector3();
+                const center = getBarycentre(coveredPoints);
+                const vector = new Vector3();
                 vector.subVectors(coveredPoints[0], center);
-                let vectorPerp = new Vector3().copy(vector);
+                const vectorPerp = new Vector3().copy(vector);
                 vectorPerp.applyAxisAngle(planeNormal, Math.PI/2.0);
 
                 coveredPoints.sort((A,B) => {
-                    let vectorA = new Vector3();
+                    const vectorA = new Vector3();
                     vectorA.subVectors(A, center);
                 
-                    let vectorB = new Vector3();
+                    const vectorB = new Vector3();
                     vectorB.subVectors(B, center);
                     
-                    let dotProdA = Math.abs(vectorPerp.dot(vectorA)) > 0.001 ? vectorPerp.dot(vectorA) : 1;
-                    let dotProdB = Math.abs(vectorPerp.dot(vectorB)) > 0.001 ? vectorPerp.dot(vectorB) : 1;
+                    const dotProdA = Math.abs(vectorPerp.dot(vectorA)) > 0.001 ? vectorPerp.dot(vectorA) : 1;
+                    const dotProdB = Math.abs(vectorPerp.dot(vectorB)) > 0.001 ? vectorPerp.dot(vectorB) : 1;
 
                     return Math.abs(dotProdB) / dotProdB * vector.angleTo(vectorB) - Math.abs(dotProdA) / dotProdA * vector.angleTo(vectorA);
                 });
@@ -643,11 +671,11 @@ class SceneManager{
              */
             for(let i = 1; i < borderPoints.length - 1; i++)
             {
-                let vectorAB = new Vector3().subVectors(borderPoints[i], borderPoints[0]);
+                const vectorAB = new Vector3().subVectors(borderPoints[i], borderPoints[0]);
 
-                let vectorAC = new Vector3().subVectors(borderPoints[i + 1], borderPoints[0]);
+                const vectorAC = new Vector3().subVectors(borderPoints[i + 1], borderPoints[0]);
 
-                let areaOfThisTriangle = 0.5 * vectorAB.cross(vectorAC).length();
+                const areaOfThisTriangle = 0.5 * vectorAB.cross(vectorAC).length();
                 areaValue += areaOfThisTriangle;
             }
 
@@ -668,7 +696,7 @@ class SceneManager{
         function drawAreaWithPoints(coveredPoints, color = 0x008888)
         {
             const geometryArea = new BufferGeometry();
-            let verticesArray = [];
+            const verticesArray = [];
             
             for(let i = 1; i < coveredPoints.length - 1; i++)
             {
@@ -704,7 +732,7 @@ class SceneManager{
         {
             let union = givenAreaPolygon;
             cameras.forEach(c => {
-                let polyCam = {
+                const polyCam = {
                     regions: [[]],
                     inverted: false
                 }
@@ -721,7 +749,7 @@ class SceneManager{
         {
             cameras.forEach(c => {
                 c.update();
-                drawProjection(c);
+                this.drawProjection(c);
             });
         }
 
@@ -729,9 +757,7 @@ class SceneManager{
         this.initScene();
     }
 
-    get scene(){
-        return this.#scene;
-    }
+    get scene(){ return this.#scene; }
 }
 
 export { SceneManager }
@@ -965,12 +991,12 @@ function getIntersectionOfPlanes(plane1, plane2)
   */
 function getIntersectionPointOfRays(ray1, ray2)
 {
-    let o1 = ray1.origin;
-    let d1 = ray1.direction;
-    let o2 = ray2.origin;
-    let d2 = ray2.direction;
+    const o1 = ray1.origin;
+    const d1 = ray1.direction;
+    const o2 = ray2.origin;
+    const d2 = ray2.direction;
     
-    let normal = new Vector3().crossVectors(d1,d2);
+    const normal = new Vector3().crossVectors(d1,d2);
 
     //no intersection points if rays are parrallel or coincident
     if(normal.length() < 0.001) return -1;
@@ -1012,7 +1038,7 @@ function getIntersectionPointOfRays(ray1, ray2)
      * Same for d2.y != 0 and d2.z != 0 (Direction of lines cannot be zero vectors. This case must have been avoided earlier)
      */
 
-    let intersectionPoint = new Vector3();
+    const intersectionPoint = new Vector3();
     if(Math.abs(d2.x) > 0.001)
     {
         if(Math.abs(d2.x * d1.y - d2.y * d1.x) > 0.001)

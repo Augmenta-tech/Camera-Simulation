@@ -51,44 +51,6 @@ class Dummy {
 
             return model;
         }
-/*
-        function loadModel(dummy, scene)
-        {
-            let genre = (Math.random() < 0.5) ? "male" : "female";
-            let scaling = DEFAULT_DUMMIES_HEIGHT / 180.0; 
-        
-            const onProgress = function ( xhr ) {
-        
-                if ( xhr.lengthComputable ) {
-        
-                    const percentComplete = xhr.loaded / xhr.total * 100;
-                    console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
-        
-                }
-        
-            };
-        
-            new MTLLoader()
-            .setPath( 'models/'+ genre +'02/' )
-            .load( genre +'02.mtl', function ( materials ) {
-        
-                materials.preload();
-        
-                new OBJLoader()
-                    .setMaterials( materials )
-                    .setPath( 'models/'+ genre +'02/' )
-                    .load( genre +'02.obj', function ( object ) {
-        
-                        dummy.model = object;
-                        dummy.model.scale.set(scaling, scaling, scaling);
-                        dummy.model.position.set(dummy.xPos, dummy.yPos, dummy.zPos);
-        
-                        scene.add( dummy.model );
-        
-                    }, onProgress );
-        
-            } );
-        }*/
 
         this.addToScene = function(scene)
         {

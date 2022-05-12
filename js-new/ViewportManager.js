@@ -122,12 +122,8 @@ class ViewportManager{
             return transformControl;
         }
 
-        this.isTransformControlObject = (object) => sceneManager.transformControl.object === object;
-        this.detachTransformControl = () => sceneManager.transformControl.detach();
-
 
         /* USER'S ACTIONS */
-
         this.onWindowResize = function() {
 
             viewportWidth = viewportElement.offsetWidth;
