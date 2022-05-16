@@ -5,9 +5,11 @@ import {
     Raycaster
 } from 'three'
 import { ViewportManager } from './ViewportManager.js'
+import { UIManager } from './UIManager.js'
 
 const viewportElement = document.getElementById('viewport');
 const viewportManager = new ViewportManager(viewportElement);
+const uiManager = new UIManager();
 
 bindEventListeners();
 animate();
@@ -27,10 +29,19 @@ function bindEventListeners()
     document.getElementById('remove-dummies').addEventListener('click', () => viewportManager.sceneManager.removeDummies());
 
 
-document.getElementById("generate-link").addEventListener('click', () => generateLink());
+    //document.getElementById("generate-link").addEventListener('click', () => viewportManager.sceneManager.generateLink());
 
     //DEBUG
     document.addEventListener( 'keydown', onKeyDown );
+    //END DEBUG
+
+
+    document.getElementById("areaWantedWidth").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("areaWantedWidth").value), parseFloat(document.getElementById("areaWantedHeight").value)));
+    document.getElementById("areaWantedHeight").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("areaWantedWidth").value), parseFloat(document.getElementById("areaWantedHeight").value)));
+
+    document.getElementById('generate-scene').addEventListener('click', () => uiManager.createSceneFromForm(viewportManager.sceneManager));
+    
+    document.getElementById('copy-link').addEventListener('click', () => navigator.clipboard.writeText(viewportManager.sceneManager.generateLink()));
 
     /* HANDLE VIEWPORT ACTIONS */
     viewportManager.element.addEventListener( 'pointerdown', onPointerDown );
@@ -59,11 +70,6 @@ function animate() {
     isAreaCoveredUI();
 }
 
-
-export function setupCameraChangement(newPos, changeCameraType = true)
-{
-    viewportManager.setupCameraChangement(newPos, changeCameraType);
-}
 
 /* MOUSE CONTROLS */
 const onDownPosition = new Vector2();
@@ -139,7 +145,8 @@ function onKeyDown( event ) {
     switch ( event.keyCode ) {
 
         case 80: /*P*/
-        
+
+            console.log(viewportManager.sceneManager.heightDetected);
             break;
 
     }
@@ -153,16 +160,3 @@ function isAreaCoveredUI()
     coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
     coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
 }
-
-
-/**
- * MANQUE : 
- * /Du main :
- *  - la gestion du Share (Bouton Share, Modal, generate link et copy) (l.228-l.258 et l.317-l.335)
- *  - la création du formulaire (l.340-l.366) (dans index.html directement ?)
- * 
- * /De projection area :
- *  - création de la "scene"/la bordure (l.852 -> l.860)
- *  - création de la scène à partir du formulaire (createSceneFromForm, l.908-l990)
- *  - gestion du modal du formulaire (l.993-l.1006)
- */

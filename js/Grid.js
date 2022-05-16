@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { units } from './projection-area.js'
+import { units } from './cameras.js'
 
 
 export class Grid{

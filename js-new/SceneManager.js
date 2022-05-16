@@ -19,6 +19,9 @@ import {
 } from 'three';
 import { DoubleSide } from 'three';
 
+//DEBUG
+import { SphereGeometry } from 'three';
+
 import * as POLYBOOL from 'polybool';
 
 import { Dummy } from './Dummy.js';
@@ -52,11 +55,6 @@ class SceneManager{
         const floorNormal = new Vector3(0,1,0);
         const wallXNormal = new Vector3(1,0,0);
         const wallZNormal = new Vector3(0,0,1);
-
-        const floorPlane = new Plane(floorNormal, 0);
-        const abovePlane = new Plane(floorNormal, -this.heightDetected);
-        const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
-        const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
 
         const grid = new Grid(this.size, this.currentUnit);
 
@@ -212,6 +210,7 @@ class SceneManager{
 
         /* SCENE OBJECTS MANAGEMENT */
 
+        // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
         this.deleteObject = function(obj)
         {
             if (this.transformControl.object === obj.mesh) this.transformControl.detach();
@@ -293,14 +292,18 @@ class SceneManager{
 
         this.resetCams = function()
         {
+            cameras.forEach(c => {
+                delete c.uiElement;
+                this.deleteObject(c);
+            });
+            cameras.length = 0;
+            this.camMeshes.length = 0;
+
             const camerasUIdivs = document.getElementsByClassName("cameraUI");
             for(let i = camerasUIdivs.length - 1; i >= 0; i--)
             {
                 camerasUIdivs[i].remove();
             }
-            cameras.forEach(c => this.deleteObject(c));
-            cameras.length = 0;
-            this.camMeshes.length = 0;
         }
 
 
@@ -334,16 +337,10 @@ class SceneManager{
             this.currentUnit = unit;
         }
 
-        this.updateBorder = function()
+        this.updateBorder = function(givenWidth, givenHeight)
         {
-            let givenWidth = document.getElementById('areaWantedWidth').value;
-            let givenHeight = document.getElementById('areaWantedHeight').value;
-        
-            if(givenWidth !== "" && givenHeight !=="")
+            if(givenWidth && givenHeight)
             {
-                givenWidth = parseFloat(givenWidth);
-                givenHeight = parseFloat(givenHeight);
-        
                 const geometry = new BoxGeometry(Math.round(givenWidth * 10) / 10.0, 0.001, Math.round(givenHeight * 10) / 10.0);
                 sceneBorder.geometry = new EdgesGeometry(geometry);
                 sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
@@ -363,6 +360,37 @@ class SceneManager{
             dummies.forEach(d => d.updatePosition());
         }
 
+        this.generateLink = function()
+        {
+            let url = document.location.href
+            let index = url.indexOf('?')
+            if(index !== -1) url = url.substring(0, index);
+            if(url[url.length-1] != '/') url += '/';
+            url += '?';
+            cameras.forEach(c => {
+                url += "id=";
+                url += c.id;
+                url += ",typeID=";
+                url += c.type.id;
+                url += ",x=";
+                url += Math.round(c.XPos*100)/100.0;
+                url += ",y=";
+                url += Math.round(c.YPos*100)/100.0;
+                url += ",z=";
+                url += Math.round(c.ZPos*100)/100.0;
+                url += ",p=";
+                url += Math.round(c.pitch*10000)/10000.0;
+                url += ",a=";
+                url += Math.round(c.yaw*10000)/10000.0;
+                url += ",r=";
+                url += Math.round(c.roll*10000)/10000.0;
+                url += '&';
+            });
+            url = url.slice(0, -1);
+        
+            return url;
+        }
+
 
         /* SCENE UPDATE */
 
@@ -373,6 +401,8 @@ class SceneManager{
          */
         this.drawProjection = function(cam)
         {
+            //TODO: Comment ++
+
             /** GLOBAL OPERATING PHILOSPHY
              * 
              * 1/ remove all drawn projections
@@ -387,6 +417,11 @@ class SceneManager{
             this.#scene.remove(cam.areaCoveredAbove);
             this.#scene.remove(cam.areaCoveredWallX);
             this.#scene.remove(cam.areaCoveredWallZ);
+
+            const floorPlane = new Plane(floorNormal, 0);
+            const abovePlane = new Plane(floorNormal, -this.heightDetected);
+            const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
+            const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
 
             if(cam.areaAppear)
             {
@@ -552,17 +587,17 @@ class SceneManager{
             /*
             for(let i = 0; i < spheres.length; i++)
             {
-                sphere[i].geometry.dispose();
-                sphere[i].material.dispose();
-                scene.remove(spheres[i]);
+                spheres[i].geometry.dispose();
+                spheres[i].material.dispose();
+                this.#scene.remove(spheres[i]);
             }
-            for(let i = 0; i < intersectionPointsWallX.length; i++)
+            for(let i = 0; i < intersectionPointsAbove.length; i++)
             {
                 const geometry = new SphereGeometry( 0.4, 32, 16 );
                 const material = new MeshBasicMaterial({ color: 0x00ff22 });
                 const sphere = new Mesh( geometry, material );
-                scene.add( sphere );
-                sphere.translateOnAxis(intersectionPointsWallX[i],1);
+                this.#scene.add( sphere );
+                sphere.translateOnAxis(intersectionPointsAbove[i],1);
                 spheres.push(sphere);
             }
             */
@@ -753,8 +788,7 @@ class SceneManager{
             });
         }
 
-
-        this.initScene();
+        Camera.loadFont(() => this.initScene());
     }
 
     get scene(){ return this.#scene; }

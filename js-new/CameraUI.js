@@ -5,11 +5,8 @@ import { camerasTypes, units } from './cameras.js'
 class CameraUI{
     constructor(_camera, currentUnit)
     {
-        this.camera = _camera;
-
-        this.element = buildUIDiv(this.camera)
-
-        bindEventListeners(this);
+        buildUIDiv(_camera);
+        bindEventListeners(_camera);
 
         function buildUIDiv(cam)
         {
@@ -88,29 +85,24 @@ class CameraUI{
             return cameraUIdiv;
         }
 
-        function bindEventListeners(cameraUI)
+        function bindEventListeners(cam)
         {
-            console.log(cameraUI);
-            //Make elements draggable:
-            dragElement(document.getElementById("x-pos-" + cameraUI.camera.id), cameraUI.camera);
-            dragElement(document.getElementById("y-pos-" + cameraUI.camera.id), cameraUI.camera);
-            dragElement(document.getElementById("z-pos-" + cameraUI.camera.id), cameraUI.camera);
-            dragElement(document.getElementById("pitch-rot-" + cameraUI.camera.id), cameraUI.camera);
-            dragElement(document.getElementById("yaw-rot-" + cameraUI.camera.id), cameraUI.camera);
-            dragElement(document.getElementById("roll-rot-" + cameraUI.camera.id), cameraUI.camera);
+            
+            makeElementDraggable(document.getElementById("x-pos-" + cam.id), cam);
+            makeElementDraggable(document.getElementById("y-pos-" + cam.id), cam);
+            makeElementDraggable(document.getElementById("z-pos-" + cam.id), cam);
+            makeElementDraggable(document.getElementById("pitch-rot-" + cam.id), cam);
+            makeElementDraggable(document.getElementById("yaw-rot-" + cam.id), cam);
+            makeElementDraggable(document.getElementById("roll-rot-" + cam.id), cam);
         
+    
+            document.getElementById('cam-' + (cam.id) + '-hide-UI').addEventListener('click', () => hideUICam(cam));
+            document.getElementById('cam-' + (cam.id) + '-visible').addEventListener('click', () => changeVisibilityofCam(cam));
         
-            document.getElementById('cam-' + (cameraUI.camera.id) + '-hide-UI').addEventListener('click', () => hideUICam(cameraUI.camera));
-            document.getElementById('cam-' + (cameraUI.camera.id) + '-visible').addEventListener('click', () => changeVisibilityofCam(cameraUI.camera));
-        
-            document.getElementById('cam-type-' + cameraUI.camera.id).addEventListener('click', () => changeCameraType(cameraUI.camera));
+            document.getElementById('cam-type-' + cam.id).addEventListener('click', () => changeCameraType(cam));
         }
 
-        /**
-         * Make an UI element draggable
-         * @param {Element} element the element you want to be draggable
-         */
-        function dragElement(element, cam) {
+        function makeElementDraggable(element, cam) {
             let valueElement = element.getElementsByTagName('strong')[0];
             let value = parseFloat(valueElement.innerHTML);
             let mousePosX = 0;

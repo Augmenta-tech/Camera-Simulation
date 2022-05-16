@@ -53,4 +53,10 @@ const data =
     }
 ];
 
+const units = {
+    meters: 1,
+    feets: 3.28084
+};
+
+export {units}
 export default data;

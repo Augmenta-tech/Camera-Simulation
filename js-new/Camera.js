@@ -14,6 +14,14 @@ import { TextGeometry } from 'three-text-geometry';
 import { camerasTypes, units } from './cameras.js'
 
 class Camera{
+    static loadFont(callback)
+    {
+        new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+            Camera.font = response;
+            callback();
+            return;
+        });
+    }
     static font;
     static DEFAULT_CAMERA_TYPE_ID = 0;
     static DEFAULT_CAMERA_HEIGHT = 4.5;
@@ -49,6 +57,7 @@ class Camera{
 
         this.nameText = buildTextMesh("Node " + (this.id+1), Camera.SIZE_TEXT_CAMERA, this.XPos - Camera.SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + Camera.SIZE_TEXT_CAMERA/2.0)
         this.areaDisplay = buildTextMesh("AREA VALUE", Camera.SIZE_TEXT_CAMERA * 2/3.0, this.XPos - Camera.SIZE_TEXT_CAMERA * 4/3.0, this.YPos - (this.type.rangeFar - 1), this.ZPos + 3*Camera.SIZE_TEXT_CAMERA/2.0);
+
 
         function buildCamera(camType, x, y, z, pitch, yaw, roll)
         {
@@ -111,6 +120,7 @@ class Camera{
             scene.remove(this.areaDisplay);
         }
 
+        //TODO: Mettre le code de la UI dans camera UI (stocke sa propre camera UI et appelle les méthodes)
         this.changeVisibility = function(display = !this.areaAppear)
         {
             const value = display;
@@ -157,8 +167,27 @@ class Camera{
 
         this.dispose = function()
         {
+
+            this.cameraPerspective.children.forEach(mesh => {
+                if(mesh.isMesh)
+                {
+                    mesh.geometry.dispose();
+                    mesh.material.dispose();
+                }
+            });
+            this.cameraPerspective.clear()
+
+            this.cameraPerspectiveHelper.children.forEach(mesh => {
+                if(mesh.isMesh)
+                {
+                    mesh.geometry.dispose();
+                    mesh.material.dispose();
+                }
+            });
+            this.cameraPerspectiveHelper.clear()
             this.cameraPerspectiveHelper.geometry.dispose();
             this.cameraPerspectiveHelper.material.dispose();
+            this.cameraPerspectiveHelper.dispose();
 
             this.mesh.geometry.dispose();
             this.mesh.material.dispose();
@@ -183,12 +212,3 @@ class Camera{
 }
 
 export { Camera }
-
-
-new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
-    Camera.font = response;
-});
-
-
-
-

@@ -1,13 +1,25 @@
+/**
+  Copyright (c) 2021 Millennium-Fennec
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+ */
+
 import {
   Vector2,
   Vector3,
   Matrix4
 } from "three";
 
-import { setupCameraChangement } from '../main.js';
-
 class OrbitControlsGizmo {
-	constructor(orbitControls, options) {
+	constructor(orbitControls, options, _viewportManager) {
 
 		options = Object.assign({
 			size: 90,
@@ -64,6 +76,7 @@ class OrbitControlsGizmo {
     }
 
     // Internals
+    const viewportManager = _viewportManager;
     const scoped = this;
     const orbit = orbitControls;
     const camera = orbitControls.object;
@@ -216,7 +229,7 @@ class OrbitControlsGizmo {
       }
       
       loop();*/
-      setupCameraChangement(vec, !!camera.isPerspectiveCamera);
+      viewportManager.setupCameraChangement(vec, !!camera.isPerspectiveCamera);
       
       selectedAxis = null;
     }

@@ -3,13 +3,14 @@ import * as THREE from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
 import { TextGeometry } from 'three-text-geometry';
 
-import { transformControl } from './main.js';
+import { transformControl, detachTransformControl } from './main.js';
 
-import { currentUnit, units } from './projection-area.js';
+import { currentUnit } from './projection-area.js';
 import { scene } from './projection-area.js';
 import { drawProjection } from './projection-area.js';
 
 import data from './cameras.js';
+import { units } from './cameras.js'
 
 console.log(data);
 export const camerasTypes = data;
@@ -22,7 +23,7 @@ const DEFAULT_CAMERA_PITCH = - Math.PI / 2.0;
 
 
 export let camMeshes = [];
-export let cameras = [];
+export const cameras = [];
 
 let font;
 const fontLoader = new FontLoader();
@@ -215,18 +216,18 @@ export class Camera{
         
     }
 
-    render()
+    update()
     {
         this.cameraPerspective.updateProjectionMatrix();
         this.cameraPerspectiveHelper.update();
-        drawProjection(this);
+        //drawProjection(this);
     }
 
     remove()
     {
         scene.remove(this.cameraPerspectiveHelper);
         scene.remove(this.cameraPerspective);
-        if ( transformControl.object === this.mesh ) transformControl.detach();
+        if ( transformControl.object === this.mesh ) detachTransformControl();
         scene.remove(this.mesh);
         scene.remove(this.areaCoveredFloor);
         scene.remove(this.areaCoveredAbove);
@@ -565,6 +566,6 @@ export function resetCams()
         camerasUIdivs[i].remove();
     }
     cameras.forEach(c => c.remove());
-    cameras.splice(0, cameras.length);
-    camMeshes.splice(0, camMeshes.length);
+    cameras.length = 0;
+    camMeshes.length = 0;
 }

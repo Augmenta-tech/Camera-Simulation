@@ -4,7 +4,7 @@ import { MTLLoader } from 'three-loaders/MTLLoader.js';
 import { OBJLoader } from 'three-loaders/OBJLoader.js';
 
 import { scene } from './projection-area.js'
-import { transformControl } from './main.js';
+import { transformControl, detachTransformControl } from './main.js';
 
 
 export let dummiesMeshes = [];
@@ -23,7 +23,7 @@ class Dummy {
 
         for(let i = 0; i < dummies.length; i++)
         {
-            if(new THREE.Vector3(this.xPos, this.yPos, this.zPos).distanceTo(dummies[i].model.position) < 1.0)
+            if(new THREE.Vector3(this.xPos, this.yPos, this.zPos).distanceTo(dummies[i].mesh.position) < 1.0)
             {
                 this.xPos++;
                 i = 0;
@@ -49,30 +49,33 @@ class Dummy {
     {
         loadDummy(this)
         scene.add(this.mesh);
-        this.model.position.clone(this.mesh.position); 
+        this.model.position.clone(this.mesh.position);
     }
 
     updatePosition()
     {
-        this.XPos = this.mesh.position.x;
-        this.YPos = this.mesh.position.y - this.height / 2.0;
-        this.ZPos = this.mesh.position.z;
-        this.model.position.set(this.XPos, this.YPos, this.ZPos);
+        this.xPos = this.mesh.position.x;
+        this.yPos = this.mesh.position.y - this.height / 2.0;
+        this.zPos = this.mesh.position.z;
+        this.model.position.set(this.xPos, this.yPos, this.zPos);
 
     }
 
     remove()
     {
-        if ( transformControl.object === this.mesh ) transformControl.detach();
+        if ( transformControl.object === this.mesh ) detachTransformControl();
         scene.remove(this.model);
         scene.remove(this.mesh);
     }
 }
 
+export { Dummy }
+
 /* ADDING DUMMY */
 document.getElementById('add-dummy').onclick = addDummy;
 function addDummy()
 {
+    if(dummies.length >0 ) console.log(dummies[0].model)
     let newDummy = new Dummy(dummies.length);
     newDummy.addDummyToScene();
     dummies.push(newDummy);

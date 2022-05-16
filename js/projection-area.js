@@ -3,13 +3,14 @@ import * as THREE from 'three';
 import { cameras, camerasTypes } from './Camera.js';
 import { resetCams, addCamera } from './Camera.js'
 import { Grid } from './Grid.js';
+import { units } from './cameras.js'
 
 import * as POLYBOOL from 'polybool';
-import { placeCamera } from './main.js';
+//import { placeCamera } from './main.js';
 
-export let scene = new THREE.Scene();
+export const scene = new THREE.Scene();
 
-export const units = {meters: 1, feets: 3.28084}
+
 export let currentUnit = units.meters;
 
 let floor, wallX, wallZ;
@@ -24,7 +25,6 @@ const DEFAULT_SCENE_SIZE = 70;
 let grid;
 
 //DEBUG
-
 let spheres = [];
 let rays = [];
 
@@ -67,25 +67,26 @@ export function initScene()
     // WallX
     let materialWallX = new THREE.MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
 
-    let geometryWallX = new THREE.PlaneGeometry( 2000, 2000 );
+    let geometryWallX = new THREE.PlaneGeometry( size, size );
 
     wallXDepth = - size / 2.0;
     wallX = new THREE.Mesh(geometryWallX, materialWallX);
-    wallX.position.set( wallXDepth - 0.01, 0, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallX.position.set( wallXDepth - 0.01, size / 2.0, 0 ); //to avoid noise with area covered by cam (y = 0 for area covered)
     wallX.rotation.y = Math.PI / 2.0;
     scene.add(wallX);
 
     // WallZ
     let materialWallZ = new THREE.MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
 
-    let geometryWallZ = new THREE.PlaneGeometry( 2000, 2000 );
+    let geometryWallZ = new THREE.PlaneGeometry( size, size );
 
     wallZDepth = - size / 2.0;
     wallZ = new THREE.Mesh(geometryWallZ, materialWallZ);
-    wallZ.position.set( 0, 0, - size/2.0 - 0.01 ); //to avoid noise with area covered by cam (y = 0 for area covered)
+    wallZ.position.set( 0, size/2.0, - size/2.0 - 0.01 ); //to avoid noise with area covered by cam (y = 0 for area covered)
     scene.add(wallZ);
 
     //Close scene
+    /*
     const wallRight = new THREE.Mesh(new THREE.PlaneGeometry( 2000, 2000 ), materialWallX);
     wallRight.position.set( size/2.0 , 0, 0 ); 
     wallRight.rotation.y = - Math.PI / 2.0;
@@ -94,19 +95,17 @@ export function initScene()
     const wallBack = new THREE.Mesh(new THREE.PlaneGeometry( 2000, 2000 ), materialWallZ);
     wallBack.position.set( 0, 0, size/2.0 ); 
     wallBack.rotation.y = Math.PI;
-    scene.add(wallBack);
+    scene.add(wallBack);*/
 }
 
-document.getElementById('toggle-unit').onclick = changeUnit;
-function changeUnit()
-{
-    grid.unit === units.meters ? toggleUnit(units.feets) : toggleUnit(units.meters);
-}
+document.getElementById('toggle-unit').addEventListener('click', () => toggleUnit());
 
-function toggleUnit(unit)
+
+function toggleUnit()
 {
+    const unit = grid.unit === units.meters ? units.feets : units.meters;
     grid.toggleUnit(unit);
-    let unitNumberElements = document.querySelectorAll('[data-unit]');
+    const unitNumberElements = document.querySelectorAll('[data-unit]');
     unitNumberElements.forEach(e => {
         e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 10) / 10.0;
         e.dataset.unit = unit;
@@ -163,22 +162,22 @@ export function drawProjection(cam)
     scene.remove(cam.areaCoveredWallX);
     scene.remove(cam.areaCoveredWallZ);
 
-    let floorPlane = new THREE.Plane(floorNormal, 0);
-    let abovePlane = new THREE.Plane(floorNormal, -heightDetected);
-    let wallXPlane = new THREE.Plane(wallXNormal, -wallXDepth);
-    let wallZPlane = new THREE.Plane(wallZNormal, -wallZDepth);
+    const floorPlane = new THREE.Plane(floorNormal, 0);
+    const abovePlane = new THREE.Plane(floorNormal, -heightDetected);
+    const wallXPlane = new THREE.Plane(wallXNormal, -wallXDepth);
+    const wallZPlane = new THREE.Plane(wallZNormal, -wallZDepth);
 
-    let floorRays = [];
-    let aboveRays = [];
-    let wallXRays = [];
-    let wallZRays = [];
+    const floorRays = [];
+    const aboveRays = [];
+    const wallXRays = [];
+    const wallZRays = [];
 
     const frustum = new THREE.Frustum();
     frustum.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
     //calculate the rays representing the intersection between frustum's planes and the floor or the walls
     for(let i = 0; i < 6; i++) 
     {
-        let plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+        const plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
 
         //crossing the floor
         const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
@@ -221,10 +220,10 @@ export function drawProjection(cam)
     
     
     //get intersection points
-    let intersectionPointsFloor = getIntersectionPoints(floorRays);
-    let intersectionPointsAbove = getIntersectionPoints(aboveRays);
-    let intersectionPointsWallX = getIntersectionPoints(wallXRays);
-    let intersectionPointsWallZ = getIntersectionPoints(wallZRays);
+    const intersectionPointsFloor = getIntersectionPoints(floorRays);
+    const intersectionPointsAbove = getIntersectionPoints(aboveRays);
+    const intersectionPointsWallX = getIntersectionPoints(wallXRays);
+    const intersectionPointsWallZ = getIntersectionPoints(wallZRays);
 
 
     //filter points in the camera frustum
@@ -736,7 +735,7 @@ function getIntersectionPoints(raysCrossing)
 }
 
 /**
- * Sort the array passed as an argument so the vertices are ordered
+ * Sort the array of vertices passed as an argument so that they are ordered according to the convex shape they create
  * 
  * @param {Array} coveredPoints array of vertices of a convex shape
  * @param {THREE.Vector3} planeNormal normal of the plane in which the shape is inscribed
@@ -849,10 +848,10 @@ function drawAreaWithPoints(coveredPoints, color = 0x008888)
 let line = new THREE.LineSegments(new THREE.EdgesGeometry(), new THREE.LineBasicMaterial( { color: 0x000000 }));
 scene.add( line );
 
+//reset values after reloading page
 let inputAreaWidth = document.getElementById("areaWantedWidth");
 let inputAreaHeight = document.getElementById("areaWantedHeight");
 
-//reset values after reloading page
 inputAreaWidth.value = 1;
 inputAreaHeight.value = 1;
 document.getElementById('hook-cam').value = 5;
@@ -860,7 +859,7 @@ document.getElementById('hook-cam').value = 5;
 inputAreaWidth.onchange = createBorder;
 inputAreaHeight.onchange = createBorder;
 
-let givenAreaPolygon = { regions: [[]], inverted: true};
+const givenAreaPolygon = { regions: [[]], inverted: true};
 function createBorder()
 {
     let givenWidth = document.getElementById('areaWantedWidth').value

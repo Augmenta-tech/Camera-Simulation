@@ -5,6 +5,7 @@ import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
 import { TransformControls } from 'three-controls/TransformControls.js';
 
 import { SceneManager } from './SceneManager.js';
+import { Scene } from 'three';
 
 
 class ViewportManager{
@@ -25,7 +26,7 @@ class ViewportManager{
         this.activeCamera = perspCam;
 
         let orbitControls = buildOrbitControls(this);
-        let controlsGizmo = buildGuizmo(orbitControls);
+        let controlsGizmo = buildGuizmo(orbitControls, this);
         this.sceneManager = new SceneManager(buildTransformControl(this));
 
 
@@ -78,9 +79,9 @@ class ViewportManager{
             return controls;
         }
 
-        function buildGuizmo(controls)
+        function buildGuizmo(controls, viewportManager)
         {
-            const gizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff" });
+            const gizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff" }, viewportManager);
             viewportElement.appendChild(gizmo.domElement);
 
             return gizmo;
@@ -108,7 +109,7 @@ class ViewportManager{
             orbitControls = buildOrbitControls(this);
 
             controlsGizmo.dispose();
-            controlsGizmo = buildGuizmo(orbitControls)
+            controlsGizmo = buildGuizmo(orbitControls, this)
         }
 
         function buildTransformControl(viewportManager)
@@ -141,8 +142,7 @@ class ViewportManager{
             orthoCam.bottom = - frustumSize / (2.0 * aspect);
             orthoCam.updateProjectionMatrix();
         }
-
-
+        
         /* RENDER */
         this.render = function()
         {
