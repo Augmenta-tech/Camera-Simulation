@@ -54,7 +54,7 @@ class UIManager{
                     const camTypeChoice = document.createElement("div");
                     const camTypeCheckbox = document.createElement("input");
                     camTypeCheckbox.setAttribute("type", "checkbox");
-                    camTypeCheckbox.setAttribute("checked","true");
+                    if(c.checkedDefault) camTypeCheckbox.setAttribute("checked", "true");
                     camTypeCheckbox.id = "check-" + c.id;
                     const label = document.createElement("label");
                     label.setAttribute("for", "check-" + c.id)
