@@ -6,11 +6,12 @@ const camerasTypes =
         HFov:56.5, 
         VFov:45, 
         rangeNear: 0.6,
-        rangeFar: 7,
+        rangeFar: 6,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
+        checkedDefault : true,
         recommanded: true
     },
     {
@@ -19,11 +20,12 @@ const camerasTypes =
         HFov:60, 
         VFov:49.5, 
         rangeNear: 0.6,
-        rangeFar: 7,
+        rangeFar: 6,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
+        checkedDefault : false,
         recommanded: true
     },
     {
@@ -36,6 +38,7 @@ const camerasTypes =
         suitable: [
             "hand-tracking" 
         ],
+        checkedDefault : false,
         recommanded: false
     },
     {
@@ -49,7 +52,8 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
-        recommanded: true
+        checkedDefault : false,
+        recommanded: false
     }
 ];
 
