@@ -1,4 +1,4 @@
-import { camerasTypes, units } from './cameras.js'
+import { camerasTypes } from './cameras.js'
 
 class UIManager{
     constructor()
