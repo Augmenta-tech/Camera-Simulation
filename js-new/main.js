@@ -36,8 +36,8 @@ function bindEventListeners()
     //END DEBUG
 
 
-    document.getElementById("areaWantedWidth").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("areaWantedWidth").value), parseFloat(document.getElementById("areaWantedHeight").value)));
-    document.getElementById("areaWantedHeight").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("areaWantedWidth").value), parseFloat(document.getElementById("areaWantedHeight").value)));
+    document.getElementById("givenSceneWidth").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
+    document.getElementById("givenSceneHeight").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
 
     document.getElementById('generate-scene').addEventListener('click', () => uiManager.createSceneFromForm(viewportManager.sceneManager));
     

@@ -27,7 +27,7 @@ class CameraUI{
                 <div id="cam-` + (cam.id) + `-UI-header" class="row s-p">
                     <div class="row">
                         <div class="camera-color" style="background-color: #`+ cam.color.getHexString() + `;"></div>
-                        <h1>Camera et Node ` + (cam.id + 1) + `</h1>
+                        <h1>Node + Sensor ` + (cam.id + 1) + `</h1>
                     </div>
                     <div class="row">
                         <!-- <div id="cam-` + (cam.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->

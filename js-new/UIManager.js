@@ -3,24 +3,25 @@ import { camerasTypes } from './cameras.js'
 class UIManager{
     constructor()
     {
-        resetUIValues();
-
         createFormModal();
         addCamTypesToForm();
 
         createShareModal();
 
-        function resetUIValues()
+        function resetFormValues()
         {
-            document.getElementById("areaWantedWidth").value = 1;
-            document.getElementById("areaWantedHeight").value = 1;
-            document.getElementById('hook-cam').value = 4.5;
+            document.getElementById("areaWantedWidth").value = document.getElementById("givenSceneWidth").value;
+            document.getElementById("areaWantedHeight").value = document.getElementById("givenSceneHeight").value;
+            document.getElementById('hook-cam').value = document.getElementById('hook-cam').value ? document.getElementById('hook-cam').value : 4.5;
         }
 
         function createFormModal()
         {
             const formModal = document.getElementById("generate-scene-modal");
-            document.getElementById("open-scene-form").addEventListener('click', () => formModal.style.display = "block");
+            document.getElementById("open-scene-form").addEventListener('click', () => {
+                resetFormValues();
+                formModal.style.display = "block"
+            });
             document.getElementById("close-form").addEventListener('click', () => formModal.style.display = "none");
             
             window.addEventListener('click', () => {
@@ -77,6 +78,15 @@ class UIManager{
             const givenHeight = parseFloat(document.getElementById('areaWantedHeight').value);
             const camsHeight = parseFloat(document.getElementById('hook-cam').value);
 
+            if(!givenWidth || !givenHeight)
+            {
+                alert("Merci de renseigner une longueur et une largeur de scene. \nPlease fill your scene horizontal and vertical length");
+                return;
+            }
+
+            document.getElementById("givenSceneWidth").value = givenWidth;
+            document.getElementById("givenSceneHeight").value = givenHeight;
+
             let configs = [];
 
             camerasTypes.filter(c => c.recommanded).forEach(type => {
@@ -115,10 +125,12 @@ class UIManager{
             if(configs.length === 0)
             {
                 alert("Aucune camera n'est adaptée pour cette configuration. \nNo camera is adapted to your demand");
+                return;
             }
             else
             {
-                console.log("here")
+                console.log("here");
+                console.log(configs)
                 sceneManager.updateBorder(givenWidth, givenHeight);
 
                 configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);

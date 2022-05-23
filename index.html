@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
-    <title>Augmenta Simulator</title>
+    <title>Augmenta Designer (beta)</title>
     <script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
   </head>
 
@@ -14,17 +14,17 @@
     <div class="row full-height">
       <div id="main">
         <div id="header" class="row s-p">
-          <a href="https://augmenta.tech/fr/accueil-2/">
+          <a href="https://www.augmenta.tech">
             <img src="img/augmenta-logo.png" alt="Augmenta">
           </a>
-          <div class="row">
-            <p>Unsaved Draft</p>
+          <div>
+            <p class="website-title">Augmenta Designer (beta)</p>
           </div>
           <div class="row">
             <div id="generate-link" data-button class="active">
               <p> Share </p>
             </div>
-            <p>Help ?</p>
+            <!-- TO ADD <p>Help ?</p> -->
           </div>
         </div>
         <div id="viewport">
@@ -35,27 +35,29 @@
               <span id="close-link" class="close">&times;</span>
             </div>
           </div>
+          <!-- ADD TOOLS 
           <div id="toolbar" class="row">
             <div data-tool="1" class="active">
-              <span class="iconify" data-icon="fluent:cursor-20-filled"></span><!-- REPLACE BY TOOL BUTTON -->
+              <span class="iconify" data-icon="fluent:cursor-20-filled"></span>
             </div>
             <div data-tool="2">
-              <span class="iconify" data-icon="fluent:hand-right-16-filled"></span><!-- REPLACE BY TOOL BUTTON -->
+              <span class="iconify" data-icon="fluent:hand-right-16-filled"></span>
             </div>
             <div data-tool="3">
-              <span class="iconify" data-icon="fluent:arrow-rotate-clockwise-16-filled"></span><!-- REPLACE BY TOOL BUTTON -->
+              <span class="iconify" data-icon="fluent:arrow-rotate-clockwise-16-filled"></span>
             </div>
             <div data-tool="4">
-              <span class="iconify" data-icon="fluent:zoom-in-16-filled"></span><!-- REPLACE BY TOOL BUTTON -->
+              <span class="iconify" data-icon="fluent:zoom-in-16-filled"></span>
             </div>
-          </div>
+          </div> -->
           <div id="viewport-button" class="row center">
             <div id="display-frustums-button" data-button  class="active">
               <p id="display-frustums">Frustums</p>
             </div>
+            <!-- ADD BUTTON
             <div data-button  class="active">
-              <p>Measures</p><!-- REPLACE BY TOOL BUTTON -->
-            </div>
+              <p>Measures</p>
+            </div> -->
             <div id="toggle-unit" data-button  class="active">
               <p>m - ft</p>
             </div>
@@ -73,28 +75,24 @@
 
       <div id="inspector">
         <div id="scene-info">
-          <!--<h1>Tracking data</h1>
-           <!- REPLACE BY DATA ->
-          <div class="row">
-            <div>
-              <p>Centroid (x,y)</p>
-              <p>Overlaps</p>
-            </div>
-            <div>
-              <p>Rotation</p>
-              <p>Boundingbox</p>
-            </div>
+          <h1>Scene Size</h1>
+          <div>
+            <p>Horizontal length</p>
+            <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
           </div>
-            <br>-->
-          <!-- The Modal -->
+          <div>
+            <p>Vertical length</p>
+            <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+          </div>
           <div id="open-scene-form" class="active" data-button>
             <p >Generate My Scene</p>
           </div>
+          <!-- The Modal -->
           <div id="generate-scene-modal" class="modal">
             <div id="scene-form-content" class="modal-content scene-form">
               <span id="close-form" class="close">&times;</span>
               <div>
-                <h1>Tracking surface</h1>
+                <h1>Scene size</h1>
                 <div class="">
                   <p>Horizontal length</p>
                   <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
@@ -111,8 +109,8 @@
                   <p>Target overlap height detection</p>
                   <select id="given-height-detection" class="select select-form" name="camType">
                     <option value="0.2">Feets</option>
-                    <option value="0.6">Knees (recommended)</option>
-                    <option value="1" selected>Hips</option>
+                    <option value="0.6">Knees</option>
+                    <option value="1" selected>Hips (recommended)</option>
                     <option value="1.6">Shoulders</option>
                     <option id="height-reference" value="2">Entire body</option>
                   </select>
@@ -121,7 +119,7 @@
                   <h1>What do you want to track ?</h1>
                   <select id="tracking-mode" class="select select-form" name="camType">
                     <option value="human-tracking" selected>Human tracking</option>
-                    <option value="hand-tracking">Hand tracking</option>
+                    <!--<option value="hand-tracking">Hand tracking</option> -->
                   </select>
                 </div>
                 <div id="cam-types-checkboxes">
@@ -133,9 +131,10 @@
               </div>
             </div>
           </div>
+          <!-- End Modal -->
           
           <div class="row">
-            <p>Area fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
+            <p>Scene fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
           </div>
         </div>
         <div id="cameras-buttons" class="row">

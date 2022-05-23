@@ -45,6 +45,13 @@ strong{
   overflow: hidden;
 }
 
+.website-title{
+  color: var(--color-white);
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: initial;
+}
+
 .row {
   display: flex;
 }

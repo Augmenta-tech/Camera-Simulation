@@ -1,6 +1,7 @@
 import {
     Scene,
     AxesHelper,
+    GridHelper,
     AmbientLight,
     EdgesGeometry,
     PlaneGeometry,
@@ -56,7 +57,7 @@ class SceneManager{
         const wallXNormal = new Vector3(1,0,0);
         const wallZNormal = new Vector3(0,0,1);
 
-        const grid = new Grid(this.size, this.currentUnit);
+        const grid = new Grid(this.currentUnit);
 
         const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         
@@ -91,6 +92,10 @@ class SceneManager{
             //Origin
             const axesHelper = buildAxesHelper();
             this.#scene.add( axesHelper );
+
+            // Grid Helper
+            const gridHelper = buildGridHelper(this.size);
+            this.#scene.add( gridHelper );
 
 
             grid.addPlanesToScene(this.#scene);
@@ -149,6 +154,14 @@ class SceneManager{
                 linewidth: 3});
 
             return axesHelper;
+        }
+
+        function buildGridHelper(size)
+        {
+            const gridHelper = new GridHelper( size, size );
+            gridHelper.position.y = -0.006
+
+            return gridHelper;
         }
 
         function createSceneFromURL(sceneManager)
@@ -344,6 +357,9 @@ class SceneManager{
                 const geometry = new BoxGeometry(Math.round(givenWidth * 10) / 10.0, 0.001, Math.round(givenHeight * 10) / 10.0);
                 sceneBorder.geometry = new EdgesGeometry(geometry);
                 sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
+
+                //update grid
+                grid.setSize(givenWidth, givenHeight);
         
                 //Calculate area polygon
                 givenAreaPolygon.regions[0] = [];
