@@ -27,9 +27,9 @@ import { SphereGeometry } from 'three';
 import * as POLYBOOL from 'polybool';
 
 import { Dummy } from './Dummy.js';
-import { Camera } from './Camera.js';
+import { Node } from './Node.js';
 import { CameraUI } from './CameraUI.js';
-import { Grid } from './Grid.js';
+import { Checkerboard } from './Checkerboard.js';
 
 import { units } from './cameras.js'
 
@@ -39,11 +39,10 @@ class SceneManager{
 
     constructor(_transformControl)
     {
-        this.#scene = new Scene();
-        this.#scene.background = new Color(0x222222);
-        const cameras = [];
+        this.#scene = buildScene();
+        const nodes = [];
         const dummies = [];
-        this.camMeshes = [];
+        this.nodeMeshes = [];
         this.dummiesMeshes = [];
 
         this.transformControl = _transformControl;
@@ -59,7 +58,7 @@ class SceneManager{
         const wallXNormal = new Vector3(1,0,0);
         const wallZNormal = new Vector3(0,0,1);
 
-        const grid = new Grid(this.currentUnit);
+        const checkerboard = new Checkerboard(this.currentUnit);
 
         const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         
@@ -71,7 +70,7 @@ class SceneManager{
     
 
 
-        /* SCENE INITIALISATION */
+    /* SCENE INITIALISATION */
 
         this.initScene = function()
         {
@@ -100,13 +99,22 @@ class SceneManager{
             this.#scene.add( gridHelper );
 
             // Scene Checkerboard
-            grid.addPlanesToScene(this.#scene);
+            checkerboard.addPlanesToScene(this.#scene);
 
 
             this.#scene.add(this.transformControl);
             this.#scene.add(sceneBorder);
 
             createSceneFromURL(this);
+        }
+
+    /* BUILDERS */
+        function buildScene()
+        {
+            const scene = new Scene();
+            scene.background = new Color(0x222222);
+
+            return scene;
         }
 
         function buildFloorMesh(size)
@@ -168,13 +176,18 @@ class SceneManager{
             return gridHelper;
         }
 
+        /**
+         * Initialize a scene according to the url
+         * 
+         * @param {SceneManager} sceneManager this object
+         */
         function createSceneFromURL(sceneManager)
         {
             let url = document.location.href;
             const index = url.indexOf('&');
             if(index === -1)
             {
-                sceneManager.addCamera();
+                sceneManager.addNode();
             }
             else
             {
@@ -193,6 +206,9 @@ class SceneManager{
                             break;
                         case "l":
                             document.getElementById("givenSceneHeight").value = val;
+                            break;
+                        case "h":
+                            sceneManager.heightDetected = val;
                             break;
                         default:
                             break;
@@ -237,16 +253,21 @@ class SceneManager{
                                 break;
                         }
                     });
-                    sceneManager.addCamera(true, typeID, x, y, z, p, a, r)
+                    sceneManager.addNode(true, typeID, x, y, z, p, a, r)
                 })
             }
-            sceneManager.updateBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
+            sceneManager.updateSceneBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
         }
 
 
-        /* SCENE OBJECTS MANAGEMENT */
+    /* SCENE SUBJECTS MANAGEMENT */
 
         // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
+        /**
+         * Remove an object from the scene and free its memory
+         * 
+         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method. 
+         */
         this.deleteObject = function(obj)
         {
             if (this.transformControl.object === obj.mesh) this.transformControl.detach();
@@ -289,23 +310,34 @@ class SceneManager{
             this.dummiesMeshes.length = 0;
         }
 
-
-        this.addCamera = function(autoConstruct = false, typeID = Camera.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Camera.DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+        /**
+         * Add a node to the scene
+         * 
+         * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
+         * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
+         * @param {float} x x position at creation. Default is 0.
+         * @param {float} y y position at creation. Default is defined in Node.js.
+         * @param {float} z z position at creation. Default is 0.
+         * @param {float} p pitch rotation at creation. Default is 0.
+         * @param {float} a yaw rotation at creation. Default is 0.
+         * @param {float} r roll rotation at creation. Default is 0.
+         */
+        this.addNode = function(autoConstruct = false, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
         {
-            if(!Camera.font)
+            if(!Node.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
                 return;
             }
-            const newCamera = new Camera(cameras.length, typeID, x, y, z, p, a, r)
+            const newCamera = new Node(nodes.length, typeID, x, y, z, p, a, r)
             newCamera.uiElement = new CameraUI(newCamera, this.currentUnit);
             
             //Offset
             if(!autoConstruct)
             {
-                for(let i = 0; i < cameras.length; i++)
+                for(let i = 0; i < nodes.length; i++)
                 {
-                    if(newCamera.mesh.position.distanceTo(cameras[i].mesh.position) < 0.5)
+                    if(newCamera.mesh.position.distanceTo(nodes[i].mesh.position) < 0.5)
                     {
                         newCamera.mesh.position.x += 0.5;
                         i = 0;
@@ -316,40 +348,40 @@ class SceneManager{
 
             newCamera.addToScene(this.#scene);
 
-            cameras.push(newCamera);
-            this.camMeshes.push(newCamera.mesh);
+            nodes.push(newCamera);
+            this.nodeMeshes.push(newCamera.mesh);
         }
 
         this.displayFrustums = function()
         {
-            const visibles = cameras.filter(c => c.areaAppear);
-            cameras.forEach(c => c.changeVisibility(visibles.length != cameras.length));
+            const visibles = nodes.filter(n => n.areaAppear);
+            nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
         }
 
-        this.resetCams = function()
+        this.removeNodes = function()
         {
-            cameras.forEach(c => {
-                delete c.uiElement;
-                this.deleteObject(c);
+            nodes.forEach(n => {
+                delete n.uiElement;
+                this.deleteObject(n);
             });
-            cameras.length = 0;
-            this.camMeshes.length = 0;
+            nodes.length = 0;
+            this.nodeMeshes.length = 0;
 
-            const camerasUIdivs = document.getElementsByClassName("cameraUI");
-            for(let i = camerasUIdivs.length - 1; i >= 0; i--)
+            const nodesUIdivs = document.getElementsByClassName("nodeUI");
+            for(let i = nodesUIdivs.length - 1; i >= 0; i--)
             {
-                camerasUIdivs[i].remove();
+                nodesUIdivs[i].remove();
             }
         }
 
 
-        /* USER'S ACTIONS */
+    /* USER'S ACTIONS */
 
         this.toggleUnit = function()
         {
-            const unit = grid.unit === units.meters ? units.feets : units.meters;
+            const unit = checkerboard.unit === units.meters ? units.feets : units.meters;
 
-            grid.toggleUnit(unit);
+            checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
                 e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 10) / 10.0;
@@ -373,7 +405,13 @@ class SceneManager{
             this.currentUnit = unit;
         }
 
-        this.updateBorder = function(givenWidthValue, givenHeightValue)
+        /**
+         * Define the border of the scene to track
+         * 
+         * @param {*} givenWidthValue horizontal length value entered input.
+         * @param {*} givenHeightValue vertical length value entered input.
+         */
+        this.updateSceneBorder = function(givenWidthValue, givenHeightValue)
         {
             if(givenWidthValue && givenHeightValue)
             {
@@ -384,7 +422,7 @@ class SceneManager{
                 sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
 
                 //update grid
-                grid.setSize(givenWidth, givenHeight);
+                checkerboard.setSize(givenWidth, givenHeight);
         
                 //Calculate area polygon
                 givenAreaPolygonRegions[0].length = 0;
@@ -397,10 +435,15 @@ class SceneManager{
 
         this.updateObjectsPosition = function()
         {
-            cameras.forEach(c => c.updatePosition(this.currentUnit));
+            nodes.forEach(n => n.updatePosition(this.currentUnit));
             dummies.forEach(d => d.updatePosition());
         }
 
+        /**
+         * Create an url containing all the informations of the scene
+         * 
+         * @returns the url of this scene
+         */
         this.generateLink = function()
         {
             let url = document.location.href;
@@ -412,24 +455,26 @@ class SceneManager{
             url += document.getElementById("givenSceneWidth").value ? document.getElementById("givenSceneWidth").value : 0;
             url += ",l=";
             url += document.getElementById("givenSceneHeight").value ? document.getElementById("givenSceneHeight").value : 0;
+            url += ",h=";
+            url += this.heightDetected;
             url += '&';
-            cameras.forEach(c => {
+            nodes.forEach(n => {
                 url += "id=";
-                url += c.id;
+                url += n.id;
                 url += ",typeID=";
-                url += c.type.id;
+                url += n.cameraType.id;
                 url += ",x=";
-                url += Math.round(c.XPos*100)/100.0;
+                url += Math.round(n.xPos*100)/100.0;
                 url += ",y=";
-                url += Math.round(c.YPos*100)/100.0;
+                url += Math.round(n.yPos*100)/100.0;
                 url += ",z=";
-                url += Math.round(c.ZPos*100)/100.0;
+                url += Math.round(n.zPos*100)/100.0;
                 url += ",p=";
-                url += Math.round(c.pitch*10000)/10000.0;
+                url += Math.round(n.xRot*10000)/10000.0;
                 url += ",a=";
-                url += Math.round(c.yaw*10000)/10000.0;
+                url += Math.round(n.yRot*10000)/10000.0;
                 url += ",r=";
-                url += Math.round(c.roll*10000)/10000.0;
+                url += Math.round(n.zRot*10000)/10000.0;
                 url += '&';
             });
             url = url.slice(0, -1);
@@ -441,11 +486,11 @@ class SceneManager{
         /* SCENE UPDATE */
 
         /**
-         * Calculate area covered by the camera cam to draw it and display it
+         * Calculate area covered by the node to draw it and display it
          * 
-         * @param {Camera} cam the camera to draw the projection 
+         * @param {Node} node the node to draw the projection 
          */
-        this.drawProjection = function(cam)
+        this.drawProjection = function(node)
         {
             //TODO: Comment ++
 
@@ -459,17 +504,17 @@ class SceneManager{
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
             
-            this.#scene.remove(cam.areaCoveredFloor);
-            this.#scene.remove(cam.areaCoveredAbove);
-            this.#scene.remove(cam.areaCoveredWallX);
-            this.#scene.remove(cam.areaCoveredWallZ);
+            this.#scene.remove(node.areaCoveredFloor);
+            this.#scene.remove(node.areaCoveredAbove);
+            this.#scene.remove(node.areaCoveredWallX);
+            this.#scene.remove(node.areaCoveredWallZ);
 
             const floorPlane = new Plane(floorNormal, 0);
             const abovePlane = new Plane(floorNormal, -this.heightDetected);
             const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
             const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
 
-            if(cam.areaAppear)
+            if(node.areaAppear)
             {
                 const floorRays = [];
                 const aboveRays = [];
@@ -477,11 +522,11 @@ class SceneManager{
                 const wallZRays = [];
 
                 const frustum = new Frustum();
-                frustum.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
+                frustum.setFromProjectionMatrix(node.cameraPerspective.projectionMatrix);
                 //calculate the rays representing the intersection between frustum's planes and the floor or the walls
                 for(let i = 0; i < 6; i++) 
                 {
-                    const plane = frustum.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+                    const plane = frustum.planes[i].applyMatrix4(node.cameraPerspective.matrixWorld);
 
                     //crossing the floor
                     const rayIntersectFloor = getIntersectionOfPlanes(plane, floorPlane);
@@ -531,11 +576,11 @@ class SceneManager{
 
                 //filter points in the camera frustum
                 const frustumScaled = new Frustum();
-                frustumScaled.setFromProjectionMatrix(cam.cameraPerspective.projectionMatrix);
+                frustumScaled.setFromProjectionMatrix(node.cameraPerspective.projectionMatrix);
 
                 for(let i = 0; i < 6; i++) 
                 {
-                    frustumScaled.planes[i].applyMatrix4(cam.cameraPerspective.matrixWorld);
+                    frustumScaled.planes[i].applyMatrix4(node.cameraPerspective.matrixWorld);
                     frustumScaled.planes[i].constant += 0.01;
                 }
 
@@ -582,51 +627,51 @@ class SceneManager{
                 sortByAngle(coveredPointsWallX, wallXNormal);
                 sortByAngle(coveredPointsWallZ, wallZNormal);
 
-                cam.coveredPointsAbove = coveredPointsAbove;
+                node.coveredPointsAbove = coveredPointsAbove;
 
-                coveredPointsFloor.forEach((p) => p.y += 0.01*cam.id / cameras.length);
-                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*cam.id / cameras.length);
-                coveredPointsWallX.forEach((p) => p.x += 0.01*cam.id / cameras.length);
-                coveredPointsWallZ.forEach((p) => p.z += 0.01*cam.id / cameras.length);
+                coveredPointsFloor.forEach((p) => p.y += 0.01*node.id / nodes.length);
+                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / nodes.length);
+                coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / nodes.length);
+                coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / nodes.length);
 
                 //display area value 
-                const previousValue = cam.areaValue;
-                cam.areaValue = calculateArea(coveredPointsAbove);
+                const previousValue = node.areaValue;
+                node.areaValue = calculateArea(coveredPointsAbove);
 
                 //Place text 
                 if(coveredPointsAbove.length > 2)
                 {
                     //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
                     const barycentre = getBarycentre(coveredPointsAbove);
-                    cam.changeTextPosition(barycentre);
-                    if(previousValue != cam.areaValue) cam.updateTextArea(this.currentUnit);
+                    node.changeTextPosition(barycentre);
+                    if(previousValue != node.areaValue) node.updateAreaText(this.currentUnit);
                 }
                 else
                 {
-                    cam.nameText.position.copy(cam.cameraPerspective.position);
-                    cam.areaDisplay.visible = false;
+                    node.nameText.position.copy(node.cameraPerspective.position);
+                    node.areaValueText.visible = false;
                 }
 
                 //draw area
 
-                cam.areaCoveredFloor.geometry.dispose();
-                cam.areaCoveredFloor.material.dispose();
-                cam.areaCoveredAbove.geometry.dispose();
-                cam.areaCoveredAbove.material.dispose();
-                cam.areaCoveredWallX.geometry.dispose();
-                cam.areaCoveredWallX.material.dispose();
-                cam.areaCoveredWallZ.geometry.dispose();
-                cam.areaCoveredWallZ.material.dispose();
+                node.areaCoveredFloor.geometry.dispose();
+                node.areaCoveredFloor.material.dispose();
+                node.areaCoveredAbove.geometry.dispose();
+                node.areaCoveredAbove.material.dispose();
+                node.areaCoveredWallX.geometry.dispose();
+                node.areaCoveredWallX.material.dispose();
+                node.areaCoveredWallZ.geometry.dispose();
+                node.areaCoveredWallZ.material.dispose();
 
-                cam.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
-                cam.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
-                cam.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
-                cam.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
+                node.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
+                node.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
+                node.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
+                node.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
 
-                this.#scene.add(cam.areaCoveredFloor);
-                this.#scene.add(cam.areaCoveredAbove);
-                this.#scene.add(cam.areaCoveredWallX);
-                this.#scene.add(cam.areaCoveredWallZ);
+                this.#scene.add(node.areaCoveredFloor);
+                this.#scene.add(node.areaCoveredAbove);
+                this.#scene.add(node.areaCoveredWallX);
+                this.#scene.add(node.areaCoveredWallZ);
             }
 
             //DEBUG SPHERES
@@ -760,7 +805,7 @@ class SceneManager{
                 areaValue += areaOfThisTriangle;
             }
 
-            return areaValue / (grid.unit * grid.unit);
+            return areaValue / (checkerboard.unit * checkerboard.unit);
         }
 
         function getBarycentre(points)
@@ -809,16 +854,21 @@ class SceneManager{
         }
 
 
+        /**
+         * Calculate the area covered by node and compare it to the scene size
+         * 
+         * @returns {boolean} whether the scene is fully tracked by nodes or not
+         */
         this.doesCoverArea = function()
         {
-            //PolyBool.epsilon(0.001);
+            PolyBool.epsilon(0.1);
             const unionRegions = [...givenAreaPolygonRegions];
             let union = {
                 regions: unionRegions,
                 inverted: true
             };
 
-            cameras.forEach(c => {
+            nodes.forEach(c => {
                 const polyCam = {
                     regions: [[]],
                     inverted: false
@@ -827,26 +877,28 @@ class SceneManager{
                     polyCam.regions[0].push([p.x, p.z]);
                 });
 
+                union = PolyBool.union(union, polyCam);
+                /*
                 const segmentsCam = PolyBool.segments(polyCam);
                 const segmentsUnion = PolyBool.segments(union);
                 const comb = PolyBool.combine(segmentsCam, segmentsUnion);
-                union = PolyBool.polygon(PolyBool.selectUnion(comb))
+                union = PolyBool.polygon(PolyBool.selectUnion(comb))*/
             });
 
             return union.regions.length === 0;
         }
 
-        this.getNbNodes = () => cameras.length;
+        this.getNbNodes = () => nodes.length;
 
         this.update = function ()
         {
-            cameras.forEach(c => {
+            nodes.forEach(c => {
                 c.update();
                 this.drawProjection(c);
             });
         }
 
-        Camera.loadFont(() => this.initScene());
+        Node.loadFont(() => this.initScene());
     }
 
     get scene(){ return this.#scene; }

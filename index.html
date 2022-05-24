@@ -4,14 +4,10 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/main.css">
     <link rel="shortcut icon" href="#">
-    <!--
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
-    
     <title>Augmenta Designer (beta)</title>
-    <script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
   </head>
 
   <body>
@@ -104,7 +100,7 @@
                 </div>
                 <div class="">
                   <p>Camera hook height</p>
-                  <input class="" id="hook-cam" type="number" placeholder="r" min="0" max="15" step = "0.1">
+                  <input class="" id="hook-node" type="number" placeholder="r" min="0" max="15" step = "0.1">
                 </div>
                 <div class="">
                   <p>Target overlap height detection</p>
@@ -153,11 +149,11 @@
           <div class="row">
             <p class="number-nodes">Number of Nodes: <span id="nb-nodes">0</span></p>
           </div>
-          <div id="cameras-buttons" class="row">
-            <div id="new-camera" class="active" data-button>
+          <div id="nodes-buttons" class="row">
+            <div id="add-node" class="active" data-button>
               <p>+ New Node</p>
             </div>
-            <div id="delete-cameras" data-button>
+            <div id="remove-nodes" data-button>
               <p>Delete all nodes</p>
             </div>
           </div>
@@ -166,6 +162,7 @@
     </div>
   </body>
 
+  <script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
   <!-- Import maps polyfill -->
   <!-- Remove this when import maps will be widely supported -->
   <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>

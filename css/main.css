@@ -112,11 +112,11 @@ strong{
   background-color: #F4F4F4;
 }
 
-.camera-color{
+.node-color{
   width: 10px;
   height: 10px;
 }
-[data-camera] .camera-color{
+[data-camera] .node-color{
   margin: 2px 8px 0 0;
 }
 

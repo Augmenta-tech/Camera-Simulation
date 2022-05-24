@@ -1,11 +1,21 @@
-import * as THREE from 'three';
+import {
+    WebGLRenderer,
+    PerspectiveCamera,
+    OrthographicCamera,
+    Vector3
+} from 'three';
+
+import {
+    PCFSoftShadowMap,
+    sRGBEncoding
+} from 'three';
+
+import { TransformControls } from 'three-controls/TransformControls.js';
 
 import { OrbitControls } from './lib/OrbitControls.js';
 import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
-import { TransformControls } from 'three-controls/TransformControls.js';
 
 import { SceneManager } from './SceneManager.js';
-import { Scene } from 'three';
 
 
 class ViewportManager{
@@ -30,20 +40,22 @@ class ViewportManager{
         this.sceneManager = new SceneManager(buildTransformControl(this));
 
 
+    /* BUILDERS */
+
         function buildRenderer()
         {
             const containerElement = document.createElement( 'div' );
             viewportElement.insertBefore(containerElement, viewportElement.firstChild);
 
-            const renderer = new THREE.WebGLRenderer( { logarithmicDepthBuffer: true, antialias: true } );
+            const renderer = new WebGLRenderer( { logarithmicDepthBuffer: true, antialias: true } );
             renderer.setPixelRatio( window.devicePixelRatio );
             renderer.setSize( viewportWidth, viewportHeight );
             containerElement.appendChild( renderer.domElement );
         
             renderer.shadowMap.enabled = true;
         
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.shadowMap.type = PCFSoftShadowMap;
+            renderer.outputEncoding = sRGBEncoding;
         
             renderer.autoClear = false;
 
@@ -51,23 +63,23 @@ class ViewportManager{
         }
 
 
-        /* CREATION OF USER'S CAMERAS */
+        /* USER'S CAMERAS */
         function buildPerspCamera()
         {
-            const perspectiveCamera = new THREE.PerspectiveCamera( 70, aspect, 0.2, 10000 );
+            const perspectiveCamera = new PerspectiveCamera( 70, aspect, 0.2, 10000 );
             perspectiveCamera.position.set(6,6,6); //height and retreat
             return perspectiveCamera;
         }
     
         function buildOrthoCamera(frustumSize, aspect)
         {
-            const orthographicCamera = new THREE.OrthographicCamera( -frustumSize, frustumSize, frustumSize / aspect, -frustumSize / aspect, 0.2, 10000);
+            const orthographicCamera = new OrthographicCamera( -frustumSize, frustumSize, frustumSize / aspect, -frustumSize / aspect, 0.2, 10000);
             orthographicCamera.position.set(0,0,10);
             return orthographicCamera;
         }
     
 
-        /* USER'S CONTROLS */
+        /* CONTROLS */
         function buildOrbitControls(viewportManager)
         {
             const controls = new OrbitControls( viewportManager.activeCamera, renderer.domElement );
@@ -90,7 +102,7 @@ class ViewportManager{
         /**
          * Change the postion of the camera and allow to switch from perspective to orthogaphic.
          * 
-         * @param {THREE.Vector3} newPos 
+         * @param {Vector3} newPos 
          * @param {boolean} changeCameraType 
          */
         this.setupCameraChangement = function (newPos, changeCameraType = true)
@@ -112,6 +124,7 @@ class ViewportManager{
             controlsGizmo = buildGuizmo(orbitControls, this)
         }
 
+        /* ALLOW TO TRANSFORM SCENE SUBJECTS IN THE VIEWPORT */
         function buildTransformControl(viewportManager)
         {
             const transformControl = new TransformControls(viewportManager.activeCamera, renderer.domElement );
@@ -124,7 +137,7 @@ class ViewportManager{
         }
 
 
-        /* USER'S ACTIONS */
+    /* USER'S ACTIONS */
         this.onWindowResize = function() {
 
             viewportWidth = viewportElement.offsetWidth;
@@ -143,7 +156,7 @@ class ViewportManager{
             orthoCam.updateProjectionMatrix();
         }
         
-        /* RENDER */
+    /* RENDER */
         this.render = function()
         {
             this.sceneManager.update(renderer);

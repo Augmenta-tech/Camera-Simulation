@@ -3,9 +3,9 @@ import {
     Vector2,
     Vector3,
     Raycaster
-} from 'three'
-import { ViewportManager } from './ViewportManager.js'
-import { UIManager } from './UIManager.js'
+} from 'three';
+import { ViewportManager } from './ViewportManager.js';
+import { UIManager } from './UIManager.js';
 
 const viewportElement = document.getElementById('viewport');
 const viewportManager = new ViewportManager(viewportElement);
@@ -22,8 +22,8 @@ function bindEventListeners()
     document.getElementById('display-frustums').addEventListener('click', () => viewportManager.sceneManager.displayFrustums());
     document.getElementById('toggle-unit').addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
 
-    document.getElementById('new-camera').addEventListener('click', () => viewportManager.sceneManager.addCamera());
-    document.getElementById('delete-cameras').addEventListener('click', () => viewportManager.sceneManager.resetCams());
+    document.getElementById('add-node').addEventListener('click', () => viewportManager.sceneManager.addNode());
+    document.getElementById('remove-nodes').addEventListener('click', () => viewportManager.sceneManager.removeNodes());
 
     document.getElementById('add-dummy').addEventListener('click', () => viewportManager.sceneManager.addDummy());
     document.getElementById('remove-dummies').addEventListener('click', () => viewportManager.sceneManager.removeDummies());
@@ -36,8 +36,8 @@ function bindEventListeners()
     //END DEBUG
 
 
-    document.getElementById("givenSceneWidth").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
-    document.getElementById("givenSceneHeight").addEventListener('change', () => viewportManager.sceneManager.updateBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
+    document.getElementById("givenSceneWidth").addEventListener('change', () => viewportManager.sceneManager.updateSceneBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
+    document.getElementById("givenSceneHeight").addEventListener('change', () => viewportManager.sceneManager.updateSceneBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
 
     document.getElementById('generate-scene').addEventListener('click', () => uiManager.createSceneFromForm(viewportManager.sceneManager));
     
@@ -111,7 +111,7 @@ function onPointerMove(event)
     const raycaster = new Raycaster()
     raycaster.setFromCamera( pointer, viewportManager.activeCamera );
     
-    const meshes = viewportManager.sceneManager.camMeshes.concat(viewportManager.sceneManager.dummiesMeshes);
+    const meshes = viewportManager.sceneManager.nodeMeshes.concat(viewportManager.sceneManager.dummiesMeshes);
 
     const intersect = raycaster.intersectObjects( meshes, false );
 

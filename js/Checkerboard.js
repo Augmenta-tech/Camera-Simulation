@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { units } from './cameras.js'
 
 
-export class Grid{
+class Checkerboard{
     constructor(unit = units.meters, width = 0, height = 0)
     {
         //const gridSize = size
@@ -121,3 +121,5 @@ export class Grid{
         }
     }
 }
+
+export { Checkerboard }

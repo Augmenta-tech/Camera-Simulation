@@ -8,61 +8,61 @@ class CameraUI{
         buildUIDiv(_camera);
         bindEventListeners(_camera);
 
-        function buildUIDiv(cam)
+        function buildUIDiv(node)
         {
             let cameraTypesOptions = ``;
             camerasTypes.filter(c => c.recommanded).forEach(type => {
-                let optionElement = `<option value="` + type.name + `" ` + (cam.type.name === type.name ? `selected` : ``) + `>` + type.name;
+                const optionElement = `<option value="` + type.name + `" ` + (node.cameraType.name === type.name ? `selected` : ``) + `>` + type.name;
                 cameraTypesOptions += optionElement;
                 cameraTypesOptions += "</option>"
             });
         
-            const cameraUIdiv = document.createElement('div');
-            cameraUIdiv.dataset.camera = cam.id;
-            cameraUIdiv.classList.add("active");
-            cameraUIdiv.classList.add("cameraUI");
+            const nodeUIdiv = document.createElement('div');
+            nodeUIdiv.dataset.camera = node.id;
+            nodeUIdiv.classList.add("active");
+            nodeUIdiv.classList.add("nodeUI");
             
-            cameraUIdiv.id = 'cam-' + (cam.id) + '-UI';
-            cameraUIdiv.innerHTML = `
-                <div id="cam-` + (cam.id) + `-UI-header" class="row s-p">
+            nodeUIdiv.id = 'node-' + (node.id) + '-UI';
+            nodeUIdiv.innerHTML = `
+                <div id="node-` + (node.id) + `-UI-header" class="row s-p">
                     <div class="row">
-                        <div class="camera-color" style="background-color: #`+ cam.color.getHexString() + `;"></div>
-                        <h1>Node + Sensor ` + (cam.id + 1) + `</h1>
+                        <div class="node-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
+                        <h1>Node + Sensor ` + (node.id + 1) + `</h1>
                     </div>
                     <div class="row">
-                        <!-- <div id="cam-` + (cam.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
-                        <div id="cam-` + (cam.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
-                        <div id="cam-` + (cam.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
+                        <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
+                        <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
+                        <div id="node-` + (node.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
                     </div>
                 </div>
-                <div id="cam-infos-` + (cam.id) + `-UI">
+                <div id="node-infos-` + (node.id) + `-UI">
                     <div id="select-camera" class="row s-p">
                         <div class="column-2 row ">
-                            <select id="cam-type-` + (cam.id) + `" class="select camera-type" name="camType">
+                            <select id="cam-type-` + (node.id) + `" class="select camera-type" name="camType">
                             ` + cameraTypesOptions + `
                             </select>
                         </div>
                         <div class="row s-p column-2">
                             <div>
-                                <p id="hfov` + cam.id + `">FOV H: <span>` + cam.type.HFov + `°</p>
-                                <p id="near` + cam.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(cam.type.rangeNear*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="hfov` + node.id + `">FOV H: <span>` + node.cameraType.HFov + `°</p>
+                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeNear*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                             </div>
                             <div>
-                                <p id="vfov` + cam.id + `">FOV V: <span>` + cam.type.VFov + `°</p>
-                                <p id="far` + cam.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(cam.type.rangeFar*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="vfov` + node.id + `">FOV V: <span>` + node.cameraType.VFov + `°</p>
+                                <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeFar*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                             </div>
                         </div>
                     </div>
-                    <div id = "cam-` + (cam.id) + `-transformations">
+                    <div id = "node-` + (node.id) + `-transformations">
                         <div class="row s-p">
                             <div class="2-column ">
                                 <p>  Position </p>
                             </div>
                             <div class="row s-p column-2">
-                                <p id="x-pos-`+ cam.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(cam.XPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="y-pos-`+ cam.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-cam.ZPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="z-pos-`+ cam.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(cam.YPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(node.xPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-node.zPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(node.yPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
                             </div>
                         </div>
                         <div  class="row s-p">
@@ -70,9 +70,9 @@ class CameraUI{
                                 <p>  Rotation </p>
                             </div>
                             <div class="row s-p column-2">
-                                <p id="pitch-rot-`+ cam.id +`" class="draggable">PITCH <strong>` + Math.round(cam.pitch*180/Math.PI) + `</strong>°</p>
-                                <p id="yaw-rot-`+ cam.id +`" class="draggable">YAW <strong>` + Math.round(cam.yaw*180/Math.PI) + `</strong>°</p>
-                                <p id="roll-rot-`+ cam.id +`" class="draggable">ROLL <strong>` + Math.round(cam.roll*180/Math.PI) + `</strong>° </p>
+                                <p id="x-rot-`+ node.id +`" class="draggable">X <strong>` + Math.round(node.xRot*180/Math.PI) + `</strong>°</p>
+                                <p id="y-rot-`+ node.id +`" class="draggable">Y <strong>` + Math.round(node.yRot*180/Math.PI) + `</strong>°</p>
+                                <p id="z-rot-`+ node.id +`" class="draggable">Z <strong>` + Math.round(node.zRot*180/Math.PI) + `</strong>° </p>
                             </div>
                         </div>
                     </div>
@@ -80,29 +80,29 @@ class CameraUI{
 
 
             const sensorDiv = document.getElementById('sensors');
-            sensorDiv.appendChild(cameraUIdiv);
+            sensorDiv.appendChild(nodeUIdiv);
 
-            return cameraUIdiv;
+            return nodeUIdiv;
         }
 
-        function bindEventListeners(cam)
+        function bindEventListeners(node)
         {
             
-            makeElementDraggable(document.getElementById("x-pos-" + cam.id), cam);
-            makeElementDraggable(document.getElementById("y-pos-" + cam.id), cam);
-            makeElementDraggable(document.getElementById("z-pos-" + cam.id), cam);
-            makeElementDraggable(document.getElementById("pitch-rot-" + cam.id), cam);
-            makeElementDraggable(document.getElementById("yaw-rot-" + cam.id), cam);
-            makeElementDraggable(document.getElementById("roll-rot-" + cam.id), cam);
+            makeElementDraggable(document.getElementById("x-pos-" + node.id), node);
+            makeElementDraggable(document.getElementById("y-pos-" + node.id), node);
+            makeElementDraggable(document.getElementById("z-pos-" + node.id), node);
+            makeElementDraggable(document.getElementById("x-rot-" + node.id), node);
+            makeElementDraggable(document.getElementById("y-rot-" + node.id), node);
+            makeElementDraggable(document.getElementById("z-rot-" + node.id), node);
         
     
-            document.getElementById('cam-' + (cam.id) + '-hide-UI').addEventListener('click', () => hideUICam(cam));
-            document.getElementById('cam-' + (cam.id) + '-visible').addEventListener('click', () => changeVisibilityofCam(cam));
+            document.getElementById('node-' + (node.id) + '-hide-UI').addEventListener('click', () => hideUICam(node));
+            document.getElementById('node-' + (node.id) + '-visible').addEventListener('click', () => changeVisibilityofCam(node));
         
-            document.getElementById('cam-type-' + cam.id).addEventListener('click', () => changeCameraType(cam));
+            document.getElementById('cam-type-' + node.id).addEventListener('click', () => changeCameraType(node));
         }
 
-        function makeElementDraggable(element, cam) {
+        function makeElementDraggable(element, node) {
             let valueElement = element.getElementsByTagName('strong')[0];
             let value = parseFloat(valueElement.innerHTML);
             let mousePosX = 0;
@@ -152,40 +152,61 @@ class CameraUI{
                 switch(element.id.split('-')[0])
                 {
                     case "x":
-                        cam.XPos = value / currentUnit;
-                        cam.cameraPerspective.position.x = cam.XPos;
-                        cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
+                        switch(element.id.split('-')[1])
+                        {
+                            case "pos" :
+                                node.xPos = value / currentUnit;
+                                node.cameraPerspective.position.x = node.xPos;
+                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                break;
+                            case "rot":
+                                /*node.cameraPerspective.rotateOnWorldAxis(node.xRotationAxis, value * (Math.PI / 180.0) - node.pitch);*/
+                                node.cameraPerspective.rotateOnWorldAxis(new Vector3(1,0,0), value * (Math.PI / 180.0) - node.xRot);
+                                node.xRot = value * (Math.PI / 180.0);
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     case "y":
-                        cam.ZPos = - value / currentUnit;
-                        cam.cameraPerspective.position.z = cam.ZPos;
-                        cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
+                        switch(element.id.split('-')[1])
+                        {
+                            case "pos" :
+                                node.zPos = - value / currentUnit;
+                                node.cameraPerspective.position.z = node.zPos;
+                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                break;
+                            case "rot":
+                                /*node.cameraPerspective.rotateOnWorldAxis(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
+                                node.xRotationAxis.applyAxisAngle(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
+                                node.xRotationAxis.normalize();
+                                node.yaw = value * (Math.PI / 180.0);*/
+                                const rotateYAxis = new Vector3(0,1,0);
+                                rotateYAxis.applyAxisAngle(new Vector3(0,0,- 1), - node.zRot);
+                                node.cameraPerspective.rotateOnAxis(rotateYAxis, value * (Math.PI / 180.0) - node.yRot);
+                                node.yRot = value * (Math.PI / 180.0);
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     case "z":
-                        cam.YPos = value / currentUnit;
-                        cam.cameraPerspective.position.y = cam.YPos;
-                        cam.mesh.position.set( cam.XPos, cam.YPos, cam.ZPos );
-                        break;
-                    case "pitch":
-                        /*cam.cameraPerspective.rotateOnWorldAxis(cam.xRotationAxis, value * (Math.PI / 180.0) - cam.pitch);*/
-                        cam.cameraPerspective.rotateOnWorldAxis(new Vector3(1,0,0), value * (Math.PI / 180.0) - cam.pitch);
-                        cam.pitch = value * (Math.PI / 180.0);
-                        break;
-                    case "yaw":
-                        /*cam.cameraPerspective.rotateOnWorldAxis(new Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
-                        cam.xRotationAxis.applyAxisAngle(new Vector3(0,1,0), value * (Math.PI / 180.0) - cam.yaw);
-                        cam.xRotationAxis.normalize();
-                        cam.yaw = value * (Math.PI / 180.0);*/
-                        const rotateYawAxis = new Vector3(0,1,0);
-                        rotateYawAxis.applyAxisAngle(new Vector3(0,0,- 1), - cam.roll);
-                        cam.cameraPerspective.rotateOnAxis(rotateYawAxis, value * (Math.PI / 180.0) - cam.yaw);
-                        cam.yaw = value * (Math.PI / 180.0);
-                        break;
-                    case "roll":
-                        const rotationAxis = new Vector3();
-                        cam.cameraPerspective.getWorldDirection(rotationAxis);
-                        cam.cameraPerspective.rotateOnWorldAxis(rotationAxis, value * (Math.PI / 180.0) - cam.roll);
-                        cam.roll = value * (Math.PI / 180.0);
+                        switch(element.id.split('-')[1])
+                        {
+                            case "pos" :
+                                node.yPos = value / currentUnit;
+                                node.cameraPerspective.position.y = node.yPos;
+                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                break;
+                            case "rot":
+                                const rotateZAxis = new Vector3();
+                                node.cameraPerspective.getWorldDirection(rotateZAxis);
+                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis, value * (Math.PI / 180.0) - node.zRot);
+                                node.zRot = value * (Math.PI / 180.0);
+                                break;
+                            default:
+                                break;
+                        }
                         break;
                     default:
                         break;
@@ -216,37 +237,37 @@ class CameraUI{
             }
         }
 
-        function hideUICam(cam)
+        function hideUICam(node)
         {
-            const camInfosUI = document.getElementById('cam-infos-' + (cam.id) + '-UI');
-            const camUIheader = document.getElementById('cam-' + (cam.id) + '-UI-header');
+            const camInfosUI = document.getElementById('node-infos-' + (node.id) + '-UI');
+            const camUIheader = document.getElementById('node-' + (node.id) + '-UI-header');
             const hidden = camInfosUI.style.display === "none";
             camInfosUI.style.display = hidden ?  "block" : "none";
             camUIheader.style.marginBottom = hidden ? "0px" : "-100px"
             camUIheader.style.marginTop = hidden ? "0px" : "-4px"
-            const iconElem = document.getElementById('cam-' + (cam.id) + '-hide-UI').firstChild;
+            const iconElem = document.getElementById('node-' + (node.id) + '-hide-UI').firstChild;
             iconElem.dataset.icon = hidden ? "bx:minus" : "bx:plus";
         }
 
-        function changeVisibilityofCam(cam)
+        function changeVisibilityofCam(node)
         {
-            cam.changeVisibility();
+            node.changeVisibility();
         }
 
-        function changeCameraType(cam)
+        function changeCameraType(node)
         {
-            cam.type = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + cam.id).value)
+            node.cameraType = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + node.id).value)
             
-            document.getElementById('hfov' + cam.id + '').innerHTML = 'FOV H: ' + cam.type.HFov + '°';
-            document.getElementById('vfov' + cam.id + '').innerHTML = 'FOV V: ' + cam.type.VFov + '°';
-            document.getElementById('near' + cam.id + '').innerHTML = 'NEAR: ' + (Math.round(cam.type.rangeNear*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
-            document.getElementById('far' + cam.id + '').innerHTML = 'FAR: ' + (Math.round(cam.type.rangeFar*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
+            document.getElementById('hfov' + node.id + '').innerHTML = 'FOV H: ' + node.cameraType.HFov + '°';
+            document.getElementById('vfov' + node.id + '').innerHTML = 'FOV V: ' + node.cameraType.VFov + '°';
+            document.getElementById('near' + node.id + '').innerHTML = 'NEAR: ' + (Math.round(node.cameraType.rangeNear*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
+            document.getElementById('far' + node.id + '').innerHTML = 'FAR: ' + (Math.round(node.cameraType.rangeFar*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
             
             
-            cam.cameraPerspective.fov = cam.type.VFov;
-            cam.cameraPerspective.aspect = cam.type.aspectRatio;
-            cam.cameraPerspective.near = cam.type.rangeNear;
-            cam.cameraPerspective.far = cam.type.rangeFar;
+            node.cameraPerspective.fov = node.cameraType.VFov;
+            node.cameraPerspective.aspect = node.cameraType.aspectRatio;
+            node.cameraPerspective.near = node.cameraType.rangeNear;
+            node.cameraPerspective.far = node.cameraType.rangeFar;
         }
     }
 }
@@ -254,10 +275,10 @@ class CameraUI{
 export { CameraUI }
 
 /*
-function addCameraGUI(cam)
+function addCameraGUI(node)
 {
     
-    document.getElementById('cam-' + (cam.id) + '-solo-button').onclick = soloCamView;
+    document.getElementById('node-' + (node.id) + '-solo-button').onclick = soloCamView;
     function soloCamView()
     {
         const iconElem = this.firstChild;
@@ -266,31 +287,31 @@ function addCameraGUI(cam)
 
         const display = solo ? "block" : "none";
 
-        const otherCams = cameras.filter(c => c.id !== cam.id);
+        const otherCams = cameras.filter(c => c.id !== node.id);
         otherCams.forEach(c => {
             solo ? c.addCameraToScene() : c.removeCameraFromScene();
-            const camUI = document.getElementById('cam-' + (c.id) + '-UI');
+            const camUI = document.getElementById('node-' + (c.id) + '-UI');
             camUI.style.display = display;
         });
 
         frustumsButton.style.display = display;
 
-        const camTransfoDiv = document.getElementById('cam-' + (cam.id) + '-transformations');
+        const camTransfoDiv = document.getElementById('node-' + (node.id) + '-transformations');
         camTransfoDiv.style.display = display;
 
         if(!solo)
         {
-            const camUI = document.getElementById('cam-' + (cam.id) + '-UI');
+            const camUI = document.getElementById('node-' + (node.id) + '-UI');
             const camHeight = document.createElement("div");
             camHeight.classList.add("row");
             camHeight.classList.add("s-p");
-            camHeight.id = "cam-solo-height";
-            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(cam.YPos * currentUnit * 10) /10.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
+            camHeight.id = "node-solo-height";
+            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(node.YPos * currentUnit * 10) /10.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
             camUI.appendChild(camHeight);
         }
         else
         {
-            document.getElementById('cam-solo-height').remove();
+            document.getElementById('node-solo-height').remove();
         }
         iconElem.dataset.icon = solo ? "bx:search-alt-2" : "bx:log-out";
     }

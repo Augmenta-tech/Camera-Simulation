@@ -12,7 +12,7 @@ class UIManager{
         {
             document.getElementById("areaWantedWidth").value = document.getElementById("givenSceneWidth").value;
             document.getElementById("areaWantedHeight").value = document.getElementById("givenSceneHeight").value;
-            document.getElementById('hook-cam').value = document.getElementById('hook-cam').value ? document.getElementById('hook-cam').value : 4.5;
+            document.getElementById('hook-node').value = document.getElementById('hook-node').value ? document.getElementById('hook-node').value : 4.5;
         }
 
         function createFormModal()
@@ -54,7 +54,7 @@ class UIManager{
             title.innerHTML = "Choose the type.s of camera.s you want to use";
             camTypesForm.appendChild(title);
             camerasTypes.filter(c => c.recommanded).forEach(c => {
-                //const hookHeight = parseFloat(document.getElementById("hook-cam").value);
+                //const hookHeight = parseFloat(document.getElementById("hook-node").value);
                 //if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById("tracking-mode").value))
                 //{
                     const camTypeChoice = document.createElement("div");
@@ -81,7 +81,7 @@ class UIManager{
             //place cameras
             const givenWidth = parseFloat(document.getElementById('areaWantedWidth').value);
             const givenHeight = parseFloat(document.getElementById('areaWantedHeight').value);
-            const camsHeight = parseFloat(document.getElementById('hook-cam').value);
+            const camsHeight = parseFloat(document.getElementById('hook-node').value);
 
             if(!givenWidth || !givenHeight)
             {
@@ -134,15 +134,13 @@ class UIManager{
             }
             else
             {
-                console.log("here");
-                console.log(configs)
-                sceneManager.updateBorder(givenWidth, givenHeight);
+                sceneManager.updateSceneBorder(givenWidth, givenHeight);
 
                 configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                 configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
                 configs.sort((A,B) => A.typeID - B.typeID);
                 let chosenConfig = configs[0];
-                sceneManager.resetCams();
+                sceneManager.removeNodes();
 
                 let offsetX = chosenConfig.w / 2.0;
                 let offsetY = chosenConfig.h / 2.0;
@@ -157,9 +155,9 @@ class UIManager{
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.addCamera(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.addNode(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.addCamera(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.addNode(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
 
                     }
                 }

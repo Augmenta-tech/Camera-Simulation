@@ -13,37 +13,37 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { camerasTypes, units } from './cameras.js'
 
-class Camera{
+class Node{
     static loadFont(callback)
     {
         new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
-            Camera.font = response;
+            Node.font = response;
             callback();
             return;
         });
     }
     static font;
     static DEFAULT_CAMERA_TYPE_ID = 0;
-    static DEFAULT_CAMERA_HEIGHT = 4.5;
-    static DEFAULT_CAMERA_PITCH = - Math.PI / 2.0;
-    static SIZE_TEXT_CAMERA = 0.4;
+    static DEFAULT_NODE_HEIGHT = 4.5;
+    static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
+    static SIZE_TEXT_NODE = 0.4;
 
-    constructor(id, typeID = Camera.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Camera.DEFAULT_CAMERA_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+    constructor(id, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = Node.DEFAULT_NODE_HEIGHT, p_z = 0, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
-        this.type = camerasTypes.find(t => t.id === typeID);
-        this.XPos = x;
-        this.YPos = y;
-        this.ZPos = z;
-        this.pitch = p;
-        this.yaw = a;
-        this.roll = r;
+        this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
+        this.xPos = p_x;
+        this.yPos = p_y;
+        this.zPos = p_z;
+        this.xRot = r_x;
+        this.yRot = r_y;
+        this.zRot = r_z;
 
-        this.cameraPerspective = buildCamera(this.type, this.XPos, this.YPos, this.ZPos, this.pitch, this.yaw, this.roll);
+        this.cameraPerspective = buildCamera(this.cameraType, this.xPos, this.yPos, this.zPos, this.xRot, this.yRot, this.zRot);
         this.cameraPerspectiveHelper = new CameraHelper( this.cameraPerspective );
     
         this.color = new Color(Math.random(), Math.random(), Math.random());
-        this.mesh = buildMesh(this.color, this.XPos, this.YPos, this.ZPos);
+        this.mesh = buildMesh(this.color, this.xPos, this.yPos, this.zPos);
 
         this.coveredPointsAbove = [];
 
@@ -55,22 +55,22 @@ class Camera{
         this.areaAppear = true;
         this.areaValue = 0;
 
-        this.nameText = buildTextMesh("Node " + (this.id+1), Camera.SIZE_TEXT_CAMERA, this.XPos - Camera.SIZE_TEXT_CAMERA * 2, this.YPos - (this.type.rangeFar - 1), this.ZPos + Camera.SIZE_TEXT_CAMERA/2.0)
-        this.areaDisplay = buildTextMesh("AREA VALUE", Camera.SIZE_TEXT_CAMERA * 2/3.0, this.XPos - Camera.SIZE_TEXT_CAMERA * 4/3.0, this.YPos - (this.type.rangeFar - 1), this.ZPos + 3*Camera.SIZE_TEXT_CAMERA/2.0);
+        this.nameText = buildTextMesh("Node " + (this.id+1), Node.SIZE_TEXT_NODE, this.xPos - Node.SIZE_TEXT_NODE * 2, this.yPos - (this.cameraType.rangeFar - 1), this.zPos + Node.SIZE_TEXT_NODE/2.0)
+        this.areaValueText = buildTextMesh("AREA VALUE", Node.SIZE_TEXT_NODE * 2/3.0, this.xPos - Node.SIZE_TEXT_NODE * 4/3.0, this.yPos - (this.cameraType.rangeFar - 1), this.zPos + 3*Node.SIZE_TEXT_NODE/2.0);
 
-
-        function buildCamera(camType, x, y, z, pitch, yaw, roll)
+    /* BUILDERS */
+        function buildCamera(camType, pos_x, pos_y, pos_z, rot_x, rot_y, rot_z)
         {
             const camPersp = new PerspectiveCamera( camType.VFov, camType.aspectRatio, camType.rangeNear, camType.rangeFar );
 
-            camPersp.position.set(x, y, z);
+            camPersp.position.set(pos_x, pos_y, pos_z);
 
-            camPersp.rotateX(Camera.DEFAULT_CAMERA_PITCH);
-            camPersp.rotateOnWorldAxis(new Vector3(1,0,0), pitch);
-            camPersp.rotateOnAxis(new Vector3(0,1,0), yaw);
+            camPersp.rotateX(Node.DEFAULT_NODE_ROTATION_X);
+            camPersp.rotateOnWorldAxis(new Vector3(1,0,0), rot_x);
+            camPersp.rotateOnAxis(new Vector3(0,1,0), rot_y);
             let rotationAxis = new Vector3();
             camPersp.getWorldDirection(rotationAxis);
-            camPersp.rotateOnWorldAxis(rotationAxis, roll);
+            camPersp.rotateOnWorldAxis(rotationAxis, rot_z);
 
             return camPersp;
         }
@@ -88,7 +88,7 @@ class Camera{
 
         function buildTextMesh(text, size, initialXPos, initialYPos, initialZPos)
         {
-            const textGeometry = new TextGeometry(text, { font: Camera.font, size: size, height: 0.01 } );
+            const textGeometry = new TextGeometry(text, { font: Node.font, size: size, height: 0.01 } );
             const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ))
             textMesh.position.set(initialXPos, initialYPos, initialZPos);
             textMesh.rotation.x = -Math.PI / 2.0;
@@ -96,13 +96,14 @@ class Camera{
             return textMesh;
         }
 
+    /* SCENE MANAGEMENT */
         this.addToScene = function(scene)
         {
             scene.add(this.cameraPerspective);
             scene.add(this.cameraPerspectiveHelper);
             scene.add(this.mesh);
             scene.add(this.nameText);
-            scene.add(this.areaDisplay);
+            scene.add(this.areaValueText);
             this.areaAppear = true;
         }
 
@@ -117,9 +118,10 @@ class Camera{
             scene.remove(this.areaCoveredWallX);
             scene.remove(this.areaCoveredWallZ);
             scene.remove(this.nameText);
-            scene.remove(this.areaDisplay);
+            scene.remove(this.areaValueText);
         }
 
+    /* USER'S ACTION */
         //TODO: Mettre le code de la UI dans camera UI (stocke sa propre camera UI et appelle les méthodes)
         this.changeVisibility = function(display = !this.areaAppear)
         {
@@ -128,35 +130,35 @@ class Camera{
             this.cameraPerspective.visible = value;
             this.cameraPerspectiveHelper.visible = value;
             this.nameText.visible = value;
-            let iconElem = document.getElementById('cam-' + (this.id) + '-visible').firstChild;
+            let iconElem = document.getElementById('node-' + (this.id) + '-visible').firstChild;
             iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
-            this.areaDisplay.visible = value;
+            this.areaValueText.visible = value;
         }
 
         this.updatePosition = function(currentUnit)
         {
-            this.XPos = this.mesh.position.x;
-            this.YPos = this.mesh.position.y;
-            this.ZPos = this.mesh.position.z;
-            this.cameraPerspective.position.set(this.XPos, this.YPos, this.ZPos);
+            this.xPos = this.mesh.position.x;
+            this.yPos = this.mesh.position.y;
+            this.zPos = this.mesh.position.z;
+            this.cameraPerspective.position.set(this.xPos, this.yPos, this.zPos);
     
-            document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.XPos * currentUnit * 10)/10.0;
-            document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.ZPos * currentUnit * 10)/10.0;
-            document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.YPos * currentUnit * 10)/10.0;
+            document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.xPos * currentUnit * 10)/10.0;
+            document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.zPos * currentUnit * 10)/10.0;
+            document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.yPos * currentUnit * 10)/10.0;
         }
 
-        this.updateTextArea = function(currentUnit)
+        this.updateAreaText = function(currentUnit)
         {
-            this.areaDisplay.geometry.dispose();
-            this.areaDisplay.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
+            this.areaValueText.geometry.dispose();
+            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: Node.font, size: Node.SIZE_TEXT_NODE * 2/3.0, height: 0.01 } );
             //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft') + ", Y: " + Math.round(this.ZPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft'), { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         }
 
         this.changeTextPosition = function(center)
         {
-            this.nameText.position.copy(center.add(new Vector3( - Camera.SIZE_TEXT_CAMERA * 2, 0.1, 0)));
-            this.areaDisplay.position.copy(center.add(new Vector3(0, 0, 1.5*Camera.SIZE_TEXT_CAMERA )));
-            this.areaDisplay.visible = this.areaAppear;
+            this.nameText.position.copy(center.add(new Vector3( - Node.SIZE_TEXT_NODE * 2, 0.1, 0)));
+            this.areaValueText.position.copy(center.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE )));
+            this.areaValueText.visible = this.areaAppear;
         }
 
         this.update = function()
@@ -205,10 +207,10 @@ class Camera{
 
             this.nameText.geometry.dispose();
             this.nameText.material.dispose();
-            this.areaDisplay.geometry.dispose();
-            this.areaDisplay.material.dispose();
+            this.areaValueText.geometry.dispose();
+            this.areaValueText.material.dispose();
         }
     }
 }
 
-export { Camera }
+export { Node }
