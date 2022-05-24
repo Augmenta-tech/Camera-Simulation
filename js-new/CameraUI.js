@@ -79,8 +79,8 @@ class CameraUI{
                 </div>`;
 
 
-            const inspectorDiv = document.getElementById('inspector');
-            inspectorDiv.appendChild(cameraUIdiv);
+            const sensorDiv = document.getElementById('sensors');
+            sensorDiv.appendChild(cameraUIdiv);
 
             return cameraUIdiv;
         }
@@ -223,7 +223,7 @@ class CameraUI{
             const hidden = camInfosUI.style.display === "none";
             camInfosUI.style.display = hidden ?  "block" : "none";
             camUIheader.style.marginBottom = hidden ? "0px" : "-100px"
-            camUIheader.style.marginTop = hidden ? "0px" : "-10px"
+            camUIheader.style.marginTop = hidden ? "0px" : "-4px"
             const iconElem = document.getElementById('cam-' + (cam.id) + '-hide-UI').firstChild;
             iconElem.dataset.icon = hidden ? "bx:minus" : "bx:plus";
         }

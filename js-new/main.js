@@ -66,8 +66,7 @@ function animate() {
     requestAnimationFrame( animate );
 
     viewportManager.render();
-
-    isAreaCoveredUI();
+    uiManager.update(viewportManager.sceneManager);
 }
 
 
@@ -150,13 +149,4 @@ function onKeyDown( event ) {
             break;
 
     }
-}
-
-/* TO PUT SOMEWHERE ELSE */
-function isAreaCoveredUI()
-{
-    const coversArea = viewportManager.sceneManager.doesCoverArea();
-    const coversUI = document.getElementById('covers-check');
-    coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
-    coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
 }

@@ -121,7 +121,7 @@ strong{
 }
 
 [data-camera]{
-  padding: 29px;
+  padding: 20px 29px 29px;
   border-bottom: 2px solid var(--color-viewport);
 }
 [data-camera] p{
@@ -236,6 +236,13 @@ canvas{
   position: absolute;
   width: 100%;
   bottom: 25px;
+}
+
+.number-nodes{
+  line-height: 25px;
+  font-weight: bold;
+  margin-left: 29px;
+  margin-top: 20px;
 }
 
 #select-camera{

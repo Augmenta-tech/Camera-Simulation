@@ -22,11 +22,16 @@ class UIManager{
                 resetFormValues();
                 formModal.style.display = "block"
             });
-            document.getElementById("close-form").addEventListener('click', () => formModal.style.display = "none");
+            document.getElementById("close-form").addEventListener('click', () => closeModal());
             
-            window.addEventListener('click', () => {
-                if(event.target == formModal) formModal.style.display = "none"
+            window.addEventListener('mousedown', () => {
+                if(event.target === formModal) closeModal();
             });
+
+            function closeModal()
+            {
+                formModal.style.display = "none"
+            }
         }
         
         function createShareModal()
@@ -161,6 +166,26 @@ class UIManager{
                 //placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
                 document.getElementById("generate-scene-modal").style.display = "none";
             }
+        }
+
+        /* UPDATE */
+        function isAreaCoveredUI(sceneManager)
+        {
+            const coversArea = sceneManager.doesCoverArea();
+            const coversUI = document.getElementById('covers-check');
+            coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
+            coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
+        }
+        
+        function changeNumberOfNodes(sceneManager)
+        {
+            document.getElementById('nb-nodes').innerHTML = sceneManager.getNbNodes();
+        }
+
+        this.update = function(sceneManager)
+        {
+            isAreaCoveredUI(sceneManager);
+            changeNumberOfNodes(sceneManager);
         }
     }
 }

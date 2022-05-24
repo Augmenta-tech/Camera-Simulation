@@ -12,7 +12,9 @@
 
   <body>
     <div class="row full-height">
+      <!-- LEFT -->
       <div id="main">
+        <!-- HEADER -->
         <div id="header" class="row s-p">
           <a href="https://www.augmenta.tech">
             <img src="img/augmenta-logo.png" alt="Augmenta">
@@ -27,6 +29,8 @@
             <!-- TO ADD <p>Help ?</p> -->
           </div>
         </div>
+
+        <!-- VIEWPORT -->
         <div id="viewport">
           <!-- The Modal -->
           <div id="link-modal" class="modal">
@@ -73,17 +77,10 @@
         </div>
       </div>
 
+      <!-- INSPECTOR - RIGHT -->
       <div id="inspector">
+        <!-- SCENE PANEL -->
         <div id="scene-info">
-          <h1>Scene Size</h1>
-          <div>
-            <p>Horizontal length</p>
-            <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
-          </div>
-          <div>
-            <p>Vertical length</p>
-            <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
-          </div>
           <div id="open-scene-form" class="active" data-button>
             <p >Generate My Scene</p>
           </div>
@@ -132,17 +129,33 @@
             </div>
           </div>
           <!-- End Modal -->
-          
+
+          <h1>Scene Size</h1>
+          <div>
+            <p>Horizontal length</p>
+            <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+          </div>
+          <div>
+            <p>Vertical length</p>
+            <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+          </div>
           <div class="row">
             <p>Scene fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
           </div>
         </div>
-        <div id="cameras-buttons" class="row">
-          <div id="new-camera" class="active" data-button>
-            <p>+ New Node</p>
+
+        <!-- SENSOR PANEL -->
+        <div id="sensors">
+          <div class="row">
+            <p class="number-nodes">Number of Nodes: <span id="nb-nodes">0</span></p>
           </div>
-          <div id="delete-cameras" data-button>
-            <p>Delete all nodes</p>
+          <div id="cameras-buttons" class="row">
+            <div id="new-camera" class="active" data-button>
+              <p>+ New Node</p>
+            </div>
+            <div id="delete-cameras" data-button>
+              <p>Delete all nodes</p>
+            </div>
           </div>
         </div>
       </div>

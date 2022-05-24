@@ -16,7 +16,8 @@ import {
     Vector3,
     Ray,
     Plane,
-    Frustum
+    Frustum,
+    Color
 } from 'three';
 import { DoubleSide } from 'three';
 
@@ -39,6 +40,7 @@ class SceneManager{
     constructor(_transformControl)
     {
         this.#scene = new Scene();
+        this.#scene.background = new Color(0x222222);
         const cameras = [];
         const dummies = [];
         this.camMeshes = [];
@@ -61,7 +63,7 @@ class SceneManager{
 
         const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         
-        const givenAreaPolygon = { regions: [[]], inverted: true};
+        const givenAreaPolygonRegions = [[]];
 
         //DEBUG
         const spheres = [];
@@ -97,8 +99,10 @@ class SceneManager{
             const gridHelper = buildGridHelper(this.size);
             this.#scene.add( gridHelper );
 
-
+            // Scene Checkerboard
             grid.addPlanesToScene(this.#scene);
+
+
             this.#scene.add(this.transformControl);
             this.#scene.add(sceneBorder);
 
@@ -158,7 +162,7 @@ class SceneManager{
 
         function buildGridHelper(size)
         {
-            const gridHelper = new GridHelper( size, size );
+            const gridHelper = new GridHelper( size, size, 0x444444, 0x444444 );
             gridHelper.position.y = -0.006
 
             return gridHelper;
@@ -166,16 +170,34 @@ class SceneManager{
 
         function createSceneFromURL(sceneManager)
         {
-            let url = document.location.href
-            const index = url.indexOf('?')
+            let url = document.location.href;
+            const index = url.indexOf('&');
             if(index === -1)
             {
                 sceneManager.addCamera();
             }
             else
             {
-                url = url.substring(index + 1);
+                url = url.substring(url.indexOf('?') + 1);
                 const cams = url.split('&');
+                const sceneInfo = cams.shift();
+                const infos = sceneInfo.split(',');
+                infos.forEach(info => {
+                    const keyVal = info.split('=');
+                    const key = keyVal[0];
+                    const val = parseFloat(keyVal[1]);
+                    switch(key)
+                    {
+                        case "L":
+                            document.getElementById("givenSceneWidth").value = val
+                            break;
+                        case "l":
+                            document.getElementById("givenSceneHeight").value = val;
+                            break;
+                        default:
+                            break;
+                    }
+                });
                 
                 cams.forEach(c => {
                     const props = c.split(',');
@@ -218,6 +240,7 @@ class SceneManager{
                     sceneManager.addCamera(true, typeID, x, y, z, p, a, r)
                 })
             }
+            sceneManager.updateBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
         }
 
 
@@ -350,10 +373,12 @@ class SceneManager{
             this.currentUnit = unit;
         }
 
-        this.updateBorder = function(givenWidth, givenHeight)
+        this.updateBorder = function(givenWidthValue, givenHeightValue)
         {
-            if(givenWidth && givenHeight)
+            if(givenWidthValue && givenHeightValue)
             {
+                const givenWidth = parseFloat(givenWidthValue);
+                const givenHeight = parseFloat(givenHeightValue);
                 const geometry = new BoxGeometry(Math.round(givenWidth * 10) / 10.0, 0.001, Math.round(givenHeight * 10) / 10.0);
                 sceneBorder.geometry = new EdgesGeometry(geometry);
                 sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
@@ -362,11 +387,11 @@ class SceneManager{
                 grid.setSize(givenWidth, givenHeight);
         
                 //Calculate area polygon
-                givenAreaPolygon.regions[0] = [];
-                givenAreaPolygon.regions[0].push([0, 0]);
-                givenAreaPolygon.regions[0].push([givenWidth, 0]);
-                givenAreaPolygon.regions[0].push([givenWidth, givenHeight]);
-                givenAreaPolygon.regions[0].push([0, givenHeight]);
+                givenAreaPolygonRegions[0].length = 0;
+                givenAreaPolygonRegions[0].push([0, 0]);
+                givenAreaPolygonRegions[0].push([givenWidth, 0]);
+                givenAreaPolygonRegions[0].push([givenWidth, givenHeight]);
+                givenAreaPolygonRegions[0].push([0, givenHeight]);
             }
         }
 
@@ -378,11 +403,16 @@ class SceneManager{
 
         this.generateLink = function()
         {
-            let url = document.location.href
-            let index = url.indexOf('?')
+            let url = document.location.href;
+            let index = url.indexOf('?');
             if(index !== -1) url = url.substring(0, index);
             if(url[url.length-1] != '/') url += '/';
             url += '?';
+            url += "L=";
+            url += document.getElementById("givenSceneWidth").value ? document.getElementById("givenSceneWidth").value : 0;
+            url += ",l=";
+            url += document.getElementById("givenSceneHeight").value ? document.getElementById("givenSceneHeight").value : 0;
+            url += '&';
             cameras.forEach(c => {
                 url += "id=";
                 url += c.id;
@@ -771,7 +801,7 @@ class SceneManager{
             
             materialArea.side = DoubleSide;
             materialArea.transparent = true;
-            materialArea.opacity = 0.7;
+            materialArea.opacity = 0.6;
             materialArea.alphaTest = 0.5;
             
             const areaCovered = new Mesh( geometryArea, materialArea );
@@ -781,20 +811,32 @@ class SceneManager{
 
         this.doesCoverArea = function()
         {
-            let union = givenAreaPolygon;
+            //PolyBool.epsilon(0.001);
+            const unionRegions = [...givenAreaPolygonRegions];
+            let union = {
+                regions: unionRegions,
+                inverted: true
+            };
+
             cameras.forEach(c => {
                 const polyCam = {
                     regions: [[]],
                     inverted: false
-                }
+                };
                 c.coveredPointsAbove.forEach(p => {
                     polyCam.regions[0].push([p.x, p.z]);
                 });
-                union = PolyBool.union(union, polyCam);
+
+                const segmentsCam = PolyBool.segments(polyCam);
+                const segmentsUnion = PolyBool.segments(union);
+                const comb = PolyBool.combine(segmentsCam, segmentsUnion);
+                union = PolyBool.polygon(PolyBool.selectUnion(comb))
             });
 
             return union.regions.length === 0;
         }
+
+        this.getNbNodes = () => cameras.length;
 
         this.update = function ()
         {
