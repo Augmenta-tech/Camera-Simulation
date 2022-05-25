@@ -145,7 +145,6 @@ function onKeyDown( event ) {
 
         case 80: /*P*/
 
-            console.log(viewportManager.sceneManager.heightDetected);
             break;
 
     }

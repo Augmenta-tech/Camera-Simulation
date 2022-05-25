@@ -873,7 +873,6 @@ class SceneManager{
          */
         this.doesCoverArea = function()
         {
-            PolyBool.epsilon(0.1);
             const unionRegions = [...givenAreaPolygonRegions];
             let union = {
                 regions: unionRegions,
@@ -889,12 +888,12 @@ class SceneManager{
                     polyCam.regions[0].push([p.x, p.z]);
                 });
 
-                union = PolyBool.union(union, polyCam);
-                /*
+                //union = PolyBool.union(union, polyCam);
+                
                 const segmentsCam = PolyBool.segments(polyCam);
                 const segmentsUnion = PolyBool.segments(union);
                 const comb = PolyBool.combine(segmentsCam, segmentsUnion);
-                union = PolyBool.polygon(PolyBool.selectUnion(comb))*/
+                union = PolyBool.polygon(PolyBool.selectUnion(comb))
             });
 
             return union.regions.length === 0;
