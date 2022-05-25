@@ -8,21 +8,13 @@ import {
     Vector3
 } from 'three';
 
-import { FontLoader } from 'three-loaders/FontLoader.js';
 import { TextGeometry } from 'three-text-geometry';
 
 import { camerasTypes, units } from './cameras.js'
 
+import { SceneManager } from './SceneManager.js';
+
 class Node{
-    static loadFont(callback)
-    {
-        new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
-            Node.font = response;
-            callback();
-            return;
-        });
-    }
-    static font;
     static DEFAULT_CAMERA_TYPE_ID = 0;
     static DEFAULT_NODE_HEIGHT = 4.5;
     static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
@@ -88,7 +80,7 @@ class Node{
 
         function buildTextMesh(text, size, initialXPos, initialYPos, initialZPos)
         {
-            const textGeometry = new TextGeometry(text, { font: Node.font, size: size, height: 0.01 } );
+            const textGeometry = new TextGeometry(text, { font: SceneManager.font, size: size, height: 0.01 } );
             const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ))
             textMesh.position.set(initialXPos, initialYPos, initialZPos);
             textMesh.rotation.x = -Math.PI / 2.0;
@@ -150,7 +142,7 @@ class Node{
         this.updateAreaText = function(currentUnit)
         {
             this.areaValueText.geometry.dispose();
-            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: Node.font, size: Node.SIZE_TEXT_NODE * 2/3.0, height: 0.01 } );
+            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * 2/3.0, height: 0.01 } );
             //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft') + ", Y: " + Math.round(this.ZPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft'), { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         }
 

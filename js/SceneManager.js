@@ -24,6 +24,8 @@ import { DoubleSide } from 'three';
 //DEBUG
 import { SphereGeometry } from 'three';
 
+import { FontLoader } from 'three-loaders/FontLoader.js';
+
 import * as POLYBOOL from 'polybool';
 
 import { Dummy } from './Dummy.js';
@@ -35,6 +37,15 @@ import { units } from './cameras.js'
 
 
 class SceneManager{
+    static loadFont(callback)
+    {
+        new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+            SceneManager.font = response;
+            callback();
+            return;
+        });
+    }
+    static font;
     #scene;
 
     constructor(_transformControl)
@@ -58,7 +69,7 @@ class SceneManager{
         const wallXNormal = new Vector3(1,0,0);
         const wallZNormal = new Vector3(0,0,1);
 
-        const checkerboard = new Checkerboard(this.currentUnit);
+        this.checkerboard;
 
         const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         
@@ -99,7 +110,8 @@ class SceneManager{
             this.#scene.add( gridHelper );
 
             // Scene Checkerboard
-            checkerboard.addPlanesToScene(this.#scene);
+            this.checkerboard = new Checkerboard(this.currentUnit);
+            this.checkerboard.addPlanesToScene(this.#scene);
 
 
             this.#scene.add(this.transformControl);
@@ -324,7 +336,7 @@ class SceneManager{
          */
         this.addNode = function(autoConstruct = false, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
         {
-            if(!Node.font)
+            if(!SceneManager.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
                 return;
@@ -379,9 +391,9 @@ class SceneManager{
 
         this.toggleUnit = function()
         {
-            const unit = checkerboard.unit === units.meters ? units.feets : units.meters;
+            const unit = this.checkerboard.unit === units.meters ? units.feets : units.meters;
 
-            checkerboard.toggleUnit(unit);
+            this.checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
                 e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 10) / 10.0;
@@ -422,7 +434,7 @@ class SceneManager{
                 sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
 
                 //update grid
-                checkerboard.setSize(givenWidth, givenHeight);
+                this.checkerboard.setSize(givenWidth, givenHeight);
         
                 //Calculate area polygon
                 givenAreaPolygonRegions[0].length = 0;
@@ -636,7 +648,7 @@ class SceneManager{
 
                 //display area value 
                 const previousValue = node.areaValue;
-                node.areaValue = calculateArea(coveredPointsAbove);
+                node.areaValue = calculateArea(coveredPointsAbove, this.checkerboard.unit);
 
                 //Place text 
                 if(coveredPointsAbove.length > 2)
@@ -781,7 +793,7 @@ class SceneManager{
          * @param {Array} borderPoints array of Vector3 vertices of a convex shape. They must be ordered
          * @returns {float} value of area of the shape delimited by borderPoints
          */
-        function calculateArea(borderPoints)
+        function calculateArea(borderPoints, unit)
         {
             let areaValue = 0;
             /** MATH PARAGRAPH
@@ -805,7 +817,7 @@ class SceneManager{
                 areaValue += areaOfThisTriangle;
             }
 
-            return areaValue / (checkerboard.unit * checkerboard.unit);
+            return areaValue / (unit * unit);
         }
 
         function getBarycentre(points)
@@ -898,7 +910,7 @@ class SceneManager{
             });
         }
 
-        Node.loadFont(() => this.initScene());
+        SceneManager.loadFont(() => this.initScene());
     }
 
     get scene(){ return this.#scene; }
