@@ -101,8 +101,8 @@ class UIManager{
             const inputWidth = parseFloat(document.getElementById('areaWantedWidth').value);
             const inputHeight = parseFloat(document.getElementById('areaWantedHeight').value);
 
-            const givenWidth = Math.round(inputWidth / sceneManager.currentUnit * 100) / 100;
-            const givenHeight = Math.round(inputHeight / sceneManager.currentUnit * 100) / 100;
+            const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit * 100) / 100;
+            const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit * 100) / 100;
             const camsHeight = Math.round(parseFloat(document.getElementById('hook-node').value) / sceneManager.currentUnit * 100) / 100;
             console.log(givenWidth);
 
@@ -157,7 +157,7 @@ class UIManager{
             }
             else
             {
-                sceneManager.updateSceneBorder(givenWidth * sceneManager.currentUnit, givenHeight * sceneManager.currentUnit);
+                sceneManager.updateSceneBorder(inputWidth, inputHeight);
 
                 configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                 configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
