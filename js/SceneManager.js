@@ -17,7 +17,9 @@ import {
     Ray,
     Plane,
     Frustum,
-    Color
+    Color,
+    ArrowHelper,
+    Object3D
 } from 'three';
 import { DoubleSide } from 'three';
 
@@ -30,7 +32,7 @@ import * as POLYBOOL from 'polybool';
 
 import { Dummy } from './Dummy.js';
 import { Node } from './Node.js';
-import { CameraUI } from './CameraUI.js';
+import { NodeUI } from './NodeUI.js';
 import { Checkerboard } from './Checkerboard.js';
 
 import { units } from './cameras.js'
@@ -46,6 +48,7 @@ class SceneManager{
         });
     }
     static font;
+    static DEFAULT_UNIT = units.meters;
     #scene;
 
     constructor(_transformControl)
@@ -58,7 +61,7 @@ class SceneManager{
 
         this.transformControl = _transformControl;
 
-        this.currentUnit = units.meters;
+        this.currentUnit = SceneManager.DEFAULT_UNIT;
 
         this.size = 70;
         this.heightDetected = 1;
@@ -231,38 +234,43 @@ class SceneManager{
                     const props = c.split(',');
                     let id, typeID;
                     let x, y, z, p, a, r;
+
                     props.forEach(prop => {
                         const keyVal = prop.split('=');
                         const key = keyVal[0];
-                        const val = parseFloat(keyVal[1]);
-                        switch(key)
+                        const stringVal = keyVal[1];
+                        if(key && stringVal)
                         {
-                            case "id":
-                                id = val
-                                break;
-                            case "typeID":
-                                typeID = val;
-                                break;
-                            case "x":
-                                x = val;
-                                break;
-                            case "y":
-                                y = val;
-                                break;
-                            case "z":
-                                z = val;
-                                break;
-                            case "p":
-                                p = val;
-                                break;
-                            case "a":
-                                a = val;
-                                break;
-                            case "r":
-                                r = val;
-                                break;
-                            default:
-                                break;
+                            const val = parseFloat(stringVal);
+                            switch(key)
+                            {
+                                case "id":
+                                    id = val
+                                    break;
+                                case "typeID":
+                                    typeID = val;
+                                    break;
+                                case "x":
+                                    x = val;
+                                    break;
+                                case "y":
+                                    y = val;
+                                    break;
+                                case "z":
+                                    z = val;
+                                    break;
+                                case "p":
+                                    p = val;
+                                    break;
+                                case "a":
+                                    a = val;
+                                    break;
+                                case "r":
+                                    r = val;
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     });
                     sceneManager.addNode(true, typeID, x, y, z, p, a, r)
@@ -342,7 +350,7 @@ class SceneManager{
                 return;
             }
             const newCamera = new Node(nodes.length, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new CameraUI(newCamera, this.currentUnit);
+            newCamera.uiElement = new NodeUI(newCamera, this.currentUnit);
             
             //Offset
             if(!autoConstruct)
@@ -396,7 +404,8 @@ class SceneManager{
             this.checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
-                e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 10) / 10.0;
+                if(e.tagName === 'INPUT') e.value = Math.round(e.value / e.dataset.unit * unit * 100) / 100.0;
+                else e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 100) / 100.0;
                 e.dataset.unit = unit;
             });
             const unitCharElements = document.querySelectorAll('[data-unittext]');
@@ -420,16 +429,16 @@ class SceneManager{
         /**
          * Define the border of the scene to track
          * 
-         * @param {*} givenWidthValue horizontal length value entered input.
-         * @param {*} givenHeightValue vertical length value entered input.
+         * @param {*} givenWidthValue horizontal length value entered input in the current unit.
+         * @param {*} givenHeightValue vertical length value entered input in the current unit.
          */
         this.updateSceneBorder = function(givenWidthValue, givenHeightValue)
         {
             if(givenWidthValue && givenHeightValue)
             {
-                const givenWidth = parseFloat(givenWidthValue);
-                const givenHeight = parseFloat(givenHeightValue);
-                const geometry = new BoxGeometry(Math.round(givenWidth * 10) / 10.0, 0.001, Math.round(givenHeight * 10) / 10.0);
+                const givenWidth = parseFloat(givenWidthValue) / this.currentUnit;
+                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit;
+                const geometry = new BoxGeometry(Math.round(givenWidth * 100) / 100.0, 0, Math.round(givenHeight * 100) / 100.0);
                 sceneBorder.geometry = new EdgesGeometry(geometry);
                 sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
 
@@ -900,6 +909,32 @@ class SceneManager{
         }
 
         this.getNbNodes = () => nodes.length;
+
+        // DEBUG
+        this.debug = function()
+        {
+            //this.transformControl.children[0].children.splice(2,3);
+            /*this.transformControl.children.forEach(p =>{
+                p.children.forEach(c => {
+                    c.children.forEach(v => { if(c.id%2 !== 0) v.visible = false;});
+                    c.visible.false;
+                });
+                p.visible = false;
+            })*/
+            //this.transformControl.children[0].children[0].visible = false;
+
+            /*
+            console.log(this.transformControl.children[0].helper.translate.visible)
+            this.transformControl.children[0].helper.translate.visible = false;
+            console.log(this.transformControl.children[0].helper.translate.visible)
+            console.log(this.transformControl.children[0]);
+            this.transformControl.up.set(0,0,-1);
+            this.transformControl.rotation.set(Math.PI/2,0,0);*/
+
+            const up = new ArrowHelper(Object3D.DefaultUp, new Vector3(), 1, 0x0000ff, 0.2, 0.1);
+            up.position.set(nodes[0].xPos, nodes[0].yPos, nodes[0].zPos);
+            this.#scene.add(up);
+        }
 
         this.update = function ()
         {

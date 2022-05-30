@@ -54,6 +54,12 @@ strong{
 
 .row {
   display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display:flex;
+  flex-direction: column;
 }
 
 .s-p{
@@ -295,6 +301,13 @@ strong
 #copy-link{
   width: auto;
   height: auto;
+}
+
+#copy-feedback{
+  display: none;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 /* The Modal (background) */

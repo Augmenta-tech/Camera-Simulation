@@ -1,14 +1,27 @@
 import { camerasTypes } from './cameras.js'
+import { SceneManager } from './SceneManager.js';
 
 class UIManager{
     constructor()
     {
+        resetValues();
         createFormModal();
         addCamTypesToForm();
 
         createShareModal();
 
-        function resetFormValues()
+
+        function resetValues()
+        {
+            const inputs = document.getElementsByTagName('input');//.forEach(elem => elem.dataset.unit = SceneManager.DEFAULT_UNIT);
+            for(let i = 0; i < inputs.length; i++)
+            {
+                inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT;
+                inputs[i].value = '';
+            }
+        }
+
+        function initFormValues()
         {
             document.getElementById("areaWantedWidth").value = document.getElementById("givenSceneWidth").value;
             document.getElementById("areaWantedHeight").value = document.getElementById("givenSceneHeight").value;
@@ -19,7 +32,7 @@ class UIManager{
         {
             const formModal = document.getElementById("generate-scene-modal");
             document.getElementById("open-scene-form").addEventListener('click', () => {
-                resetFormValues();
+                initFormValues();
                 formModal.style.display = "block"
             });
             document.getElementById("close-form").addEventListener('click', () => closeModal());
@@ -43,6 +56,13 @@ class UIManager{
             window.addEventListener('click', () => {
                 if(event.target == copyUrlModal) copyUrlModal.style.display = "none"
             });
+        }
+
+        this.copyLink = function(link)
+        {
+            navigator.clipboard.writeText(link);
+            document.getElementById('copy-feedback').style.display = "block flex";
+            window.setTimeout(() => document.getElementById('copy-feedback').style.display = "none", 2000);
         }
 
         function addCamTypesToForm(){
@@ -78,10 +98,13 @@ class UIManager{
             //set heightDetected 
             sceneManager.heightDetected = parseFloat(document.getElementById('given-height-detection').value);
 
-            //place cameras
-            const givenWidth = parseFloat(document.getElementById('areaWantedWidth').value);
-            const givenHeight = parseFloat(document.getElementById('areaWantedHeight').value);
-            const camsHeight = parseFloat(document.getElementById('hook-node').value);
+            const inputWidth = parseFloat(document.getElementById('areaWantedWidth').value);
+            const inputHeight = parseFloat(document.getElementById('areaWantedHeight').value);
+
+            const givenWidth = Math.round(inputWidth / sceneManager.currentUnit * 100) / 100;
+            const givenHeight = Math.round(inputHeight / sceneManager.currentUnit * 100) / 100;
+            const camsHeight = Math.round(parseFloat(document.getElementById('hook-node').value) / sceneManager.currentUnit * 100) / 100;
+            console.log(givenWidth);
 
             if(!givenWidth || !givenHeight)
             {
@@ -89,8 +112,8 @@ class UIManager{
                 return;
             }
 
-            document.getElementById("givenSceneWidth").value = givenWidth;
-            document.getElementById("givenSceneHeight").value = givenHeight;
+            document.getElementById("givenSceneWidth").value = inputWidth;
+            document.getElementById("givenSceneHeight").value = inputHeight;
 
             let configs = [];
 
@@ -111,7 +134,7 @@ class UIManager{
                 }
                 if(type.rangeFar > augmentaFar) type.rangeFar = augmentaFar;
                 */
-                if(document.getElementById('check-' + type.id)) if(document.getElementById('check-' + type.id).checked && camsHeight <= type.rangeFar && camsHeight >= type.rangeNear + sceneManager.heightDetected)
+                if(document.getElementById('check-' + type.id).checked && camsHeight <= type.rangeFar && camsHeight >= type.rangeNear + sceneManager.heightDetected)
                 {
                     const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
                     const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
@@ -134,7 +157,7 @@ class UIManager{
             }
             else
             {
-                sceneManager.updateSceneBorder(givenWidth, givenHeight);
+                sceneManager.updateSceneBorder(givenWidth * sceneManager.currentUnit, givenHeight * sceneManager.currentUnit);
 
                 configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                 configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);

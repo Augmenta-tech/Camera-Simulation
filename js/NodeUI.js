@@ -2,11 +2,11 @@ import { Vector3 } from 'three'
 
 import { camerasTypes, units } from './cameras.js'
 
-class CameraUI{
-    constructor(_camera, currentUnit)
+class NodeUI{
+    constructor(_node, currentUnit)
     {
-        buildUIDiv(_camera);
-        bindEventListeners(_camera);
+        buildUIDiv(_node);
+        bindEventListeners(_node);
 
         function buildUIDiv(node)
         {
@@ -46,11 +46,11 @@ class CameraUI{
                         <div class="row s-p column-2">
                             <div>
                                 <p id="hfov` + node.id + `">FOV H: <span>` + node.cameraType.HFov + `°</p>
-                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeNear*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeNear*currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                             </div>
                             <div>
                                 <p id="vfov` + node.id + `">FOV V: <span>` + node.cameraType.VFov + `°</p>
-                                <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeFar*currentUnit * 10) / 10.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeFar*currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                             </div>
                         </div>
                     </div>
@@ -60,9 +60,9 @@ class CameraUI{
                                 <p>  Position </p>
                             </div>
                             <div class="row s-p column-2">
-                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(node.xPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-node.zPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(node.yPos * currentUnit * 10) /10.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(node.xPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-node.zPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(node.yPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
                             </div>
                         </div>
                         <div  class="row s-p">
@@ -136,7 +136,7 @@ class CameraUI{
                 switch(element.id.split('-')[1])
                 {
                     case "pos" :
-                        fac = 1 / 10.0;
+                        fac = 1 / 100.0;
                         break;
                     case "rot":
                         fac = 1;
@@ -172,7 +172,7 @@ class CameraUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.zPos = - value / currentUnit;
+                                node.zPos = value / currentUnit;
                                 node.cameraPerspective.position.z = node.zPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -183,7 +183,7 @@ class CameraUI{
                                 node.yaw = value * (Math.PI / 180.0);*/
                                 const rotateYAxis = new Vector3(0,1,0);
                                 rotateYAxis.applyAxisAngle(new Vector3(0,0,- 1), - node.zRot);
-                                node.cameraPerspective.rotateOnAxis(rotateYAxis, value * (Math.PI / 180.0) - node.yRot);
+                                node.cameraPerspective.rotateOnAxis(rotateYAxis, -(value * (Math.PI / 180.0) - node.yRot));
                                 node.yRot = value * (Math.PI / 180.0);
                                 break;
                             default:
@@ -201,7 +201,7 @@ class CameraUI{
                             case "rot":
                                 const rotateZAxis = new Vector3();
                                 node.cameraPerspective.getWorldDirection(rotateZAxis);
-                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis, value * (Math.PI / 180.0) - node.zRot);
+                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis,-(value * (Math.PI / 180.0) - node.zRot));
                                 node.zRot = value * (Math.PI / 180.0);
                                 break;
                             default:
@@ -260,8 +260,8 @@ class CameraUI{
             
             document.getElementById('hfov' + node.id + '').innerHTML = 'FOV H: ' + node.cameraType.HFov + '°';
             document.getElementById('vfov' + node.id + '').innerHTML = 'FOV V: ' + node.cameraType.VFov + '°';
-            document.getElementById('near' + node.id + '').innerHTML = 'NEAR: ' + (Math.round(node.cameraType.rangeNear*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
-            document.getElementById('far' + node.id + '').innerHTML = 'FAR: ' + (Math.round(node.cameraType.rangeFar*currentUnit * 10) / 10.0) + (currentUnit === units.meters ? 'm' : "ft");
+            document.getElementById('near' + node.id + '').innerHTML = 'NEAR: ' + (Math.round(node.cameraType.rangeNear*currentUnit * 100) / 100.0) + (currentUnit === units.meters ? 'm' : "ft");
+            document.getElementById('far' + node.id + '').innerHTML = 'FAR: ' + (Math.round(node.cameraType.rangeFar*currentUnit * 100) / 100.0) + (currentUnit === units.meters ? 'm' : "ft");
             
             
             node.cameraPerspective.fov = node.cameraType.VFov;
@@ -272,7 +272,7 @@ class CameraUI{
     }
 }
 
-export { CameraUI }
+export { NodeUI }
 
 /*
 function addCameraGUI(node)
@@ -306,7 +306,7 @@ function addCameraGUI(node)
             camHeight.classList.add("row");
             camHeight.classList.add("s-p");
             camHeight.id = "node-solo-height";
-            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(node.YPos * currentUnit * 10) /10.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
+            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(node.YPos * currentUnit * 100) /100.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
             camUI.appendChild(camHeight);
         }
         else

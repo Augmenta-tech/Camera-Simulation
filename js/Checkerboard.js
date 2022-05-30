@@ -93,7 +93,7 @@ class Checkerboard{
         function createText(width, height, unit)
         {
             dimensionsText.geometry.dispose();
-            const dimensionsString = Math.round(width*10)/10 + (unit === units.meters ? 'm' : 'ft') + ' x ' + Math.round(height*10)/10 + (unit === units.meters ? 'm' : 'ft')
+            const dimensionsString = Math.round((width / unit)*100)/100 + (unit === units.meters ? 'm' : 'ft') + ' x ' + Math.round((height / unit)*100)/100 + (unit === units.meters ? 'm' : 'ft')
             dimensionsText.geometry = new TextGeometry(dimensionsString, { font: SceneManager.font, size: Checkerboard.SIZE_TEXT_SCENE * 2/3.0, height: 0.01 } );
             const offsetX = 0.14 * dimensionsString.length;
             dimensionsText.position.set(width - 0.2 - offsetX, 0.01, height - 0.2);
@@ -116,7 +116,7 @@ class Checkerboard{
         {
             this.dispose();
             this.unit = 1 / unit;
-            createCheckerboard(this.width, this.height, this.unit);
+            if(this.width > 0 && this.height > 0) createCheckerboard(this.width, this.height, this.unit);
         }
 
         this.setSize = function(newWidth, newHeight)
@@ -139,6 +139,9 @@ class Checkerboard{
                 plane.material.dispose();
             });
             planes.clear();
+
+            dimensionsText.geometry.dispose();
+            dimensionsText.material.dispose();
         }
     }
 }

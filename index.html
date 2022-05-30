@@ -30,15 +30,22 @@
           </div>
         </div>
 
-        <!-- VIEWPORT -->
-        <div id="viewport">
-          <!-- The Modal -->
-          <div id="link-modal" class="modal">
-            <div class="modal-content link">
+        <!-- Share Modal -->
+        <div id="link-modal" class="modal">
+          <div class="modal-content link column">
+            <div class ="row">
               <button id="copy-link" data-button>Get the link of your scene</button>
               <span id="close-link" class="close">&times;</span>
             </div>
+            <div id="copy-feedback" class="row">
+              <p>Copied to clipboard !</p>
+            </div>
           </div>
+        </div>
+        <!-- End Share Modal -->
+
+        <!-- VIEWPORT -->
+        <div id="viewport">
           <!-- ADD TOOLS 
           <div id="toolbar" class="row">
             <div data-tool="1" class="active">
