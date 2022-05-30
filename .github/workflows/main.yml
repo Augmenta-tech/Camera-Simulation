@@ -20,7 +20,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          path: Camera-Simulation
       
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
@@ -28,6 +31,6 @@ jobs:
           server: ${{ secrets.FTP_HOSTNAME }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ${{ env.GITHUB_WORKSPACE }}/Camera-Simulation/
+          local-dir: ./Camera-Simulation/
           server-dir: /
           exclude: '[.github]'
