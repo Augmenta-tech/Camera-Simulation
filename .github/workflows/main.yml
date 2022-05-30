@@ -36,4 +36,3 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
-          log-level: verbose
