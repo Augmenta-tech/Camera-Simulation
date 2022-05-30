@@ -17,9 +17,7 @@ import {
     Ray,
     Plane,
     Frustum,
-    Color,
-    ArrowHelper,
-    Object3D
+    Color
 } from 'three';
 import { DoubleSide } from 'three';
 
@@ -134,8 +132,7 @@ class SceneManager{
 
         function buildFloorMesh(size)
         {
-            const materialFloor = new MeshPhongMaterial( {color: 0x555555});
-            materialFloor.side = DoubleSide;
+            const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
             
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
@@ -863,12 +860,7 @@ class SceneManager{
             const vertices = new Float32Array( verticesArray );
 
             geometryArea.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
-            const materialArea = new MeshBasicMaterial( { color: color } );
-            
-            materialArea.side = DoubleSide;
-            materialArea.transparent = true;
-            materialArea.opacity = 0.6;
-            materialArea.alphaTest = 0.5;
+            const materialArea = new MeshBasicMaterial( {side: DoubleSide, color: color, transparent: true, opacity: 0.6, alphaTest: 0.5 } );
             
             const areaCovered = new Mesh( geometryArea, materialArea );
             return(areaCovered);
@@ -913,27 +905,7 @@ class SceneManager{
         // DEBUG
         this.debug = function()
         {
-            //this.transformControl.children[0].children.splice(2,3);
-            /*this.transformControl.children.forEach(p =>{
-                p.children.forEach(c => {
-                    c.children.forEach(v => { if(c.id%2 !== 0) v.visible = false;});
-                    c.visible.false;
-                });
-                p.visible = false;
-            })*/
-            //this.transformControl.children[0].children[0].visible = false;
-
-            /*
-            console.log(this.transformControl.children[0].helper.translate.visible)
-            this.transformControl.children[0].helper.translate.visible = false;
-            console.log(this.transformControl.children[0].helper.translate.visible)
-            console.log(this.transformControl.children[0]);
-            this.transformControl.up.set(0,0,-1);
-            this.transformControl.rotation.set(Math.PI/2,0,0);*/
-
-            const up = new ArrowHelper(Object3D.DefaultUp, new Vector3(), 1, 0x0000ff, 0.2, 0.1);
-            up.position.set(nodes[0].xPos, nodes[0].yPos, nodes[0].zPos);
-            this.#scene.add(up);
+            
         }
 
         this.update = function ()
