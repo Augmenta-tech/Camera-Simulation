@@ -104,7 +104,6 @@ class UIManager{
             const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit * 100) / 100;
             const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit * 100) / 100;
             const camsHeight = Math.round(parseFloat(document.getElementById('hook-node').value) / sceneManager.currentUnit * 100) / 100;
-            console.log(givenWidth);
 
             if(!givenWidth || !givenHeight)
             {

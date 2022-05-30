@@ -470,9 +470,9 @@ class SceneManager{
             if(url[url.length-1] != '/') url += '/';
             url += '?';
             url += "L=";
-            url += document.getElementById("givenSceneWidth").value ? document.getElementById("givenSceneWidth").value : 0;
+            url += document.getElementById("givenSceneWidth").value ? Math.floor(document.getElementById("givenSceneWidth").value / this.currentUnit  * 100)/100: 0;
             url += ",l=";
-            url += document.getElementById("givenSceneHeight").value ? document.getElementById("givenSceneHeight").value : 0;
+            url += document.getElementById("givenSceneHeight").value ? Math.floor(document.getElementById("givenSceneHeight").value / this.currentUnit * 100)/100 : 0;
             url += ",h=";
             url += this.heightDetected;
             url += '&';
