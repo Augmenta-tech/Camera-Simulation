@@ -10,10 +10,9 @@ import {
     sRGBEncoding
 } from 'three';
 
-import { TransformControls } from 'three-controls/TransformControls.js';
-
 import { OrbitControls } from './lib/OrbitControls.js';
 import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
+import { TransformControls } from './lib/TransformControls.js';
 
 import { SceneManager } from './SceneManager.js';
 
@@ -93,7 +92,7 @@ class ViewportManager{
 
         function buildGuizmo(controls, viewportManager)
         {
-            const gizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff" }, viewportManager);
+            const gizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff", colors: { x: ['#bf4747', '#662626'], y: ['#708eb0', '#405063'], z: ['#37a48a', '#1c5446'] } }, viewportManager);
             viewportElement.appendChild(gizmo.domElement);
 
             return gizmo;

@@ -59,10 +59,10 @@ class Node{
 
             camPersp.rotateX(Node.DEFAULT_NODE_ROTATION_X);
             camPersp.rotateOnWorldAxis(new Vector3(1,0,0), rot_x);
-            camPersp.rotateOnAxis(new Vector3(0,1,0), rot_y);
+            camPersp.rotateOnAxis(new Vector3(0,1,0), -rot_y);
             let rotationAxis = new Vector3();
             camPersp.getWorldDirection(rotationAxis);
-            camPersp.rotateOnWorldAxis(rotationAxis, rot_z);
+            camPersp.rotateOnWorldAxis(rotationAxis, -rot_z);
 
             return camPersp;
         }
@@ -134,9 +134,9 @@ class Node{
             this.zPos = this.mesh.position.z;
             this.cameraPerspective.position.set(this.xPos, this.yPos, this.zPos);
     
-            document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.xPos * currentUnit * 10)/10.0;
-            document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(- this.zPos * currentUnit * 10)/10.0;
-            document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.yPos * currentUnit * 10)/10.0;
+            document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.xPos * currentUnit * 100)/100.0;
+            document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.zPos * currentUnit * 100)/100.0;
+            document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.yPos * currentUnit * 100)/100.0;
         }
 
         this.updateAreaText = function(currentUnit)

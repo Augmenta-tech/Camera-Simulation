@@ -12,6 +12,12 @@
   copies or substantial portions of the Software.
  */
 
+/** Modifications: 
+ * 
+ * In createAxis() : inversion y and z
+ * OnMouseclick() : different behaviour 
+ */
+
 import {
   Vector2,
   Vector3,
