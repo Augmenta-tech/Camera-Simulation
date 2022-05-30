@@ -26,7 +26,7 @@ jobs:
           path: Camera-Simulation
       
       - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
           username: ${{ secrets.FTP_USER }}
