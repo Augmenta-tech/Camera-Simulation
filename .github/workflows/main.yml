@@ -28,6 +28,6 @@ jobs:
           server: ${{ secrets.FTP_HOSTNAME }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: $GITHUB_WORKSPACE/Camera-Simulation/
+          local-dir: ${{ env.GITHUB_WORKSPACE }}/Camera-Simulation/
           server-dir: /
           exclude: '[.github]'
