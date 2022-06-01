@@ -7,7 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
-    <title>Augmenta Designer (beta)</title>
+    <title>Augmenta designer (beta)</title>
+    <link rel="icon" href="img/augmenta-logo.png" type="image/png">
   </head>
 
   <body>
@@ -22,8 +23,9 @@
           <div>
             <p class="website-title">Augmenta Designer (beta)</p>
           </div>
-          <div class="row">
-            <div id="generate-link" data-button class="active">
+          <div>
+            <div id="generate-link" data-button class="row active">
+              <span class="iconify" data-icon="clarity:download-cloud-line" style="color: white; padding:4px;"></span>
               <p> Share </p>
             </div>
             <!-- TO ADD <p>Help ?</p> -->
@@ -32,14 +34,8 @@
 
         <!-- Share Modal -->
         <div id="link-modal" class="modal">
-          <div class="modal-content link column">
-            <div class ="row">
-              <button id="copy-link" data-button>Get the link of your scene</button>
-              <span id="close-link" class="close">&times;</span>
-            </div>
-            <div id="copy-feedback" class="row">
-              <p>Copied to clipboard !</p>
-            </div>
+          <div id="copy-feedback" class="modal-content link">
+              <p>URL of your scene has been copied to clipboard !</p>
           </div>
         </div>
         <!-- End Share Modal -->
@@ -62,7 +58,8 @@
             </div>
           </div> -->
           <div id="viewport-button" class="row center">
-            <div id="display-frustums-button" data-button  class="active">
+            <div id="display-frustums-button" data-button class="row active">
+              <span class="iconify" data-icon="akar-icons:eye-open" style="color: white; padding:4px;"></span>
               <p id="display-frustums">Frustums</p>
             </div>
             <!-- ADD BUTTON
@@ -70,12 +67,12 @@
               <p>Measures</p>
             </div> -->
             <div id="toggle-unit" data-button  class="active">
-              <p>m - ft</p>
+              <p>m / ft</p>
             </div>
           </div>
           <div id="dummies-buttons" class="row">
             <div class="active" data-button>
-              <p id="add-dummy">+ Add Dummy</p>
+              <p id="add-dummy">+ Add dummy</p>
             </div>
             <div data-button>
               <p id="remove-dummies">Remove dummies</p>
@@ -88,8 +85,9 @@
       <div id="inspector">
         <!-- SCENE PANEL -->
         <div id="scene-info">
-          <div id="open-scene-form" class="active" data-button>
-            <p >Generate My Scene</p>
+          <div id="open-scene-form" class="row active" data-button>
+            <span class="iconify" data-icon="fa:magic" style="color: white; padding: 4px;"></span>
+            <p >Generate scene</p>
           </div>
           <!-- The Modal -->
           <div id="generate-scene-modal" class="modal">
@@ -137,7 +135,7 @@
           </div>
           <!-- End Modal -->
 
-          <h1>Scene Size</h1>
+          <h1>Scene size</h1>
           <div>
             <p>Horizontal length</p>
             <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
@@ -154,11 +152,11 @@
         <!-- SENSOR PANEL -->
         <div id="sensors">
           <div class="row">
-            <p class="number-nodes">Number of Nodes: <span id="nb-nodes">0</span></p>
+            <p class="number-nodes">Number of nodes: <span id="nb-nodes">0</span></p>
           </div>
           <div id="nodes-buttons" class="row">
             <div id="add-node" class="active" data-button>
-              <p>+ New Node</p>
+              <p>+ New node</p>
             </div>
             <div id="remove-nodes" data-button>
               <p>Delete all nodes</p>

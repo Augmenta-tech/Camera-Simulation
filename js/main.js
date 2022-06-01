@@ -41,7 +41,7 @@ function bindEventListeners()
 
     document.getElementById('generate-scene').addEventListener('click', () => uiManager.createSceneFromForm(viewportManager.sceneManager));
     
-    document.getElementById('copy-link').addEventListener('click', () => uiManager.copyLink(viewportManager.sceneManager.generateLink()));
+    document.getElementById('generate-link').addEventListener('click', () => uiManager.copyLink(viewportManager.sceneManager.generateLink()));
 
     /* HANDLE VIEWPORT ACTIONS */
     viewportManager.element.addEventListener( 'pointerdown', onPointerDown );

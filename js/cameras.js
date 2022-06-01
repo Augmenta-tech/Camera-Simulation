@@ -35,13 +35,13 @@ const camerasTypes =
         HFov: Math.round(2 * (Math.atan((1/3) * ( - Math.tan(75/2 * Math.PI/180) + Math.sqrt(3*Math.tan(65/2 * Math.PI/180)*Math.tan(65/2 * Math.PI/180) + 4*Math.tan(75/2 * Math.PI/180)*Math.tan(75/2 * Math.PI/180))))) * 180/Math.PI * 10) / 10, 
         VFov:65, 
         rangeNear: 0.5,
-        rangeFar: 7,
+        rangeFar: 5.46,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: true
+        recommanded: false
     },
     {
         id:3, 
@@ -58,7 +58,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: true
+        recommanded: false
     },
     {
         id:4, 

@@ -347,7 +347,7 @@ class SceneManager{
                 return;
             }
             const newCamera = new Node(nodes.length, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new NodeUI(newCamera, this.currentUnit);
+            newCamera.uiElement = new NodeUI(newCamera, this);
             
             //Offset
             if(!autoConstruct)
@@ -373,6 +373,15 @@ class SceneManager{
         {
             const visibles = nodes.filter(n => n.areaAppear);
             nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
+            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
+            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+        }
+
+        this.updateFrustumIcon = function()
+        {
+            const visibles = nodes.filter(n => n.areaAppear);
+            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
+            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.removeNodes = function()
@@ -396,13 +405,13 @@ class SceneManager{
 
         this.toggleUnit = function()
         {
-            const unit = this.checkerboard.unit === units.meters ? units.feets : units.meters;
+            const unit = this.currentUnit === units.meters ? units.feets : units.meters;
 
             this.checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
-                if(e.tagName === 'INPUT') e.value = Math.round(e.value / e.dataset.unit * unit * 100) / 100.0;
-                else e.innerHTML = Math.round(e.innerHTML / e.dataset.unit * unit * 100) / 100.0;
+                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit * unit * 100) / 100.0;
+                else e.innerHTML = Math.round(e.innerHTML / this.currentUnit * unit * 100) / 100.0;
                 e.dataset.unit = unit;
             });
             const unitCharElements = document.querySelectorAll('[data-unittext]');

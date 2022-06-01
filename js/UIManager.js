@@ -51,7 +51,6 @@ class UIManager{
         {
             const copyUrlModal = document.getElementById("link-modal")
             document.getElementById("generate-link").addEventListener('click', () => copyUrlModal.style.display = "block");
-            document.getElementById("close-link").addEventListener('click', () => copyUrlModal.style.display = "none");
             
             window.addEventListener('click', () => {
                 if(event.target == copyUrlModal) copyUrlModal.style.display = "none"
@@ -62,7 +61,7 @@ class UIManager{
         {
             navigator.clipboard.writeText(link);
             document.getElementById('copy-feedback').style.display = "block flex";
-            window.setTimeout(() => document.getElementById('copy-feedback').style.display = "none", 2000);
+            window.setTimeout(() => document.getElementById("link-modal").style.display = "none", 1500);
         }
 
         function addCamTypesToForm(){

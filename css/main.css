@@ -203,7 +203,7 @@ canvas{
 [data-button]{
   transition: .2s all ease;
   border: 1px solid var(--color-blue);
-  width: 111px;
+  width: 130px;
   height: 24px;
   box-sizing: border-box;
   cursor: pointer;
@@ -221,6 +221,11 @@ canvas{
 
 #inspector [data-button]{
   margin: 20px auto 20px auto;
+}
+
+[data-button]{
+  flex-direction: row;
+  justify-content: center;
 }
 
 .inputArea{
@@ -339,7 +344,7 @@ strong
 }
 
 .link {
-  width: 12%;
+  width: 15%;
   display: flex;
 }
 

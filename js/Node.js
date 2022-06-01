@@ -122,7 +122,7 @@ class Node{
             this.cameraPerspective.visible = value;
             this.cameraPerspectiveHelper.visible = value;
             this.nameText.visible = value;
-            let iconElem = document.getElementById('node-' + (this.id) + '-visible').firstChild;
+            const iconElem = document.getElementById('node-' + (this.id) + '-visible').firstElementChild;
             iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
             this.areaValueText.visible = value;
         }
