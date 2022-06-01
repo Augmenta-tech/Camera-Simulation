@@ -1,8 +1,12 @@
 import {
     Group,
     PlaneGeometry,
+    EdgesGeometry,
+    BoxGeometry,
+    LineSegments,
     MeshBasicMaterial,
     MeshPhongMaterial,
+    LineBasicMaterial,
     Mesh
 } from 'three';
 
@@ -22,8 +26,9 @@ class Checkerboard{
         this.width = width;
         this.height = height;
         this.unit = 1 / unit;
-        const planes = new Group();
 
+        const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
+        const planes = new Group();
         const dimensionsText = buildTextMesh(this.width, this.height);
 
 
@@ -101,6 +106,10 @@ class Checkerboard{
 
         function createCheckerboard(width, height, unit)
         {
+            sceneBorder.geometry.dispose();
+            const geometry = new BoxGeometry(Math.round(width * 100) / 100.0, 0, Math.round(height * 100) / 100.0);
+            sceneBorder.geometry = new EdgesGeometry(geometry);
+            sceneBorder.position.set(width / 2.0, 0.01, height / 2.0);
             buildPlanes(width, height, unit);
             createText(width, height, unit);
         }
@@ -108,6 +117,7 @@ class Checkerboard{
         this.addPlanesToScene = function (scene)
         {
             //buildPlanes(this.unit);
+            scene.add(sceneBorder);
             scene.add(planes);
             scene.add(dimensionsText);
         }

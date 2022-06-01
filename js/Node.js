@@ -142,14 +142,17 @@ class Node{
         this.updateAreaText = function(currentUnit)
         {
             this.areaValueText.geometry.dispose();
-            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * 2/3.0, height: 0.01 } );
+            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * 2/3.0 * Math.sqrt(this.areaValue) / 3, height: 0.01 } );
             //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft') + ", Y: " + Math.round(this.ZPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft'), { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
+        
+            this.nameText.geometry.dispose();
+            this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3, height: 0.01 } );
         }
 
         this.changeTextPosition = function(center)
         {
-            this.nameText.position.copy(center.add(new Vector3( - Node.SIZE_TEXT_NODE * 2, 0.1, 0)));
-            this.areaValueText.position.copy(center.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE )));
+            this.nameText.position.copy(center.add(new Vector3( - Node.SIZE_TEXT_NODE * 2 * Math.sqrt(this.areaValue) / 3, 0.1, 0)));
+            this.areaValueText.position.copy(center.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 )));
             this.areaValueText.visible = this.areaAppear;
         }
 

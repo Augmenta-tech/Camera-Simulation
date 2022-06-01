@@ -3,15 +3,12 @@ import {
     AxesHelper,
     GridHelper,
     AmbientLight,
-    EdgesGeometry,
     PlaneGeometry,
-    BoxGeometry,
     BufferGeometry,
     LineBasicMaterial,
     MeshBasicMaterial,
     MeshPhongMaterial,
     Mesh,
-    LineSegments,
     BufferAttribute,
     Vector3,
     Ray,
@@ -71,8 +68,6 @@ class SceneManager{
         const wallZNormal = new Vector3(0,0,1);
 
         this.checkerboard;
-
-        const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         
         const givenAreaPolygonRegions = [[]];
 
@@ -116,7 +111,6 @@ class SceneManager{
 
 
             this.#scene.add(this.transformControl);
-            this.#scene.add(sceneBorder);
 
             createSceneFromURL(this);
         }
@@ -444,11 +438,8 @@ class SceneManager{
             {
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit;
                 const givenHeight = parseFloat(givenHeightValue) / this.currentUnit;
-                const geometry = new BoxGeometry(Math.round(givenWidth * 100) / 100.0, 0, Math.round(givenHeight * 100) / 100.0);
-                sceneBorder.geometry = new EdgesGeometry(geometry);
-                sceneBorder.position.set(givenWidth / 2.0, 0.01, givenHeight / 2.0);
 
-                //update grid
+                //update checkerboard
                 this.checkerboard.setSize(givenWidth, givenHeight);
         
                 //Calculate area polygon

@@ -17,7 +17,8 @@ class UIManager{
             for(let i = 0; i < inputs.length; i++)
             {
                 inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT;
-                inputs[i].value = '';
+                if(inputs[i].id != 'hook-node') inputs[i].value = 5*SceneManager.DEFAULT_UNIT;
+                else inputs[i].value = '';
             }
         }
 
