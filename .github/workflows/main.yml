@@ -28,7 +28,7 @@ jobs:
           path: Camera-Simulation
       
       - name: FTP Deploy Stable
-        if: github.ref == 'refs/tags/[0-9]+.*b[0-9]+' # stable tag filter
+        if: github.ref != 'refs/tags/[0-9]+.*b[0-9]+' # stable tag filter
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
@@ -41,7 +41,7 @@ jobs:
             **/.git*/**
 
       - name: FTP Deploy Beta
-        if: github.ref != 'refs/tags/[0-9]+.*b[0-9]+' # beta ftp filter
+        if: github.ref == 'refs/tags/[0-9]+.*b[0-9]+' # beta ftp filter
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
