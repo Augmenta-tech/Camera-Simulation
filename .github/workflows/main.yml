@@ -4,9 +4,11 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push events but only for for stable or beta tags (0.0.1, 1.4, 1.0, 1.0b, 1.1.1b, ...)
   push:
-    branches: [ master ]
+    tags:
+      - [0-9]??.*
+      - [0-9]??.*b
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,12 +27,26 @@ jobs:
         with:
           path: Camera-Simulation
       
-      - name: FTP Deploy
+      - name: FTP Deploy Stable
+        if: github.ref != refs/tags/[0-9]??.*b # stable tag filter
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          username: ${{ secrets.FTP_USER }} # stable ftp account
+          password: ${{ secrets.FTP_PASSWORD }} # stable ftp password
+          local-dir: ./Camera-Simulation/
+          server-dir: /
+          exclude: |
+            **/.git*
+            **/.git*/**
+
+      - name: FTP Deploy Beta
+        if: github.ref == refs/tags/[0-9]??.*b # beta ftp filter
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_HOSTNAME }}
+          username: ${{ secrets.BETA_FTP_USER }}  # beta ftp accound
+          password: ${{ secrets.BETA_FTP_PASSWORD }}  # beta ftp password
           local-dir: ./Camera-Simulation/
           server-dir: /
           exclude: |
