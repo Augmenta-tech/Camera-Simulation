@@ -228,12 +228,6 @@ canvas{
   justify-content: center;
 }
 
-.inputArea{
-  margin-left: 10%;
-  margin-top: -4%;
-  width: 40%;
-}
-
 [data-button].active p{
   color:  var(--color-white);
 }
@@ -304,6 +298,7 @@ strong
 
 .inputArea{
   margin: 7px;
+  width: 40%;
 }
 
 /* COPY LINK MODAL */

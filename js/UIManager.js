@@ -79,7 +79,7 @@ class UIManager{
             let title = document.createElement('h1');
             title.innerHTML = "Choose the type.s of camera.s you want to use";
             camTypesForm.appendChild(title);*/
-            camerasTypes.filter(c => c.recommanded).forEach(c => {
+            camerasTypes.filter(c => c.recommended).forEach(c => {
                 //const hookHeight = parseFloat(document.getElementById("hook-node").value);
                 //if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById("tracking-mode").value))
                 //{
@@ -144,7 +144,7 @@ class UIManager{
 
             let configs = [];
 
-            camerasTypes.filter(c => c.recommanded).forEach(type => {
+            camerasTypes.filter(c => c.recommended).forEach(type => {
                 let augmentaFar = 0;
                 switch(trackingMode)
                 {
@@ -156,10 +156,10 @@ class UIManager{
                         augmentaFar = type.rangeFar;
                         break;
                 }
-                if(document.getElementById('check-' + type.id).checked && camsHeight <= augmentaFar && camsHeight >= type.rangeNear + sceneManager.heightDetected)
+                if(document.getElementById('check-' + type.id).checked && camsHeight - sceneManager.floorHeight <= augmentaFar && camsHeight - sceneManager.floorHeight  >= type.rangeNear + sceneManager.heightDetected)
                 {
-                    const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
-                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
+                    const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.floorHeight - sceneManager.heightDetected) * 2;
+                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.floorHeight - sceneManager.heightDetected) * 2;
 
                     const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
                     const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
@@ -174,7 +174,7 @@ class UIManager{
 
             if(configs.length === 0)
             {
-                alert("Aucune camera n'est adaptée pour cette configuration. \nNo camera is adapted to your demand");
+                alert("Aucun capteur n'est adapté pour cette configuration. \nNo sensor is adapted to your demand");
                 return;
             }
             else
@@ -200,9 +200,9 @@ class UIManager{
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.addNode(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.addNode(true, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
 
                     }
                 }

@@ -43,16 +43,14 @@ function bindEventListeners()
         const mode = document.getElementById("tracking-mode-inspector").value;
         viewportManager.sceneManager.changeTrackingMode(mode);
         uiManager.changeTrackingMode(mode);
-        console.log("blablainspector")
     });
     document.getElementById("tracking-mode").addEventListener('change', () => {
         const mode = document.getElementById("tracking-mode").value;
         viewportManager.sceneManager.changeTrackingMode(mode);
         uiManager.changeTrackingMode(mode);
-        console.log("blabla")
     });
 
-    document.getElementById("given-height-detection-inspector").addEventListener('change', () => viewportManager.sceneManager.heightDetected = document.getElementById("given-height-detection-inspector").value);
+    document.getElementById("given-height-detection-inspector").addEventListener('change', () => viewportManager.sceneManager.heightDetected = parseFloat(document.getElementById("given-height-detection-inspector").value));
 
     document.getElementById('generate-scene').addEventListener('click', () => uiManager.createSceneFromForm(viewportManager.sceneManager));
     

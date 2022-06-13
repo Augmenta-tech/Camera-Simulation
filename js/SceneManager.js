@@ -60,6 +60,7 @@ class SceneManager{
 
         this.size = 70;
         this.heightDetected = 1;
+        this.floorHeight = 0;
         this.wallXDepth = - this.size / 2.0;
         this.wallZDepth = - this.size / 2.0;
 
@@ -81,12 +82,13 @@ class SceneManager{
 
         this.initScene = function()
         {
+
             // Lighting
             const ambient = new AmbientLight( 0xffffff, 0.5 );
             this.#scene.add(ambient);
 
             // Floor
-            const floor = buildFloorMesh(this.size);
+            const floor = buildFloorMesh(this.size, this.floorHeight);
             this.#scene.add(floor);
 
             // WallX
@@ -106,12 +108,11 @@ class SceneManager{
             this.#scene.add( gridHelper );
 
             // Scene Checkerboard
-            this.checkerboard = new Checkerboard(this.currentUnit);
+            this.checkerboard = new Checkerboard(this.currentUnit, this.floorHeight);
             this.checkerboard.addPlanesToScene(this.#scene);
 
 
             this.#scene.add(this.transformControl);
-
             createSceneFromURL(this);
         }
 
@@ -124,14 +125,14 @@ class SceneManager{
             return scene;
         }
 
-        function buildFloorMesh(size)
+        function buildFloorMesh(size, height)
         {
             const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
             
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( 0, - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            floor.position.set( 0, height - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = floorHeight for area covered)
             floor.rotation.x = - Math.PI / 2.0;
 
             return floor;
@@ -193,7 +194,7 @@ class SceneManager{
             const index = url.indexOf('&');
             if(index === -1)
             {
-                sceneManager.addNode(false, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
+                sceneManager.addNode(false, document.getElementById("tracking-mode-inspector").value, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
             }
             else
             {
@@ -201,20 +202,31 @@ class SceneManager{
                 const cams = url.split('&');
                 const sceneInfo = cams.shift();
                 const infos = sceneInfo.split(',');
+                let mode;
                 infos.forEach(info => {
                     const keyVal = info.split('=');
                     const key = keyVal[0];
-                    const val = parseFloat(keyVal[1]);
+                    const val = keyVal[1];
                     switch(key)
                     {
                         case "L":
-                            document.getElementById("givenSceneWidth").value = val
+                            document.getElementById("givenSceneWidth").value = parseFloat(val);
                             break;
                         case "l":
-                            document.getElementById("givenSceneHeight").value = val;
+                            document.getElementById("givenSceneHeight").value = parseFloat(val);
+                            break;
+                        case "m":
+                            document.getElementById("tracking-mode-inspector").value = val;
+                            mode = val;
+                            sceneManager.changeTrackingMode(mode);
                             break;
                         case "h":
-                            sceneManager.heightDetected = val;
+                            mode === 'human-tracking'
+                                ?
+                                document.getElementById('given-height-detection-inspector').value = val
+                                :
+                                document.getElementById('height-detection-choice-inspector').style.display = 'none';
+                            sceneManager.heightDetected = parseFloat(val);
                             break;
                         default:
                             break;
@@ -264,7 +276,7 @@ class SceneManager{
                             }
                         }
                     });
-                    sceneManager.addNode(true, typeID, x, y, z, p, a, r)
+                    sceneManager.addNode(true, mode, typeID, x, y, z, p, a, r)
                 })
             }
             sceneManager.updateSceneBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
@@ -325,6 +337,7 @@ class SceneManager{
          * Add a node to the scene
          * 
          * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
+         * @param {string} mode 'human-tracking', 'hand-tracking', ...
          * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
          * @param {float} x x position at creation. Default is 0.
          * @param {float} y y position at creation. Default is defined in Node.js.
@@ -333,14 +346,14 @@ class SceneManager{
          * @param {float} a yaw rotation at creation. Default is 0.
          * @param {float} r roll rotation at creation. Default is 0.
          */
-        this.addNode = function(autoConstruct = false, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+        this.addNode = function(autoConstruct = false, mode = document.getElementById("tracking-mode-inspector").value, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
         {
             if(!SceneManager.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
                 return;
             }
-            const newCamera = new Node(nodes.length, typeID, x, y, z, p, a, r)
+            const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
             newCamera.uiElement = new NodeUI(newCamera, this);
             
             //Offset
@@ -473,6 +486,8 @@ class SceneManager{
             url += document.getElementById("givenSceneWidth").value ? Math.floor(document.getElementById("givenSceneWidth").value / this.currentUnit  * 100)/100: 0;
             url += ",l=";
             url += document.getElementById("givenSceneHeight").value ? Math.floor(document.getElementById("givenSceneHeight").value / this.currentUnit * 100)/100 : 0;
+            url += ",m=";
+            url += document.getElementById("tracking-mode-inspector").value;
             url += ",h=";
             url += this.heightDetected;
             url += '&';
@@ -507,14 +522,16 @@ class SceneManager{
             {
                 case 'hand-tracking':
                     this.heightDetected = 0.25;
+                    this.floorHeight = 1;
+                    this.checkerboard.setFloorHeight(this.floorHeight);
                     break;
                 case 'human-tracking':
                 default:
                     this.heightDetected = 1;
+                    this.floorHeight = 0;
+                    this.checkerboard.setFloorHeight(this.floorHeight);
                     break;
             }
-
-            console.log(this.heightDetected);
         }
 
 
@@ -544,8 +561,8 @@ class SceneManager{
             this.#scene.remove(node.areaCoveredWallX);
             this.#scene.remove(node.areaCoveredWallZ);
 
-            const floorPlane = new Plane(floorNormal, 0);
-            const abovePlane = new Plane(floorNormal, -this.heightDetected);
+            const floorPlane = new Plane(floorNormal, -this.floorHeight);
+            const abovePlane = new Plane(floorNormal, -(this.floorHeight + this.heightDetected));
             const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
             const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
 
@@ -619,9 +636,10 @@ class SceneManager{
                     frustumScaled.planes[i].constant += 0.01;
                 }
 
-                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01);
+
 
                 //filter points above, they must be in the frustum at heightDetected but also on the floor
                 let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
@@ -650,7 +668,7 @@ class SceneManager{
                     coveredPointsAbove = candidatesPoints.filter(p => {
                         const abovePoint = new Vector3().copy(p);
                         abovePoint.y += this.heightDetected;
-                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01;
+                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01;
                     })
                 }
                 else{
@@ -668,6 +686,7 @@ class SceneManager{
                 coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / nodes.length);
                 coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / nodes.length);
                 coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / nodes.length);
+
 
                 //display area value 
                 const previousValue = node.areaValue;
@@ -922,7 +941,8 @@ class SceneManager{
         // DEBUG
         this.debug = function()
         {
-            nodes.forEach(n => n.changeFar('hand-tracking'));
+            console.log(document.getElementById("given-height-detection-inspector").value)
+            console.log(this.heightDetected);
         }
 
         this.update = function ()

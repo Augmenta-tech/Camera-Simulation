@@ -11,7 +11,7 @@ class NodeUI{
         function buildUIDiv(node)
         {
             let cameraTypesOptions = ``;
-            camerasTypes.filter(c => c.recommanded).forEach(type => {
+            camerasTypes.filter(c => c.recommended).forEach(type => {
                 const optionElement = `<option value="` + type.name + `" ` + (node.cameraType.name === type.name ? `selected` : ``) + `>` + type.name;
                 cameraTypesOptions += optionElement;
                 cameraTypesOptions += "</option>"

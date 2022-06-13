@@ -13,7 +13,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : true,
-        recommanded: true
+        recommended: true
     },
     {
         id:1, 
@@ -28,7 +28,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: true
+        recommended: true
     },
     {
         id:2, 
@@ -44,7 +44,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: true
+        recommended: false
     },
     {
         id:3, 
@@ -62,7 +62,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: true
+        recommended: false
     },
     {
         id:4, 
@@ -77,7 +77,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: false
+        recommended: false
     }
 ];
 
