@@ -39,6 +39,8 @@ function bindEventListeners()
     document.getElementById("givenSceneWidth").addEventListener('change', () => viewportManager.sceneManager.updateSceneBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
     document.getElementById("givenSceneHeight").addEventListener('change', () => viewportManager.sceneManager.updateSceneBorder(parseFloat(document.getElementById("givenSceneWidth").value), parseFloat(document.getElementById("givenSceneHeight").value)));
 
+    document.getElementById("given-height-detection-inspector").addEventListener('change', () => viewportManager.sceneManager.heightDetected = document.getElementById("given-height-detection-inspector").value);
+
     document.getElementById('generate-scene').addEventListener('click', () => uiManager.createSceneFromForm(viewportManager.sceneManager));
     
     document.getElementById('generate-link').addEventListener('click', () => uiManager.copyLink(viewportManager.sceneManager.generateLink()));
@@ -84,11 +86,7 @@ function onPointerDown( event ) {
 
 function onDrag()
 {
-    if(viewportManager.activeCamera.isOrthographicCamera)
-    {
-        const camPos = new Vector3(6,6,6);
-        viewportManager.setupCameraChangement(camPos);
-    }
+    if(viewportManager.activeCamera.isOrthographicCamera) viewportManager.setupCameraChangement();
 }
 
 function onPointerUp(event) {

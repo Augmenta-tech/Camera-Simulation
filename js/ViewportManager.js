@@ -18,6 +18,7 @@ import { SceneManager } from './SceneManager.js';
 
 
 class ViewportManager{
+    static DEFAULT_CAM_POSITION = new Vector3(12,8,12);
     constructor(viewportElement)
     {
         let viewportWidth = viewportElement.offsetWidth;
@@ -66,7 +67,7 @@ class ViewportManager{
         function buildPerspCamera()
         {
             const perspectiveCamera = new PerspectiveCamera( 70, aspect, 0.2, 10000 );
-            perspectiveCamera.position.set(6,6,6); //height and retreat
+            perspectiveCamera.position.copy(ViewportManager.DEFAULT_CAM_POSITION);
             return perspectiveCamera;
         }
     
@@ -104,7 +105,7 @@ class ViewportManager{
          * @param {Vector3} newPos 
          * @param {boolean} changeCameraType 
          */
-        this.setupCameraChangement = function (newPos, changeCameraType = true)
+        this.setupCameraChangement = function (newPos = ViewportManager.DEFAULT_CAM_POSITION, changeCameraType = true)
         {
             if(changeCameraType)
             {

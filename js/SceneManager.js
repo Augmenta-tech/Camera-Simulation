@@ -193,7 +193,7 @@ class SceneManager{
             const index = url.indexOf('&');
             if(index === -1)
             {
-                sceneManager.addNode();
+                sceneManager.addNode(false, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
             }
             else
             {
@@ -661,7 +661,7 @@ class SceneManager{
                 {
                     //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
                     const barycentre = getBarycentre(coveredPointsAbove);
-                    node.changeTextPosition(barycentre);
+                    node.changeTextPosition(barycentre, this.currentUnit);
                     if(previousValue != node.areaValue) node.updateAreaText(this.currentUnit);
                 }
                 else

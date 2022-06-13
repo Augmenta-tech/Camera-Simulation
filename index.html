@@ -25,7 +25,7 @@
           </div>
           <div>
             <div id="generate-link" data-button class="row active">
-              <span class="iconify" data-icon="clarity:download-cloud-line" style="color: white; padding:4px;"></span>
+              <span class="iconify" data-icon="ci:share" style="color: white; padding:4px;"></span>
               <p> Share </p>
             </div>
             <!-- TO ADD <p>Help ?</p> -->
@@ -66,7 +66,8 @@
             <div data-button  class="active">
               <p>Measures</p>
             </div> -->
-            <div id="toggle-unit" data-button  class="active">
+            <div id="toggle-unit" class="row active" data-button>
+              <span class="iconify" data-icon="codicon:arrow-both" style="color: white; padding: 4px;"></span>
               <p>m / ft</p>
             </div>
           </div>
@@ -74,7 +75,8 @@
             <div class="active" data-button>
               <p id="add-dummy">+ Add dummy</p>
             </div>
-            <div data-button>
+            <div data-button class="row">
+              <span class="iconify" data-icon="fluent:delete-16-filled" style="color: #708EB0; padding:4px;"></span>
               <p id="remove-dummies">Remove dummies</p>
             </div>
           </div>
@@ -94,41 +96,48 @@
             <div id="scene-form-content" class="modal-content scene-form">
               <span id="close-form" class="close">&times;</span>
               <div>
-                <h1>Scene size</h1>
-                <div class="">
-                  <p>Horizontal length</p>
-                  <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                <div class="modal-section">
+                  <h1>Scene size</h1>
+                  <div class="inputArea">
+                    <p>Horizontal length</p>
+                    <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                  </div>
+                  <div class="inputArea">
+                    <p>Vertical length</p>
+                    <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                  </div>
+                  <div class="inputArea">
+                    <p>Camera hook height</p>
+                    <input class="" id="hook-node" type="number" placeholder="r" min="0" max="15" step = "0.1">
+                  </div>
                 </div>
-                <div class="">
-                  <p>Vertical length</p>
-                  <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                <div class="modal-section">
+                  <div id="tracking-choice">
+                    <h1>What do you want to track ?</h1>
+                    <select id="tracking-mode" class="select select-form" name="camType">
+                      <option value="human-tracking" selected>Human tracking</option>
+                      <!--<option value="hand-tracking">Hand tracking</option> -->
+                    </select>
+                  </div>
+                  <div class="">
+                    <p>Target overlap height detection</p>
+                    <select id="given-height-detection" class="select select-form" name="camType">
+                      <option value="0.2">Feets</option>
+                      <option value="0.6">Knees</option>
+                      <option value="1" selected>Hips (recommended)</option>
+                      <option value="1.6">Shoulders</option>
+                      <option id="height-reference" value="2">Entire body</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="">
-                  <p>Camera hook height</p>
-                  <input class="" id="hook-node" type="number" placeholder="r" min="0" max="15" step = "0.1">
-                </div>
-                <div class="">
-                  <p>Target overlap height detection</p>
-                  <select id="given-height-detection" class="select select-form" name="camType">
-                    <option value="0.2">Feets</option>
-                    <option value="0.6">Knees</option>
-                    <option value="1" selected>Hips (recommended)</option>
-                    <option value="1.6">Shoulders</option>
-                    <option id="height-reference" value="2">Entire body</option>
-                  </select>
-                </div>
-                <div id="tracking-choice">
-                  <h1>What do you want to track ?</h1>
-                  <select id="tracking-mode" class="select select-form" name="camType">
-                    <option value="human-tracking" selected>Human tracking</option>
-                    <!--<option value="hand-tracking">Hand tracking</option> -->
-                  </select>
-                </div>
-                <div id="cam-types-checkboxes">
-                  <h1>Choose the type.s of camera.s you want to use</h1>
+                <div class="modal-section">
+                  <div id="cam-types-checkboxes">
+                    <h1>Choose the type.s of camera.s you want to use</h1>
+                  </div>
                 </div>
               </div>
-              <div id="form-button" class="active" data-button>
+              <div id="form-button" class="row active" data-button>
+                <span class="iconify" data-icon="fa:magic" style="color: white; padding: 4px;"></span>
                 <p id="generate-scene">Generate scene</p>
               </div>
             </div>
@@ -136,13 +145,30 @@
           <!-- End Modal -->
 
           <h1>Scene size</h1>
-          <div>
+          <div  class="inputArea">
             <p>Horizontal length</p>
             <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
           </div>
-          <div>
+          <div  class="inputArea">
             <p>Vertical length</p>
             <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+          </div>
+          <div id="tracking-choice-inspector">
+            <h1>What do you want to track ?</h1>
+            <select id="tracking-mode-inspector" class="select select-form" name="camType">
+              <option value="human-tracking" selected>Human tracking</option>
+              <!--<option value="hand-tracking">Hand tracking</option> -->
+            </select>
+          </div>
+          <div class="">
+            <p>Target overlap height detection</p>
+            <select id="given-height-detection-inspector" class="select select-form" name="camType">
+              <option value="0.2">Feets</option>
+              <option value="0.6">Knees</option>
+              <option value="1" selected>Hips (recommended)</option>
+              <option value="1.6">Shoulders</option>
+              <option id="height-reference-inspector" value="2">Entire body</option>
+            </select>
           </div>
           <div class="row">
             <p>Scene fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
@@ -158,7 +184,8 @@
             <div id="add-node" class="active" data-button>
               <p>+ New node</p>
             </div>
-            <div id="remove-nodes" data-button>
+            <div id="remove-nodes" class="row" data-button>
+              <span class="iconify" data-icon="fluent:delete-16-filled" style="color: #708EB0; padding:4px;"></span>
               <p>Delete all nodes</p>
             </div>
           </div>

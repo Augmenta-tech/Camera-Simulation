@@ -27,6 +27,9 @@ class UIManager{
             document.getElementById("areaWantedWidth").value = document.getElementById("givenSceneWidth").value;
             document.getElementById("areaWantedHeight").value = document.getElementById("givenSceneHeight").value;
             document.getElementById('hook-node').value = document.getElementById('hook-node').value ? document.getElementById('hook-node').value : 4.5;
+
+            document.getElementById("tracking-mode").value = document.getElementById("tracking-mode-inspector").value;
+            document.getElementById("given-height-detection").value = document.getElementById("given-height-detection-inspector").value;
         }
 
         function createFormModal()
@@ -113,6 +116,9 @@ class UIManager{
 
             document.getElementById("givenSceneWidth").value = inputWidth;
             document.getElementById("givenSceneHeight").value = inputHeight;
+
+            document.getElementById("tracking-mode-inspector").value = document.getElementById("tracking-mode").value;
+            document.getElementById("given-height-detection-inspector").value = document.getElementById("given-height-detection").value;
 
             let configs = [];
 
