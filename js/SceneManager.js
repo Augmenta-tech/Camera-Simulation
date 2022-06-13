@@ -30,7 +30,7 @@ import { Node } from './Node.js';
 import { NodeUI } from './NodeUI.js';
 import { Checkerboard } from './Checkerboard.js';
 
-import { units } from './cameras.js'
+import { camerasTypes, units } from './cameras.js'
 
 
 class SceneManager{
@@ -500,6 +500,23 @@ class SceneManager{
             return url;
         }
 
+        this.changeTrackingMode = function(mode)
+        {
+            nodes.forEach(n => n.changeFar(mode))
+            switch(mode)
+            {
+                case 'hand-tracking':
+                    this.heightDetected = 0.25;
+                    break;
+                case 'human-tracking':
+                default:
+                    this.heightDetected = 1;
+                    break;
+            }
+
+            console.log(this.heightDetected);
+        }
+
 
         /* SCENE UPDATE */
 
@@ -905,7 +922,7 @@ class SceneManager{
         // DEBUG
         this.debug = function()
         {
-            
+            nodes.forEach(n => n.changeFar('hand-tracking'));
         }
 
         this.update = function ()

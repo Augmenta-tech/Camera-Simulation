@@ -7,6 +7,7 @@ const camerasTypes =
         VFov:45, 
         rangeNear: 0.6,
         rangeFar: 6,
+        handFar: 2,
         suitable: [
             "human-tracking",
             "hand-tracking" 
@@ -21,6 +22,7 @@ const camerasTypes =
         VFov:49.5, 
         rangeNear: 0.6,
         rangeFar: 6,
+        handFar: 2,
         suitable: [
             "human-tracking",
             "hand-tracking" 
@@ -36,12 +38,13 @@ const camerasTypes =
         VFov:65, 
         rangeNear: 0.5,
         rangeFar: 5.46,
+        handFar: 1.5,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: false
+        recommanded: true
     },
     {
         id:3, 
@@ -54,11 +57,12 @@ const camerasTypes =
         VFov: Math.round(2 * Math.atan((Math.sqrt(2) / 2) * Math.tan(120 * Math.PI/180 / 2)) * 180/Math.PI * 10) / 10, 
         rangeNear: 0.25,
         rangeFar: 2.21,
+        handFar: 2.21,
         suitable: [
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: false
+        recommanded: true
     },
     {
         id:4, 
@@ -67,6 +71,7 @@ const camerasTypes =
         VFov:50.8, 
         rangeNear: 0.25,
         rangeFar: 5,
+        handFar: 1.75,
         suitable: [
             "human-tracking",
             "hand-tracking" 

@@ -156,6 +156,20 @@ class Node{
             this.areaValueText.visible = this.areaAppear;
         }
 
+        this.changeFar = function(mode)
+        {
+            switch(mode)
+            {
+                case 'hand-tracking':
+                    this.cameraPerspective.far = this.cameraType.handFar;
+                    break;
+                case 'human-tracking':
+                default:
+                    this.cameraPerspective.far = this.cameraType.rangeFar;
+                    break;
+            }
+        }
+
         this.update = function()
         {
             this.cameraPerspective.updateProjectionMatrix();
