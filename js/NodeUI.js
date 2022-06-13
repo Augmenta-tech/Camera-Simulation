@@ -99,7 +99,7 @@ class NodeUI{
             document.getElementById('node-' + (node.id) + '-hide-UI').addEventListener('click', () => hideUICam(node));
             document.getElementById('node-' + (node.id) + '-visible').addEventListener('click', () => changeVisibilityofCam(node));
         
-            document.getElementById('cam-type-' + node.id).addEventListener('click', () => changeCameraType(node));
+            document.getElementById('cam-type-' + node.id).addEventListener('change', () => changeCameraType(node));
         }
 
         function makeElementDraggable(element, node) {
@@ -267,7 +267,16 @@ class NodeUI{
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;
             node.cameraPerspective.near = node.cameraType.rangeNear;
-            node.cameraPerspective.far = node.cameraType.rangeFar;
+            switch(document.getElementById('tracking-mode-inspector').value)
+            {
+                case 'hand-tracking':
+                    node.cameraPerspective.far = node.cameraType.handFar;
+                    break;
+                case 'human-tracking':
+                default:
+                    node.cameraPerspective.far = node.cameraType.rangeFar;
+                    break;
+            }
         }
     }
 }
