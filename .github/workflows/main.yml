@@ -30,7 +30,7 @@ jobs:
         run: echo github.ref == ${{ github.ref }}
       
       - name: FTP Deploy Stable
-        if: contains(${{ github.ref }},'b') == false  # should trigger on stable
+        if: ! contains(${{ github.ref }},'b') # should trigger on stable
         run : echo "Running stable"
         # uses: SamKirkland/FTP-Deploy-Action@4.3.0
         # with:
