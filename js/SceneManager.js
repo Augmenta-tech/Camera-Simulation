@@ -227,7 +227,7 @@ class SceneManager{
             {
                 case 'hand-tracking':
                     this.heightDetected = 0.25;
-                    this.floorHeight = 1;
+                    this.floorHeight = 0.75;
                     this.checkerboard.setFloorHeight(this.floorHeight);
                     break;
                 case 'human-tracking':

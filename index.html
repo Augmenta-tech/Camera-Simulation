@@ -113,7 +113,7 @@
             <div id="scene-form-content" class="modal-content scene-form">
               <span id="close-form" class="close">&times;</span>
               <div>
-                <div class="modal-section">
+                <div id="tracking-section" class="modal-section">
                   <div id="tracking-choice">
                     <h1>What do you want to track ?</h1>
                     <select id="tracking-mode" class="select select-form" name="camType">
@@ -143,7 +143,7 @@
                     <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
                   </div>
                   <div id="hook-height-input" class="inputArea">
-                    <p>Camera hook height (<span data-unittext="1">m</span>)</p>
+                    <p>Camera hook height from scene (<span data-unittext="1">m</span>) </p>
                     <input class="" id="hook-node" type="number" placeholder="r" min="0" max="100" step = "0.1">
                   </div>
                 </div>
@@ -161,22 +161,24 @@
           </div>
           <!-- End Modal -->
 
-          <div id="tracking-choice-inspector">
-            <h1>What do you want to track ?</h1>
-            <select id="tracking-mode-inspector" class="select select-form" name="camType">
-              <option value="human-tracking" selected>Floor (people tracking)</option>
-              <option value="hand-tracking">Table (hand tracking)</option>
-            </select>
-          </div>
-          <div id="height-detection-choice-inspector" class="">
-            <p>Target overlap height detection</p>
-            <select id="given-height-detection-inspector" class="select select-form" name="camType">
-              <option value="0.2">Feets</option>
-              <option value="0.6">Knees</option>
-              <option value="1" selected>Hips (recommended)</option>
-              <option value="1.6">Shoulders</option>
-              <option id="height-reference-inspector" value="2">Entire body</option>
-            </select>
+          <div id="tracking-section-inspector">
+            <div id="tracking-choice-inspector">
+              <h1>What do you want to track ?</h1>
+              <select id="tracking-mode-inspector" class="select select-form" name="camType">
+                <option value="human-tracking" selected>Floor (people tracking)</option>
+                <option value="hand-tracking">Table (hand tracking)</option>
+              </select>
+            </div>
+            <div id="height-detection-choice-inspector" class="">
+              <p>Target overlap height detection</p>
+              <select id="given-height-detection-inspector" class="select select-form" name="camType">
+                <option value="0.2">Feets</option>
+                <option value="0.6">Knees</option>
+                <option value="1" selected>Hips (recommended)</option>
+                <option value="1.6">Shoulders</option>
+                <option id="height-reference-inspector" value="2">Entire body</option>
+              </select>
+            </div>
           </div>
           <h1>Scene size</h1>
           <div  class="inputArea">

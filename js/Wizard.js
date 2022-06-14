@@ -25,7 +25,7 @@ class Wizard{
             document.getElementById('hook-node').addEventListener('change', () => checkFormCoherence(sceneManager));
             function checkFormCoherence(sceneManager)
             {
-                if(document.getElementById('hook-node').value / sceneManager.currentUnit > sceneManager.floorHeight + getMaxFarFromCheckedCam(document.getElementById('tracking-mode-inspector').value))
+                if(document.getElementById('hook-node').value / sceneManager.currentUnit > getMaxFarFromCheckedCam(document.getElementById('tracking-mode-inspector').value))
                 {
                     document.getElementById('hook-node').style.color = 'red';
                     const warningElem = document.getElementById('warning-hook-height');
@@ -163,10 +163,10 @@ class Wizard{
                         augmentaFar = type.rangeFar;
                         break;
                 }
-                if(document.getElementById('check-' + type.id).checked && camsHeight - sceneManager.floorHeight <= augmentaFar && camsHeight - sceneManager.floorHeight  >= type.rangeNear + sceneManager.heightDetected)
+                if(document.getElementById('check-' + type.id).checked && camsHeight <= augmentaFar && camsHeight >= type.rangeNear + sceneManager.heightDetected)
                 {
-                    const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.floorHeight - sceneManager.heightDetected) * 2;
-                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.floorHeight - sceneManager.heightDetected) * 2;
+                    const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
+                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
 
                     const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
                     const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
@@ -207,9 +207,9 @@ class Wizard{
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneManager.floorHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneManager.floorHeight, offsetY + j*(chosenConfig.h - oY));
 
                     }
                 }
