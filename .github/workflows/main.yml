@@ -30,7 +30,7 @@ jobs:
         run: echo github.ref == ${{ github.ref }}
       
       - name: FTP Deploy Stable
-        if: ${{ github.ref != 'refs/tags/[0-9]+.*b[0-9]+' }}  # (stable || beta) && !beta tag filter -> should trigger on stable
+        if: ${{ github.ref != refs/tags/[0-9]+.*b[0-9]+ }}  # (stable || beta) && !beta tag filter -> should trigger on stable
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
@@ -43,7 +43,7 @@ jobs:
             **/.git*/**
 
       - name: FTP Deploy Beta
-        if: ${{ github.ref == 'refs/tags/[0-9]+.*b[0-9]+' }} # (stable || beta) && beta tag filter -> should trigger on beta
+        if: ${{ github.ref == refs/tags/[0-9]+.*b[0-9]+ }} # (stable || beta) && beta tag filter -> should trigger on beta
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ${{ secrets.FTP_HOSTNAME }}
