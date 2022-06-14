@@ -18,20 +18,17 @@ import {
 } from 'three';
 import { DoubleSide } from 'three';
 
-//DEBUG
-import { SphereGeometry } from 'three';
-
 import { FontLoader } from 'three-loaders/FontLoader.js';
 
-import * as POLYBOOL from 'polybool';
-
-import { Dummy } from './Dummy.js';
-import { Node } from './Node.js';
-import { NodeUI } from './NodeUI.js';
 import { Checkerboard } from './Checkerboard.js';
+import { SceneObjects } from './SceneObjects.js';
 
-import { camerasTypes, units } from './cameras.js'
+import { camerasTypes, units } from './cameras.js';
 
+import { Node } from './Node.js';
+
+//DEBUG
+import { SphereGeometry } from 'three';
 
 class SceneManager{
     static loadFont(callback)
@@ -44,17 +41,10 @@ class SceneManager{
     }
     static font;
     static DEFAULT_UNIT = units.meters;
-    #scene;
 
     constructor(_transformControl)
     {
-        this.#scene = buildScene();
-        const nodes = [];
-        const dummies = [];
-        this.nodeMeshes = [];
-        this.dummiesMeshes = [];
-
-        this.transformControl = _transformControl;
+        this.scene = buildScene();
 
         this.currentUnit = SceneManager.DEFAULT_UNIT;
 
@@ -69,8 +59,7 @@ class SceneManager{
         const wallZNormal = new Vector3(0,0,1);
 
         this.checkerboard;
-        
-        const givenAreaPolygonRegions = [[]];
+        this.objects = new SceneObjects(_transformControl, this);;
 
         //DEBUG
         const spheres = [];
@@ -82,38 +71,36 @@ class SceneManager{
 
         this.initScene = function()
         {
-
             // Lighting
             const ambient = new AmbientLight( 0xffffff, 0.5 );
-            this.#scene.add(ambient);
+            this.scene.add(ambient);
 
             // Floor
             const floor = buildFloorMesh(this.size, this.floorHeight);
-            this.#scene.add(floor);
+            this.scene.add(floor);
 
             // WallX
             const wallX = buildWallXMesh(this.size, this.wallXDepth);
-            this.#scene.add(wallX);
+            this.scene.add(wallX);
         
             // WallZ
             const wallZ = buildWallZMesh(this.size, this.wallZDepth);
-            this.#scene.add(wallZ);
+            this.scene.add(wallZ);
 
             //Origin
             const axesHelper = buildAxesHelper();
-            this.#scene.add( axesHelper );
+            this.scene.add( axesHelper );
 
             // Grid Helper
             const gridHelper = buildGridHelper(this.size);
-            this.#scene.add( gridHelper );
+            this.scene.add( gridHelper );
 
             // Scene Checkerboard
             this.checkerboard = new Checkerboard(this.currentUnit, this.floorHeight);
-            this.checkerboard.addPlanesToScene(this.#scene);
+            this.checkerboard.addPlanesToScene(this.scene);
 
-
-            this.#scene.add(this.transformControl);
-            createSceneFromURL(this);
+            //SceneObjects
+            this.objects.initObjects();
         }
 
     /* BUILDERS */
@@ -183,231 +170,6 @@ class SceneManager{
             return gridHelper;
         }
 
-        /**
-         * Initialize a scene according to the url
-         * 
-         * @param {SceneManager} sceneManager this object
-         */
-        function createSceneFromURL(sceneManager)
-        {
-            let url = document.location.href;
-            const index = url.indexOf('&');
-            if(index === -1)
-            {
-                sceneManager.addNode(false, document.getElementById("tracking-mode-inspector").value, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
-            }
-            else
-            {
-                url = url.substring(url.indexOf('?') + 1);
-                const cams = url.split('&');
-                const sceneInfo = cams.shift();
-                const infos = sceneInfo.split(',');
-                let mode;
-                infos.forEach(info => {
-                    const keyVal = info.split('=');
-                    const key = keyVal[0];
-                    const val = keyVal[1];
-                    switch(key)
-                    {
-                        case "L":
-                            document.getElementById("givenSceneWidth").value = parseFloat(val);
-                            break;
-                        case "l":
-                            document.getElementById("givenSceneHeight").value = parseFloat(val);
-                            break;
-                        case "m":
-                            document.getElementById("tracking-mode-inspector").value = val;
-                            mode = val;
-                            sceneManager.changeTrackingMode(mode);
-                            break;
-                        case "h":
-                            mode === 'human-tracking'
-                                ?
-                                document.getElementById('given-height-detection-inspector').value = val
-                                :
-                                document.getElementById('height-detection-choice-inspector').style.display = 'none';
-                            sceneManager.heightDetected = parseFloat(val);
-                            break;
-                        default:
-                            break;
-                    }
-                });
-                
-                cams.forEach(c => {
-                    const props = c.split(',');
-                    let id, typeID;
-                    let x, y, z, p, a, r;
-
-                    props.forEach(prop => {
-                        const keyVal = prop.split('=');
-                        const key = keyVal[0];
-                        const stringVal = keyVal[1];
-                        if(key && stringVal)
-                        {
-                            const val = parseFloat(stringVal);
-                            switch(key)
-                            {
-                                case "id":
-                                    id = val
-                                    break;
-                                case "typeID":
-                                    typeID = val;
-                                    break;
-                                case "x":
-                                    x = val;
-                                    break;
-                                case "y":
-                                    y = val;
-                                    break;
-                                case "z":
-                                    z = val;
-                                    break;
-                                case "p":
-                                    p = val;
-                                    break;
-                                case "a":
-                                    a = val;
-                                    break;
-                                case "r":
-                                    r = val;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    });
-                    sceneManager.addNode(true, mode, typeID, x, y, z, p, a, r)
-                })
-            }
-            sceneManager.updateSceneBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
-        }
-
-
-    /* SCENE SUBJECTS MANAGEMENT */
-
-        // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
-        /**
-         * Remove an object from the scene and free its memory
-         * 
-         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method. 
-         */
-        this.deleteObject = function(obj)
-        {
-            if (this.transformControl.object === obj.mesh) this.transformControl.detach();
-            obj.removeFromScene(this.#scene);
-            obj.dispose();
-        }
-
-        this.addDummy = function()
-        {
-            if(!Dummy.maleModel || !Dummy.femaleModel)
-            {
-                //TODO: Add UI to inform that button will work in few seconds
-                return;
-            }
-            const newDummy = new Dummy(dummies.length);
-
-            //Offset
-            for(let i = 0; i < dummies.length; i++)
-            {
-                if(newDummy.mesh.position.distanceTo(dummies[i].mesh.position) < 1.0)
-                {
-                    newDummy.mesh.position.x++;
-                    i = 0;
-                }
-            }
-            newDummy.updatePosition();
-
-            //Add to scene
-            newDummy.addToScene(this.#scene);
-
-            //Management
-            dummies.push(newDummy);
-            this.dummiesMeshes.push(newDummy.mesh);
-        }
-
-        this.removeDummies = function()
-        {
-            dummies.forEach(d => this.deleteObject(d));
-            dummies.length = 0;
-            this.dummiesMeshes.length = 0;
-        }
-
-        /**
-         * Add a node to the scene
-         * 
-         * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
-         * @param {string} mode 'human-tracking', 'hand-tracking', ...
-         * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
-         * @param {float} x x position at creation. Default is 0.
-         * @param {float} y y position at creation. Default is defined in Node.js.
-         * @param {float} z z position at creation. Default is 0.
-         * @param {float} p pitch rotation at creation. Default is 0.
-         * @param {float} a yaw rotation at creation. Default is 0.
-         * @param {float} r roll rotation at creation. Default is 0.
-         */
-        this.addNode = function(autoConstruct = false, mode = document.getElementById("tracking-mode-inspector").value, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
-        {
-            if(!SceneManager.font)
-            {
-                //TODO: Add UI to inform that button will work in few seconds
-                return;
-            }
-            const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new NodeUI(newCamera, this);
-            
-            //Offset
-            if(!autoConstruct)
-            {
-                for(let i = 0; i < nodes.length; i++)
-                {
-                    if(newCamera.mesh.position.distanceTo(nodes[i].mesh.position) < 0.5)
-                    {
-                        newCamera.mesh.position.x += 0.5;
-                        i = 0;
-                    }
-                }
-            }
-            newCamera.updatePosition(this.currentUnit);
-
-            newCamera.addToScene(this.#scene);
-
-            nodes.push(newCamera);
-            this.nodeMeshes.push(newCamera.mesh);
-        }
-
-        this.displayFrustums = function()
-        {
-            const visibles = nodes.filter(n => n.areaAppear);
-            nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
-            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
-            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
-        }
-
-        this.updateFrustumIcon = function()
-        {
-            const visibles = nodes.filter(n => n.areaAppear);
-            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
-            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
-        }
-
-        this.removeNodes = function()
-        {
-            nodes.forEach(n => {
-                delete n.uiElement;
-                this.deleteObject(n);
-            });
-            nodes.length = 0;
-            this.nodeMeshes.length = 0;
-
-            const nodesUIdivs = document.getElementsByClassName("nodeUI");
-            for(let i = nodesUIdivs.length - 1; i >= 0; i--)
-            {
-                nodesUIdivs[i].remove();
-            }
-        }
-
-
     /* USER'S ACTIONS */
 
         this.toggleUnit = function()
@@ -454,70 +216,13 @@ class SceneManager{
 
                 //update checkerboard
                 this.checkerboard.setSize(givenWidth, givenHeight);
-        
-                //Calculate area polygon
-                givenAreaPolygonRegions[0].length = 0;
-                givenAreaPolygonRegions[0].push([0, 0]);
-                givenAreaPolygonRegions[0].push([givenWidth, 0]);
-                givenAreaPolygonRegions[0].push([givenWidth, givenHeight]);
-                givenAreaPolygonRegions[0].push([0, givenHeight]);
+
+                this.objects.calculateScenePolygon(givenWidth, givenHeight);
             }
-        }
-
-        this.updateObjectsPosition = function()
-        {
-            nodes.forEach(n => n.updatePosition(this.currentUnit));
-            dummies.forEach(d => d.updatePosition());
-        }
-
-        /**
-         * Create an url containing all the informations of the scene
-         * 
-         * @returns the url of this scene
-         */
-        this.generateLink = function()
-        {
-            let url = document.location.href;
-            let index = url.indexOf('?');
-            if(index !== -1) url = url.substring(0, index);
-            if(url[url.length-1] != '/') url += '/';
-            url += '?';
-            url += "L=";
-            url += document.getElementById("givenSceneWidth").value ? Math.floor(document.getElementById("givenSceneWidth").value / this.currentUnit  * 100)/100: 0;
-            url += ",l=";
-            url += document.getElementById("givenSceneHeight").value ? Math.floor(document.getElementById("givenSceneHeight").value / this.currentUnit * 100)/100 : 0;
-            url += ",m=";
-            url += document.getElementById("tracking-mode-inspector").value;
-            url += ",h=";
-            url += this.heightDetected;
-            url += '&';
-            nodes.forEach(n => {
-                url += "id=";
-                url += n.id;
-                url += ",typeID=";
-                url += n.cameraType.id;
-                url += ",x=";
-                url += Math.round(n.xPos*100)/100.0;
-                url += ",y=";
-                url += Math.round(n.yPos*100)/100.0;
-                url += ",z=";
-                url += Math.round(n.zPos*100)/100.0;
-                url += ",p=";
-                url += Math.round(n.xRot*10000)/10000.0;
-                url += ",a=";
-                url += Math.round(n.yRot*10000)/10000.0;
-                url += ",r=";
-                url += Math.round(n.zRot*10000)/10000.0;
-                url += '&';
-            });
-            url = url.slice(0, -1);
-        
-            return url;
         }
 
         this.changeTrackingMode = function(mode)
         {
-            nodes.forEach(n => n.changeFar(mode))
             switch(mode)
             {
                 case 'hand-tracking':
@@ -532,6 +237,8 @@ class SceneManager{
                     this.checkerboard.setFloorHeight(this.floorHeight);
                     break;
             }
+
+            this.objects.changeObjectsTrackingMode(mode);
         }
 
 
@@ -556,10 +263,10 @@ class SceneManager{
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
             
-            this.#scene.remove(node.areaCoveredFloor);
-            this.#scene.remove(node.areaCoveredAbove);
-            this.#scene.remove(node.areaCoveredWallX);
-            this.#scene.remove(node.areaCoveredWallZ);
+            this.scene.remove(node.areaCoveredFloor);
+            this.scene.remove(node.areaCoveredAbove);
+            this.scene.remove(node.areaCoveredWallX);
+            this.scene.remove(node.areaCoveredWallZ);
 
             const floorPlane = new Plane(floorNormal, -this.floorHeight);
             const abovePlane = new Plane(floorNormal, -(this.floorHeight + this.heightDetected));
@@ -682,10 +389,10 @@ class SceneManager{
 
                 node.coveredPointsAbove = coveredPointsAbove;
 
-                coveredPointsFloor.forEach((p) => p.y += 0.01*node.id / nodes.length);
-                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / nodes.length);
-                coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / nodes.length);
-                coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / nodes.length);
+                coveredPointsFloor.forEach((p) => p.y += 0.01*node.id / this.objects.getNbNodes());
+                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / this.objects.getNbNodes());
+                coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / this.objects.getNbNodes());
+                coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / this.objects.getNbNodes());
 
 
                 //display area value 
@@ -722,10 +429,10 @@ class SceneManager{
                 node.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
                 node.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
 
-                this.#scene.add(node.areaCoveredFloor);
-                this.#scene.add(node.areaCoveredAbove);
-                this.#scene.add(node.areaCoveredWallX);
-                this.#scene.add(node.areaCoveredWallZ);
+                this.scene.add(node.areaCoveredFloor);
+                this.scene.add(node.areaCoveredAbove);
+                this.scene.add(node.areaCoveredWallX);
+                this.scene.add(node.areaCoveredWallZ);
             }
 
             //DEBUG SPHERES
@@ -734,14 +441,14 @@ class SceneManager{
             {
                 spheres[i].geometry.dispose();
                 spheres[i].material.dispose();
-                this.#scene.remove(spheres[i]);
+                this.scene.remove(spheres[i]);
             }
             for(let i = 0; i < intersectionPointsAbove.length; i++)
             {
                 const geometry = new SphereGeometry( 0.4, 32, 16 );
                 const material = new MeshBasicMaterial({ color: 0x00ff22 });
                 const sphere = new Mesh( geometry, material );
-                this.#scene.add( sphere );
+                this.scene.add( sphere );
                 sphere.translateOnAxis(intersectionPointsAbove[i],1);
                 spheres.push(sphere);
             }
@@ -903,60 +610,19 @@ class SceneManager{
         }
 
 
-        /**
-         * Calculate the area covered by node and compare it to the scene size
-         * 
-         * @returns {boolean} whether the scene is fully tracked by nodes or not
-         */
-        this.doesCoverArea = function()
-        {
-            const unionRegions = [...givenAreaPolygonRegions];
-            let union = {
-                regions: unionRegions,
-                inverted: true
-            };
-
-            nodes.forEach(c => {
-                const polyCam = {
-                    regions: [[]],
-                    inverted: false
-                };
-                c.coveredPointsAbove.forEach(p => {
-                    polyCam.regions[0].push([p.x, p.z]);
-                });
-
-                //union = PolyBool.union(union, polyCam);
-                
-                const segmentsCam = PolyBool.segments(polyCam);
-                const segmentsUnion = PolyBool.segments(union);
-                const comb = PolyBool.combine(segmentsCam, segmentsUnion);
-                union = PolyBool.polygon(PolyBool.selectUnion(comb))
-            });
-
-            return union.regions.length === 0;
-        }
-
-        this.getNbNodes = () => nodes.length;
-
         // DEBUG
         this.debug = function()
         {
             console.log(document.getElementById("given-height-detection-inspector").value)
             console.log(this.heightDetected);
+            this.objects.debug();
         }
 
         this.update = function ()
         {
-            nodes.forEach(c => {
-                c.update();
-                this.drawProjection(c);
-            });
+            this.objects.update();
         }
-
-        SceneManager.loadFont(() => this.initScene());
     }
-
-    get scene(){ return this.#scene; }
 }
 
 export { SceneManager }

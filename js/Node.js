@@ -13,7 +13,7 @@ import { TextGeometry } from 'three-text-geometry';
 
 import { camerasTypes, units } from './cameras.js'
 
-import { SceneManager } from './SceneManager.js';
+import { SceneObjects } from './SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;
@@ -92,7 +92,7 @@ class Node{
 
         function buildTextMesh(text, size, initialXPos, initialYPos, initialZPos)
         {
-            const textGeometry = new TextGeometry(text, { font: SceneManager.font, size: size, height: 0.01 } );
+            const textGeometry = new TextGeometry(text, { font: SceneObjects.font, size: size, height: 0.01 } );
             const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ))
             textMesh.position.set(initialXPos, initialYPos, initialZPos);
             textMesh.rotation.x = -Math.PI / 2.0;
@@ -154,11 +154,11 @@ class Node{
         this.updateAreaText = function(currentUnit)
         {
             this.areaValueText.geometry.dispose();
-            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * 2/3.0 * Math.sqrt(this.areaValue) / 3 / currentUnit, height: 0.01 } );
+            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * 2/3.0 * Math.sqrt(this.areaValue) / 3 / currentUnit, height: 0.01 } );
             //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft') + ", Y: " + Math.round(this.ZPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft'), { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         
             this.nameText.geometry.dispose();
-            this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit, height: 0.01 } );
+            this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit, height: 0.01 } );
         }
 
         this.changeTextPosition = function(center, currentUnit)

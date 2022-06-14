@@ -3,7 +3,7 @@ import { Vector3 } from 'three'
 import { camerasTypes, units } from './cameras.js'
 
 class NodeUI{
-    constructor(_node, sceneManager)
+    constructor(_node, currentUnit, sceneObjects)
     {
         buildUIDiv(_node);
         bindEventListeners(_node);
@@ -46,11 +46,11 @@ class NodeUI{
                         <div class="row s-p column-2">
                             <div>
                                 <p id="hfov` + node.id + `">FOV H: ` + node.cameraType.HFov + `°</p>
-                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + sceneManager.currentUnit + `>` + (Math.round(node.cameraType.rangeNear*sceneManager.currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeNear*currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                             </div>
                             <div>
                                 <p id="vfov` + node.id + `">FOV V: ` + node.cameraType.VFov + `°</p>
-                                <p id="far` + node.id + `">FAR: <span  data-unit=` + sceneManager.currentUnit + `>` + (Math.round(node.cameraType.rangeFar*sceneManager.currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeFar*currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
                             </div>
                         </div>
                     </div>
@@ -60,9 +60,9 @@ class NodeUI{
                                 <p>  Position </p>
                             </div>
                             <div class="row s-p column-2">
-                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + sceneManager.currentUnit + `>` + Math.round(node.xPos * sceneManager.currentUnit * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + sceneManager.currentUnit + `>` + Math.round(-node.zPos * sceneManager.currentUnit * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + sceneManager.currentUnit + `>` + Math.round(node.yPos * sceneManager.currentUnit * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(node.xPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-node.zPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(node.yPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
                             </div>
                         </div>
                         <div  class="row s-p">
@@ -155,7 +155,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.xPos = value / sceneManager.currentUnit;
+                                node.xPos = value / currentUnit;
                                 node.cameraPerspective.position.x = node.xPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -172,7 +172,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.zPos = value / sceneManager.currentUnit;
+                                node.zPos = value / currentUnit;
                                 node.cameraPerspective.position.z = node.zPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -194,7 +194,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.yPos = value / sceneManager.currentUnit;
+                                node.yPos = value / currentUnit;
                                 node.cameraPerspective.position.y = node.yPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -252,7 +252,7 @@ class NodeUI{
         function changeVisibilityofCam(node)
         {
             node.changeVisibility();
-            sceneManager.updateFrustumIcon();
+            sceneObjects.updateFrustumIcon();
         }
 
         function changeCameraType(node)
@@ -261,8 +261,8 @@ class NodeUI{
             
             document.getElementById('hfov' + node.id + '').innerHTML = 'FOV H: ' + node.cameraType.HFov + '°';
             document.getElementById('vfov' + node.id + '').innerHTML = 'FOV V: ' + node.cameraType.VFov + '°';
-            document.getElementById('near' + node.id + '').innerHTML = 'NEAR: <span data-unit=' + sceneManager.currentUnit + '>' + (Math.round(node.cameraType.rangeNear*sceneManager.currentUnit * 100) / 100.0) + '</span> <span data-unittext=' + sceneManager.currentUnit + '>' + (sceneManager.currentUnit === units.meters ? 'm' : "ft") + '</span>';
-            document.getElementById('far' + node.id + '').innerHTML = 'FAR: <span data-unit=' + sceneManager.currentUnit + '>' + (Math.round(node.cameraType.rangeFar*sceneManager.currentUnit * 100) / 100.0) + '</span> <span data-unittext=' + sceneManager.currentUnit + '>' + (sceneManager.currentUnit === units.meters ? 'm' : "ft") + '</span>';
+            document.getElementById('near' + node.id + '').innerHTML = 'NEAR: <span data-unit=' + currentUnit + '>' + (Math.round(node.cameraType.rangeNear*currentUnit * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit + '>' + (currentUnit === units.meters ? 'm' : "ft") + '</span>';
+            document.getElementById('far' + node.id + '').innerHTML = 'FAR: <span data-unit=' + currentUnit + '>' + (Math.round(node.cameraType.rangeFar*currentUnit * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit + '>' + (currentUnit === units.meters ? 'm' : "ft") + '</span>';
             
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;
@@ -315,7 +315,7 @@ function addCameraGUI(node)
             camHeight.classList.add("row");
             camHeight.classList.add("s-p");
             camHeight.id = "node-solo-height";
-            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + sceneManager.currentUnit + `>` + Math.round(node.YPos * sceneManager.currentUnit * 100) /100.0 + `</span><span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
+            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(node.YPos * currentUnit * 100) /100.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
             camUI.appendChild(camHeight);
         }
         else

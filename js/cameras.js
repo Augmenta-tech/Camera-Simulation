@@ -7,7 +7,7 @@ const camerasTypes =
         VFov:45, 
         rangeNear: 0.6,
         rangeFar: 6,
-        handFar: 2,
+        handFar: 2.2,
         suitable: [
             "human-tracking",
             "hand-tracking" 
@@ -22,7 +22,7 @@ const camerasTypes =
         VFov:49.5, 
         rangeNear: 0.6,
         rangeFar: 6,
-        handFar: 2,
+        handFar: 2.2,
         suitable: [
             "human-tracking",
             "hand-tracking" 

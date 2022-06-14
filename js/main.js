@@ -19,14 +19,14 @@ function bindEventListeners()
     window.addEventListener('resize', onWindowResize);
 
     /* HANDLE BUTTONS */
-    document.getElementById('display-frustums').addEventListener('click', () => viewportManager.sceneManager.displayFrustums());
+    document.getElementById('display-frustums').addEventListener('click', () => viewportManager.sceneManager.objects.displayFrustums());
     document.getElementById('toggle-unit').addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
 
-    document.getElementById('add-node').addEventListener('click', () => viewportManager.sceneManager.addNode());
-    document.getElementById('remove-nodes').addEventListener('click', () => viewportManager.sceneManager.removeNodes());
+    document.getElementById('add-node').addEventListener('click', () => viewportManager.sceneManager.objects.addNode());
+    document.getElementById('remove-nodes').addEventListener('click', () => viewportManager.sceneManager.objects.removeNodes());
 
-    document.getElementById('add-dummy').addEventListener('click', () => viewportManager.sceneManager.addDummy());
-    document.getElementById('remove-dummies').addEventListener('click', () => viewportManager.sceneManager.removeDummies());
+    document.getElementById('add-dummy').addEventListener('click', () => viewportManager.sceneManager.objects.addDummy());
+    document.getElementById('remove-dummies').addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
 
     //DEBUG
     document.addEventListener( 'keydown', onKeyDown );
@@ -39,9 +39,9 @@ function bindEventListeners()
     viewportManager.element.addEventListener( 'pointerup', onPointerUp );
     viewportManager.element.addEventListener( 'pointermove', onPointerMove );
 
-    viewportManager.sceneManager.transformControl.addEventListener( 'objectChange', function () {
+    viewportManager.sceneManager.objects.transformControl.addEventListener( 'objectChange', function () {
         viewportManager.element.removeEventListener( 'pointermove', onDrag);
-        viewportManager.sceneManager.updateObjectsPosition();
+        viewportManager.sceneManager.objects.updateObjectsPosition();
     });
 }
 
@@ -82,7 +82,7 @@ function onPointerUp(event) {
     onUpPosition.x = event.clientX;
     onUpPosition.y = event.clientY;
 
-    if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) viewportManager.sceneManager.transformControl.detach();
+    if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) viewportManager.sceneManager.objects.transformControl.detach();
 
     viewportManager.element.removeEventListener( 'pointermove', onDrag);
     viewportManager.element.addEventListener( 'pointermove', onPointerMove);
@@ -98,28 +98,28 @@ function onPointerMove(event)
     const raycaster = new Raycaster()
     raycaster.setFromCamera( pointer, viewportManager.activeCamera );
     
-    const meshes = viewportManager.sceneManager.nodeMeshes.concat(viewportManager.sceneManager.dummiesMeshes);
+    const meshes = viewportManager.sceneManager.objects.nodeMeshes.concat(viewportManager.sceneManager.objects.dummiesMeshes);
 
     const intersect = raycaster.intersectObjects( meshes, false );
 
     if(intersect.length > 0) {
         const object = intersect[0].object;
-        if (object !== viewportManager.sceneManager.transformControl.object)
+        if (object !== viewportManager.sceneManager.objects.transformControl.object)
         {
-            viewportManager.sceneManager.transformControl.attach(object);
+            viewportManager.sceneManager.objects.transformControl.attach(object);
             if(viewportManager.activeCamera.isOrthographicCamera)
             {
                 let dir = new Vector3();
                 viewportManager.activeCamera.getWorldDirection(dir);
-                viewportManager.sceneManager.transformControl.showX = 1 - Math.abs(dir.dot(new Vector3(1, 0, 0))) < 0.001 ? false : true;
-                viewportManager.sceneManager.transformControl.showZ = 1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001 ? false : true;
-                viewportManager.sceneManager.transformControl.showY = (1 - Math.abs(dir.dot(new Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true;
+                viewportManager.sceneManager.objects.transformControl.showX = 1 - Math.abs(dir.dot(new Vector3(1, 0, 0))) < 0.001 ? false : true;
+                viewportManager.sceneManager.objects.transformControl.showZ = 1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001 ? false : true;
+                viewportManager.sceneManager.objects.transformControl.showY = (1 - Math.abs(dir.dot(new Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true;
             }
             else
             {
-                viewportManager.sceneManager.transformControl.showX = true;
-                viewportManager.sceneManager.transformControl.showZ = true;
-                viewportManager.sceneManager.transformControl.showY = object.name === 'Dummy' ? false : true;
+                viewportManager.sceneManager.objects.transformControl.showX = true;
+                viewportManager.sceneManager.objects.transformControl.showZ = true;
+                viewportManager.sceneManager.objects.transformControl.showY = object.name === 'Dummy' ? false : true;
             }
         }
     }

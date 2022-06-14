@@ -111,9 +111,9 @@ class ViewportManager{
             {
                 /* Change vue between perspective and orthographic */
                 this.activeCamera = this.activeCamera.isOrthographicCamera ? perspCam : orthoCam;
-                this.sceneManager.transformControl.camera = this.activeCamera;
+                this.sceneManager.objects.transformControl.camera = this.activeCamera;
             }
-            this.sceneManager.transformControl.detach();
+            this.sceneManager.objects.transformControl.detach();
 
             this.activeCamera.position.set(newPos.x, newPos.y, newPos.z);
 

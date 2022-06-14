@@ -192,7 +192,7 @@ class Wizard{
                 configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
                 configs.sort((A,B) => A.typeID - B.typeID);
                 let chosenConfig = configs[0];
-                sceneManager.removeNodes();
+                sceneManager.objects.removeNodes();
 
                 let offsetX = chosenConfig.w / 2.0;
                 let offsetY = chosenConfig.h / 2.0;
@@ -207,9 +207,9 @@ class Wizard{
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight, offsetY + j*(chosenConfig.h - oY));
 
                     }
                 }

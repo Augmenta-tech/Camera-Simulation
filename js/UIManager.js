@@ -12,7 +12,7 @@ class UIManager{
         {
             const copyUrlModal = document.getElementById("link-modal")
             document.getElementById('generate-link').addEventListener('click', () => {
-                copyLink(sceneManager.generateLink());
+                copyLink(sceneManager.objects.generateLink());
                 copyUrlModal.style.display = "block";
             });
             window.addEventListener('click', () => {
@@ -83,7 +83,7 @@ class UIManager{
         /* UPDATE */
         function isAreaCoveredUI(sceneManager)
         {
-            const coversArea = sceneManager.doesCoverArea();
+            const coversArea = sceneManager.objects.doesCoverArea();
             const coversUI = document.getElementById('covers-check');
             coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
             coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
@@ -91,7 +91,7 @@ class UIManager{
         
         function changeNumberOfNodes(sceneManager)
         {
-            document.getElementById('nb-nodes').innerHTML = sceneManager.getNbNodes();
+            document.getElementById('nb-nodes').innerHTML = sceneManager.objects.getNbNodes();
         }
 
         this.update = function(sceneManager)
