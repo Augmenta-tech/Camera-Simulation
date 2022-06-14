@@ -44,7 +44,7 @@ jobs:
         #     **/.git*/**
 
       - name: FTP Deploy Beta
-        if: contains(${{ github.ref }},'b') # should trigger on beta
+        if: contains(${{ github.ref }},'b') == true # should trigger on beta
         run : echo "Running beta" 
         # uses: SamKirkland/FTP-Deploy-Action@4.3.0
         # with:
