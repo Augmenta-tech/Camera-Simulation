@@ -100,6 +100,9 @@ class UIManager{
 
         this.changeTrackingMode = function(mode)
         {
+            document.getElementById("tracking-mode-inspector").value = mode;
+            document.getElementById("tracking-mode").value = mode;
+            
             switch(mode)
             {
                 case 'hand-tracking':
