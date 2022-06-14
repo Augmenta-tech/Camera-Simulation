@@ -2,6 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache"> 
     <link rel="stylesheet" href="css/main.css">
     <link rel="shortcut icon" href="#">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +22,13 @@
             <img src="img/augmenta-logo.png" alt="Augmenta">
           </a>
           <div>
-            <p class="website-title">Augmenta Designer (beta)</p>
+            <p id="website-title">Augmenta Designer (beta)</p>
+            <script>
+              {
+                const url = document.location.href;
+                document.getElementById('website-title').innerHTML = 'Augmenta Designer '.concat(url.includes('beta') ? '(beta) (beta)' : '(beta)');
+              }
+            </script>
           </div>
           <div>
             <div id="generate-link" data-button class="row active">
@@ -35,9 +42,19 @@
         <!-- Share Modal -->
         <div id="link-modal" class="modal">
           <div id="copy-feedback" class="modal-content link">
-              <p>URL of your scene has been copied to clipboard !</p>
+              <p id="copy-feedback-text">URL of your scene has been copied to clipboard !</p>
           </div>
         </div>
+
+        <script>
+          {
+            const url = document.location.href;
+            if(url.includes('beta')){
+              document.getElementById('copy-feedback').classList.add('dark-mode');
+              document.getElementById('copy-feedback-text').classList.add('dark-mode');
+            }
+          }
+        </script>
         <!-- End Share Modal -->
 
         <!-- VIEWPORT -->
@@ -97,26 +114,11 @@
               <span id="close-form" class="close">&times;</span>
               <div>
                 <div class="modal-section">
-                  <h1>Scene size</h1>
-                  <div class="inputArea">
-                    <p>Horizontal length</p>
-                    <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
-                  </div>
-                  <div class="inputArea">
-                    <p>Vertical length</p>
-                    <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
-                  </div>
-                  <div class="inputArea">
-                    <p>Camera hook height</p>
-                    <input class="" id="hook-node" type="number" placeholder="r" min="0" max="15" step = "0.1">
-                  </div>
-                </div>
-                <div class="modal-section">
                   <div id="tracking-choice">
                     <h1>What do you want to track ?</h1>
                     <select id="tracking-mode" class="select select-form" name="camType">
-                      <option value="human-tracking" selected>Human tracking</option>
-                      <option value="hand-tracking">Hand tracking</option>
+                      <option value="human-tracking" selected>Floor (people tracking)</option>
+                      <option value="hand-tracking">Table (hand tracking)</option>
                     </select>
                   </div>
                   <div id="height-detection-choice" class="">
@@ -128,6 +130,21 @@
                       <option value="1.6">Shoulders</option>
                       <option id="height-reference" value="2">Entire body</option>
                     </select>
+                  </div>
+                </div>
+                <div class="modal-section">
+                  <h1>Scene size</h1>
+                  <div class="inputArea">
+                    <p>Width (<span data-unittext="1">m</span>)</p>
+                    <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                  </div>
+                  <div class="inputArea">
+                    <p>Height (<span data-unittext="1">m</span>)</p>
+                    <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                  </div>
+                  <div id="hook-height-input" class="inputArea">
+                    <p>Camera hook height (<span data-unittext="1">m</span>)</p>
+                    <input class="" id="hook-node" type="number" placeholder="r" min="0" max="100" step = "0.1">
                   </div>
                 </div>
                 <div class="modal-section">
@@ -144,20 +161,11 @@
           </div>
           <!-- End Modal -->
 
-          <h1>Scene size</h1>
-          <div  class="inputArea">
-            <p>Horizontal length</p>
-            <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
-          </div>
-          <div  class="inputArea">
-            <p>Vertical length</p>
-            <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
-          </div>
           <div id="tracking-choice-inspector">
             <h1>What do you want to track ?</h1>
             <select id="tracking-mode-inspector" class="select select-form" name="camType">
-              <option value="human-tracking" selected>Human tracking</option>
-              <option value="hand-tracking">Hand tracking</option>
+              <option value="human-tracking" selected>Floor (people tracking)</option>
+              <option value="hand-tracking">Table (hand tracking)</option>
             </select>
           </div>
           <div id="height-detection-choice-inspector" class="">
@@ -169,6 +177,15 @@
               <option value="1.6">Shoulders</option>
               <option id="height-reference-inspector" value="2">Entire body</option>
             </select>
+          </div>
+          <h1>Scene size</h1>
+          <div  class="inputArea">
+            <p>Width (<span data-unittext="1">m</span>)</p>
+            <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+          </div>
+          <div  class="inputArea">
+            <p>Height (<span data-unittext="1">m</span>)</p>
+            <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
           </div>
           <div class="row">
             <p>Scene fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
@@ -190,6 +207,22 @@
             </div>
           </div>
         </div>
+
+        <script>
+          {
+            const url = document.location.href;
+            if(url.includes('beta'))
+            {
+              const inspectorChilds = document.getElementById('inspector').getElementsByTagName("*");
+              for(let i = 0; i < inspectorChilds.length; i++)
+              {
+                console.log(inspectorChilds[i]);
+                inspectorChilds[i].classList.add('dark-mode');
+              }
+              document.getElementById('inspector').classList.add('dark-mode');
+            }
+          }
+        </script>
       </div>
     </div>
   </body>
