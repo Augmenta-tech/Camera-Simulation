@@ -32,27 +32,27 @@ jobs:
       - name: FTP Deploy Stable
         if: ${{ contains(github.ref,'b') == false }} # should trigger on stable
         run : echo "Running stable"
-        # uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        # with:
-        #   server: ${{ secrets.FTP_HOSTNAME }}
-        #   username: ${{ secrets.FTP_USER }} # stable ftp account
-        #   password: ${{ secrets.FTP_PASSWORD }} # stable ftp password
-        #   local-dir: ./Camera-Simulation/
-        #   server-dir: /
-        #   exclude: |
-        #     **/.git*
-        #     **/.git*/**
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_HOSTNAME }}
+          username: ${{ secrets.FTP_USER }} # stable ftp account
+          password: ${{ secrets.FTP_PASSWORD }} # stable ftp password
+          local-dir: ./Camera-Simulation/
+          server-dir: /
+          exclude: |
+            **/.git*
+            **/.git*/**
 
       - name: FTP Deploy Beta
         if: ${{ contains(github.ref,'b') == true }} # should trigger on beta
         run : echo "Running beta" 
-        # uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        # with:
-        #   server: ${{ secrets.FTP_HOSTNAME }}
-        #   username: ${{ secrets.BETA_FTP_USER }}  # beta ftp accound
-        #   password: ${{ secrets.BETA_FTP_PASSWORD }}  # beta ftp password
-        #   local-dir: ./Camera-Simulation/
-        #   server-dir: /
-        #   exclude: |
-        #     **/.git*
-        #     **/.git*/**
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+        with:
+          server: ${{ secrets.FTP_HOSTNAME }}
+          username: ${{ secrets.BETA_FTP_USER }}  # beta ftp accound
+          password: ${{ secrets.BETA_FTP_PASSWORD }}  # beta ftp password
+          local-dir: ./Camera-Simulation/
+          server-dir: /
+          exclude: |
+            **/.git*
+            **/.git*/**
