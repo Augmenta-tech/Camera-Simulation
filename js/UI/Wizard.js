@@ -1,5 +1,4 @@
-import { camerasTypes } from './cameras.js'
-import { SceneManager } from './SceneManager.js';
+import { camerasTypes } from '/js/cameras.js'
 
 class Wizard{
     constructor()

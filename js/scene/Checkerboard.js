@@ -9,14 +9,11 @@ import {
     LineBasicMaterial,
     Mesh
 } from 'three';
-
 import { DoubleSide } from 'three';
-
 import { TextGeometry } from 'three-text-geometry';
 
-import { units } from './cameras.js'
-
-import { SceneManager } from './SceneManager.js'
+import { units } from '/js/cameras.js'
+import { SceneManager } from '/js/scene/SceneManager.js'
 
 class Checkerboard{
     static SIZE_TEXT_SCENE = 0.3;
@@ -119,7 +116,7 @@ class Checkerboard{
             sceneBorder.geometry.dispose();
             const geometry = new BoxGeometry(Math.round(width * 100) / 100.0, 0, Math.round(height * 100) / 100.0);
             sceneBorder.geometry = new EdgesGeometry(geometry);
-            sceneBorder.position.set(width / 2.0, floorHeight + 0.003, height / 2.0);
+            sceneBorder.position.set(width / 2.0, floorHeight + 0.02, height / 2.0);
             buildPlanes(width, height, floorHeight, unit);
             createText(width, height, floorHeight, unit);
         }

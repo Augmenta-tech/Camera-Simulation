@@ -17,15 +17,12 @@ import {
     Color
 } from 'three';
 import { DoubleSide } from 'three';
-
 import { FontLoader } from 'three-loaders/FontLoader.js';
 
-import { Checkerboard } from './Checkerboard.js';
-import { SceneObjects } from './SceneObjects.js';
-
-import { camerasTypes, units } from './cameras.js';
-
-import { Node } from './Node.js';
+import { camerasTypes, units } from '/js/cameras.js';
+import { Checkerboard } from '/js/scene/Checkerboard.js';
+import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
@@ -119,7 +116,7 @@ class SceneManager{
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( 0, height - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = floorHeight for area covered)
+            floor.position.set( 0, height - 0.001, 0 ); //to avoid z-fight with area covered by cam (y = floorHeight for area covered)
             floor.rotation.x = - Math.PI / 2.0;
 
             return floor;
@@ -153,7 +150,7 @@ class SceneManager{
         function buildAxesHelper()
         {
             const axesHelper = new AxesHelper( 0.5 );
-            axesHelper.position.y = 0.02;
+            axesHelper.position.set(-0.01,0,-0.01);
 
             axesHelper.material = new LineBasicMaterial( {
                 color: 0xffffff,
@@ -165,7 +162,7 @@ class SceneManager{
         function buildGridHelper(size)
         {
             const gridHelper = new GridHelper( size, size, 0x444444, 0x444444 );
-            gridHelper.position.y = -0.006
+            gridHelper.position.y = -0.001
 
             return gridHelper;
         }

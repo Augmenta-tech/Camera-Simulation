@@ -1,6 +1,7 @@
-import { camerasTypes, units } from './cameras.js'
-import { SceneManager } from './SceneManager.js';
-import { Wizard } from './Wizard.js';
+import { camerasTypes, units } from '/js/cameras.js'
+import { SceneManager } from '/js/scene/SceneManager.js';
+
+import { Wizard } from '/js/UI/Wizard.js';
 
 class UIManager{
     constructor()

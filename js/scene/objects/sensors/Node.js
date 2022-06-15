@@ -8,12 +8,11 @@ import {
     Vector3,
     TrianglesDrawMode
 } from 'three';
-
 import { TextGeometry } from 'three-text-geometry';
 
-import { camerasTypes, units } from './cameras.js'
+import { camerasTypes, units } from '/js/cameras.js'
 
-import { SceneObjects } from './SceneObjects.js';
+import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;

@@ -2,12 +2,11 @@ import { FontLoader } from 'three-loaders/FontLoader.js';
 
 import * as POLYBOOL from 'polybool';
 
-import { SceneManager } from './SceneManager.js';
-import { Dummy } from './Dummy.js';
-import { Node } from './Node.js';
-import { NodeUI } from './NodeUI.js';
-
-import { camerasTypes, units } from './cameras.js'
+import { camerasTypes, units } from '/js/cameras.js'
+import { NodeUI } from '/js/UI/NodeUI.js';
+import { SceneManager } from '/js/scene/SceneManager.js';
+import { Dummy } from '/js/scene/objects/props/Dummy.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 
 
 class SceneObjects{

@@ -4,8 +4,9 @@ import {
     Vector3,
     Raycaster
 } from 'three';
-import { ViewportManager } from './ViewportManager.js';
-import { UIManager } from './UIManager.js';
+
+import { ViewportManager } from '/js/ViewportManager.js';
+import { UIManager } from '/js/UI/UIManager.js';
 
 const viewportElement = document.getElementById('viewport');
 const viewportManager = new ViewportManager(viewportElement);
