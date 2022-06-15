@@ -2,7 +2,6 @@ import { FontLoader } from 'three-loaders/FontLoader.js';
 
 import * as POLYBOOL from 'polybool';
 
-import { camerasTypes, units } from '/js/data.js'
 import { NodeUI } from '/js/UI/NodeUI.js';
 import { SceneManager } from '/js/scene/SceneManager.js';
 import { Dummy } from '/js/scene/objects/props/Dummy.js';
@@ -19,7 +18,6 @@ class SceneObjects{
         });
     }
     static font;
-    static DEFAULT_UNIT = units.meters;
 
     constructor(_transformControl, sceneManager)
     {
@@ -50,9 +48,10 @@ class SceneObjects{
         {
             let url = document.location.href;
             const index = url.indexOf('&');
+            
             if(index === -1)
             {
-                sceneObjects.addNode(false, document.getElementById("tracking-mode-inspector").value, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
+                sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
             }
             else
             {
@@ -60,7 +59,7 @@ class SceneObjects{
                 const cams = url.split('&');
                 const sceneInfo = cams.shift();
                 const infos = sceneInfo.split(',');
-                let mode;
+                let mode, sceneWidth, sceneHeight;;
                 infos.forEach(info => {
                     const keyVal = info.split('=');
                     const key = keyVal[0];
@@ -69,9 +68,11 @@ class SceneObjects{
                     {
                         case "L":
                             document.getElementById("givenSceneWidth").value = parseFloat(val);
+                            sceneWidth = val;
                             break;
                         case "l":
                             document.getElementById("givenSceneHeight").value = parseFloat(val);
+                            sceneHeight = val;
                             break;
                         case "m":
                             document.getElementById("tracking-mode-inspector").value = val;
@@ -90,6 +91,7 @@ class SceneObjects{
                             break;
                     }
                 });
+                sceneManager.updateSceneBorder(sceneWidth, sceneHeight);
                 
                 cams.forEach(c => {
                     const props = c.split(',');
@@ -134,10 +136,9 @@ class SceneObjects{
                             }
                         }
                     });
-                    sceneObjects.addNode(true, mode, typeID, x, y, z, p, a, r)
+                    sceneObjects.addNode(true, sceneManager.trackingMode, typeID, x, y, z, p, a, r)
                 })
             }
-            sceneManager.updateSceneBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
         }
 
 
@@ -204,7 +205,7 @@ class SceneObjects{
          * @param {float} a yaw rotation at creation. Default is 0.
          * @param {float} r roll rotation at creation. Default is 0.
          */
-        this.addNode = function(autoConstruct = false, mode = document.getElementById("tracking-mode-inspector").value, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+        this.addNode = function(autoConstruct = false, mode = sceneManager.trackingMode, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
         {
             if(!SceneObjects.font)
             {
@@ -226,7 +227,7 @@ class SceneObjects{
                     }
                 }
             }
-            newCamera.updatePosition(sceneManager.currentUnit);
+            newCamera.updatePosition(sceneManager.currentUnit.value);
 
             newCamera.addToScene(sceneManager.scene);
 
@@ -279,7 +280,7 @@ class SceneObjects{
 
         this.updateObjectsPosition = function()
         {
-            nodes.forEach(n => n.updatePosition(sceneManager.currentUnit));
+            nodes.forEach(n => n.updatePosition(sceneManager.currentUnit.value));
             dummies.forEach(d => d.updatePosition());
         }
 
@@ -296,11 +297,11 @@ class SceneObjects{
             if(url[url.length-1] != '/') url += '/';
             url += '?';
             url += "L=";
-            url += document.getElementById("givenSceneWidth").value ? Math.floor(document.getElementById("givenSceneWidth").value / sceneManager.currentUnit  * 100)/100: 0;
+            url += Math.floor(sceneManager.sceneWidth / sceneManager.currentUnit.value  * 100)/100;
             url += ",l=";
-            url += document.getElementById("givenSceneHeight").value ? Math.floor(document.getElementById("givenSceneHeight").value / sceneManager.currentUnit * 100)/100 : 0;
+            url += Math.floor(sceneManager.sceneHeight / sceneManager.currentUnit.value * 100)/100;
             url += ",m=";
-            url += document.getElementById("tracking-mode-inspector").value;
+            url += sceneManager.trackingMode;
             url += ",h=";
             url += sceneManager.heightDetected;
             url += '&';
@@ -328,9 +329,9 @@ class SceneObjects{
             return url;
         }
 
-        this.changeObjectsTrackingMode = function(mode)
+        this.changeSensorsTrackingMode = function(mode)
         {
-            nodes.forEach(n => n.changeFar(mode))
+            nodes.forEach(n => n.changeMode(mode))
         }
 
 

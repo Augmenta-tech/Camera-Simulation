@@ -82,13 +82,14 @@ const camerasTypes =
 ];
 
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
-
+/*
 const units = {
     meters: 1,
     feets: 3.28084
 };
+*/
 
-/*
+
 const units = {
     meters: {
         value: 1,
@@ -101,7 +102,7 @@ const units = {
         squaredLabel: 'sqft'
     }
 };
-*/
+
 
 export { units }
 export { camerasTypes }

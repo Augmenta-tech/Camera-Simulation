@@ -46,11 +46,11 @@ class NodeUI{
                         <div class="row s-p column-2">
                             <div>
                                 <p id="hfov` + node.id + `">FOV H: ` + node.cameraType.HFov + `°</p>
-                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeNear*currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
                             </div>
                             <div>
                                 <p id="vfov` + node.id + `">FOV V: ` + node.cameraType.VFov + `°</p>
-                                <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit + `>` + (Math.round(node.cameraType.rangeFar*currentUnit * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) + `</span></p>
+                                <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
                             </div>
                         </div>
                     </div>
@@ -60,9 +60,9 @@ class NodeUI{
                                 <p>  Position </p>
                             </div>
                             <div class="row s-p column-2">
-                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit + `>` + Math.round(node.xPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit + `>` + Math.round(-node.zPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
-                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit + `>` + Math.round(node.yPos * currentUnit * 100) /100.0 + `</strong><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>
+                                <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit.value + `>` + Math.round(node.xPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                                <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit.value + `>` + Math.round(-node.zPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                                <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit.value + `>` + Math.round(node.yPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
                             </div>
                         </div>
                         <div  class="row s-p">
@@ -155,7 +155,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.xPos = value / currentUnit;
+                                node.xPos = value / currentUnit.value;
                                 node.cameraPerspective.position.x = node.xPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -172,7 +172,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.zPos = value / currentUnit;
+                                node.zPos = value / currentUnit.value;
                                 node.cameraPerspective.position.z = node.zPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -194,7 +194,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.yPos = value / currentUnit;
+                                node.yPos = value / currentUnit.value;
                                 node.cameraPerspective.position.y = node.yPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -257,17 +257,12 @@ class NodeUI{
 
         function changeCameraType(node)
         {
-            node.cameraType = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + node.id).value)
-            
-            document.getElementById('hfov' + node.id + '').innerHTML = 'FOV H: ' + node.cameraType.HFov + '°';
-            document.getElementById('vfov' + node.id + '').innerHTML = 'FOV V: ' + node.cameraType.VFov + '°';
-            document.getElementById('near' + node.id + '').innerHTML = 'NEAR: <span data-unit=' + currentUnit + '>' + (Math.round(node.cameraType.rangeNear*currentUnit * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit + '>' + (currentUnit === units.meters ? 'm' : "ft") + '</span>';
-            document.getElementById('far' + node.id + '').innerHTML = 'FAR: <span data-unit=' + currentUnit + '>' + (Math.round(node.cameraType.rangeFar*currentUnit * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit + '>' + (currentUnit === units.meters ? 'm' : "ft") + '</span>';
-            
+            node.cameraType = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + node.id).value);
+
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;
             node.cameraPerspective.near = node.cameraType.rangeNear;
-            switch(document.getElementById('tracking-mode-inspector').value)
+            switch(node.trackingMode)
             {
                 case 'hand-tracking':
                     node.cameraPerspective.far = node.cameraType.handFar;
@@ -277,52 +272,17 @@ class NodeUI{
                     node.cameraPerspective.far = node.cameraType.rangeFar;
                     break;
             }
+            document.getElementById('hfov' + node.id).innerHTML = 'FOV H: ' + node.cameraType.HFov + '°';
+            document.getElementById('vfov' + node.id).innerHTML = 'FOV V: ' + node.cameraType.VFov + '°';
+            document.getElementById('near' + node.id).innerHTML = 'NEAR: <span data-unit=' + currentUnit.value + '>' + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit.value + '>' + currentUnit.label + '</span>';
+            document.getElementById('far' + node.id).innerHTML = 'FAR: <span data-unit=' + currentUnit.value + '>' + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit.value + '>' + currentUnit.label + '</span>';
+        }
+
+        this.changeFar = function(node)
+        {
+            document.getElementById('far' + node.id).innerHTML = 'FAR: <span data-unit=' + currentUnit.value + '>' + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit.value + '>' + currentUnit.label + '</span>';
         }
     }
 }
 
 export { NodeUI }
-
-/*
-function addCameraGUI(node)
-{
-    
-    document.getElementById('node-' + (node.id) + '-solo-button').onclick = soloCamView;
-    function soloCamView()
-    {
-        const iconElem = this.firstChild;
-        const solo = iconElem.dataset.icon === "bx:log-out";
-        const frustumsButton = document.getElementById('display-frustums-button');
-
-        const display = solo ? "block" : "none";
-
-        const otherCams = cameras.filter(c => c.id !== node.id);
-        otherCams.forEach(c => {
-            solo ? c.addCameraToScene() : c.removeCameraFromScene();
-            const camUI = document.getElementById('node-' + (c.id) + '-UI');
-            camUI.style.display = display;
-        });
-
-        frustumsButton.style.display = display;
-
-        const camTransfoDiv = document.getElementById('node-' + (node.id) + '-transformations');
-        camTransfoDiv.style.display = display;
-
-        if(!solo)
-        {
-            const camUI = document.getElementById('node-' + (node.id) + '-UI');
-            const camHeight = document.createElement("div");
-            camHeight.classList.add("row");
-            camHeight.classList.add("s-p");
-            camHeight.id = "node-solo-height";
-            camHeight.innerHTML = `<p> Camera height: <span data-unit=` + currentUnit + `>` + Math.round(node.YPos * currentUnit * 100) /100.0 + `</span><span data-unittext=` + currentUnit + `>` + (currentUnit === units.meters ? `m` : `ft`) +`</span></p>`
-            camUI.appendChild(camHeight);
-        }
-        else
-        {
-            document.getElementById('node-solo-height').remove();
-        }
-        iconElem.dataset.icon = solo ? "bx:search-alt-2" : "bx:log-out";
-    }
-}
-*/

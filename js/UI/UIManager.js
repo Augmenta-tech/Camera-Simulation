@@ -26,27 +26,23 @@ class UIManager{
             document.getElementById("tracking-mode-inspector").addEventListener('change', () => {
                 const mode = document.getElementById("tracking-mode-inspector").value;
                 sceneManager.changeTrackingMode(mode);
-                changeTrackingMode(mode, sceneManager);
-            });
-            document.getElementById("tracking-mode").addEventListener('change', () => {
-                const mode = document.getElementById("tracking-mode").value;
-                sceneManager.changeTrackingMode(mode);
-                changeTrackingMode(mode, sceneManager);
+                changeTrackingMode(mode);
+                this.displayWarning(sceneManager);
             });
 
             document.getElementById("given-height-detection-inspector").addEventListener('change', () => sceneManager.heightDetected = parseFloat(document.getElementById("given-height-detection-inspector").value));
             
 
-            this.wizard.bindEventListeners(sceneManager);
+            this.wizard.bindEventListeners(sceneManager, this);
         }
 
         function resetValues()
         {
-            const inputs = document.getElementsByTagName('input');//.forEach(elem => elem.dataset.unit = SceneManager.DEFAULT_UNIT);
+            const inputs = document.getElementsByTagName('input');
             for(let i = 0; i < inputs.length; i++)
             {
-                inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT;
-                if(inputs[i].id != 'hook-node') inputs[i].value = 5*SceneManager.DEFAULT_UNIT;
+                inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value;
+                if(inputs[i].id != 'hook-node') inputs[i].value = 5*SceneManager.DEFAULT_UNIT.value;
                 else inputs[i].value = '';
             }
 
@@ -60,53 +56,37 @@ class UIManager{
             window.setTimeout(() => document.getElementById("link-modal").style.display = "none", 1500);
         }
 
-        function changeTrackingMode(mode, sceneManager)
+        function changeTrackingMode(trackingMode)
         {
-            document.getElementById("tracking-mode-inspector").value = mode;
-            document.getElementById("tracking-mode").value = mode;
-
-            switch(mode)
+            switch(trackingMode)
             {
                 case 'hand-tracking':
                     document.getElementById('height-detection-choice-inspector').style.display = 'none';
-                    document.getElementById('height-detection-choice').style.display = 'none';
                     break;
                 case 'human-tracking':
                 default:
                     document.getElementById('height-detection-choice-inspector').style.display = 'block';
                     document.getElementById('given-height-detection-inspector').value = "1";
-                    document.getElementById('height-detection-choice').style.display = 'block';
-                    document.getElementById('given-height-detection').value = "1";
                     break;
             }
+        }
 
-            if(mode === 'hand-tracking')
+        this.displayWarning = function(sceneManager)
+        {
+            if(sceneManager.trackingMode === 'hand-tracking')
             {
-                const infoTableElem = document.getElementById('info-table-height');
-                if(!infoTableElem)
-                {
-                    const newInfoTableElem = document.createElement('p');
-                    newInfoTableElem.id = 'info-table-height';
-                    newInfoTableElem.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit + `>` + (sceneManager.floorHeight*sceneManager.currentUnit) + `</span><span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) + `</span> high`;
-                    newInfoTableElem.style.color = 'orange';
-                    document.getElementById('tracking-section').appendChild(newInfoTableElem);
-                }
-
                 const infoTableElemInspector = document.getElementById('info-table-height-inspector');
                 if(!infoTableElemInspector)
                 {
                     const newInfoTableElemInspector = document.createElement('p');
                     newInfoTableElemInspector.id = 'info-table-height-inspector';
-                    newInfoTableElemInspector.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit + `>` + (sceneManager.floorHeight*sceneManager.currentUnit) + `</span><span data-unittext=` + sceneManager.currentUnit + `>` + (sceneManager.currentUnit === units.meters ? `m` : `ft`) + `</span> high`;
+                    newInfoTableElemInspector.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (sceneManager.sceneElevation*sceneManager.currentUnit.value) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
                     newInfoTableElemInspector.style.color = 'orange';
                     document.getElementById('tracking-section-inspector').appendChild(newInfoTableElemInspector);
                 }
             }
             else
             {
-                const infoTableElem = document.getElementById('info-table-height');
-                if(infoTableElem) infoTableElem.remove();
-
                 const infoTableElemInspector = document.getElementById('info-table-height-inspector');
                 if(infoTableElemInspector) infoTableElemInspector.remove();
             }

@@ -38,6 +38,10 @@ class SceneManager{
     }
     static font;
     static DEFAULT_UNIT = units.meters;
+    static DEFAULT_TRACKING_MODE = 'human-tracking';
+    static DEFAULT_DETECTION_HEIGHT = 1;
+    static DEFAULT_WIDTH = 5;
+    static DEFAULT_HEIGHT = 5;
 
     constructor(_transformControl)
     {
@@ -45,9 +49,15 @@ class SceneManager{
 
         this.currentUnit = SceneManager.DEFAULT_UNIT;
 
+        this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
+
+        this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
+        this.sceneWidth = SceneManager.DEFAULT_WIDTH;
+        this.sceneHeight = SceneManager.DEFAULT_HEIGHT;
+        this.sceneElevation = 0;
+
         this.size = 70;
-        this.heightDetected = 1;
-        this.floorHeight = 0;
+
         this.wallXDepth = - this.size / 2.0;
         this.wallZDepth = - this.size / 2.0;
 
@@ -73,7 +83,7 @@ class SceneManager{
             this.scene.add(ambient);
 
             // Floor
-            const floor = buildFloorMesh(this.size, this.floorHeight);
+            const floor = buildFloorMesh(this.size);
             this.scene.add(floor);
 
             // WallX
@@ -93,7 +103,7 @@ class SceneManager{
             this.scene.add( gridHelper );
 
             // Scene Checkerboard
-            this.checkerboard = new Checkerboard(this.currentUnit, this.floorHeight);
+            this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
             this.checkerboard.addPlanesToScene(this.scene);
 
             //SceneObjects
@@ -109,14 +119,14 @@ class SceneManager{
             return scene;
         }
 
-        function buildFloorMesh(size, height)
+        function buildFloorMesh(size)
         {
             const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
             
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( 0, height - 0.001, 0 ); //to avoid z-fight with area covered by cam (y = floorHeight for area covered)
+            floor.position.set( 0, - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = sceneElevation for area covered)
             floor.rotation.x = - Math.PI / 2.0;
 
             return floor;
@@ -176,23 +186,14 @@ class SceneManager{
             this.checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
-                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit * unit * 100) / 100.0;
-                else e.innerHTML = Math.round(e.innerHTML / this.currentUnit * unit * 100) / 100.0;
-                e.dataset.unit = unit;
+                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
+                else e.innerHTML = Math.round(e.innerHTML / this.currentUnit.value * unit.value * 100) / 100.0;
+                e.dataset.unit = unit.value;
             });
             const unitCharElements = document.querySelectorAll('[data-unittext]');
             unitCharElements.forEach(e => {
-                e.dataset.unittext = unit;
-                switch(unit)
-                {
-                    case units.feets:
-                        e.innerHTML = "ft";
-                        break;
-                    case units.meters:
-                    default:
-                        e.innerHTML = 'm';
-                        break;
-                }
+                e.dataset.unittext = unit.value;
+                e.innerHTML = unit.label;
             });
             
             this.currentUnit = unit;
@@ -208,8 +209,11 @@ class SceneManager{
         {
             if(givenWidthValue && givenHeightValue)
             {
-                const givenWidth = parseFloat(givenWidthValue) / this.currentUnit;
-                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit;
+                const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
+                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
+
+                this.sceneWidth = givenWidth;
+                this.sceneHeight = givenHeight;
 
                 //update checkerboard
                 this.checkerboard.setSize(givenWidth, givenHeight);
@@ -220,22 +224,24 @@ class SceneManager{
 
         this.changeTrackingMode = function(mode)
         {
+            this.trackingMode = mode;
+
             switch(mode)
             {
                 case 'hand-tracking':
                     this.heightDetected = 0.25;
-                    this.floorHeight = 0.75;
-                    this.checkerboard.setFloorHeight(this.floorHeight);
+                    this.sceneElevation = 0.75;
+                    this.checkerboard.setSceneElevation(this.sceneElevation);
                     break;
                 case 'human-tracking':
                 default:
                     this.heightDetected = 1;
-                    this.floorHeight = 0;
-                    this.checkerboard.setFloorHeight(this.floorHeight);
+                    this.sceneElevation = 0;
+                    this.checkerboard.setSceneElevation(this.sceneElevation);
                     break;
             }
 
-            this.objects.changeObjectsTrackingMode(mode);
+            this.objects.changeSensorsTrackingMode(mode);
         }
 
 
@@ -265,8 +271,8 @@ class SceneManager{
             this.scene.remove(node.areaCoveredWallX);
             this.scene.remove(node.areaCoveredWallZ);
 
-            const floorPlane = new Plane(floorNormal, -this.floorHeight);
-            const abovePlane = new Plane(floorNormal, -(this.floorHeight + this.heightDetected));
+            const floorPlane = new Plane(floorNormal, -this.sceneElevation);
+            const abovePlane = new Plane(floorNormal, -(this.sceneElevation + this.heightDetected));
             const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
             const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
 
@@ -340,9 +346,9 @@ class SceneManager{
                     frustumScaled.planes[i].constant += 0.01;
                 }
 
-                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
 
 
                 //filter points above, they must be in the frustum at heightDetected but also on the floor
@@ -372,7 +378,7 @@ class SceneManager{
                     coveredPointsAbove = candidatesPoints.filter(p => {
                         const abovePoint = new Vector3().copy(p);
                         abovePoint.y += this.heightDetected;
-                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > this.floorHeight - 0.01 && p.z > this.wallZDepth - 0.01;
+                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01;
                     })
                 }
                 else{
@@ -394,14 +400,14 @@ class SceneManager{
 
                 //display area value 
                 const previousValue = node.areaValue;
-                node.areaValue = calculateArea(coveredPointsAbove, this.checkerboard.unit);
+                node.areaValue = calculateArea(coveredPointsAbove, this.currentUnit.value);
 
                 //Place text 
                 if(coveredPointsAbove.length > 2)
                 {
                     //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
                     const barycentre = getBarycentre(coveredPointsAbove);
-                    node.changeTextPosition(barycentre, this.currentUnit);
+                    node.changeTextPosition(barycentre, this.currentUnit.value);
                     if(previousValue != node.areaValue) node.updateAreaText(this.currentUnit);
                 }
                 else
@@ -539,7 +545,7 @@ class SceneManager{
          * @param {Array} borderPoints array of Vector3 vertices of a convex shape. They must be ordered
          * @returns {float} value of area of the shape delimited by borderPoints
          */
-        function calculateArea(borderPoints, unit)
+        function calculateArea(borderPoints, unitValue)
         {
             let areaValue = 0;
             /** MATH PARAGRAPH
@@ -563,7 +569,7 @@ class SceneManager{
                 areaValue += areaOfThisTriangle;
             }
 
-            return areaValue / (unit * unit);
+            return areaValue  * (unitValue * unitValue);
         }
 
         function getBarycentre(points)

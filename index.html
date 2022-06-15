@@ -13,49 +13,41 @@
   </head>
 
   <body>
+
     <div class="row full-height">
-      <!-- LEFT -->
+
+      <!-- HEADER/VIEWPORT - LEFT -->
       <div id="main">
+
         <!-- HEADER -->
         <div id="header" class="row s-p">
+          <!-- LOGO -->
           <a href="https://www.augmenta.tech">
             <img src="img/augmenta-logo.png" alt="Augmenta">
           </a>
+
+          <!-- TITLE -->
           <div>
             <p id="website-title">Augmenta Designer (beta)</p>
-            <script>
-              {
-                const url = document.location.href;
-                document.getElementById('website-title').innerHTML = 'Augmenta Designer '.concat(url.includes('beta') ? '(beta) (beta)' : '(beta)');
-              }
-            </script>
           </div>
+
+          <!-- SHARE BUTTON -->
           <div>
             <div id="generate-link" data-button class="row active">
               <span class="iconify" data-icon="ci:share" style="color: white; padding:4px;"></span>
               <p> Share </p>
             </div>
-            <!-- TO ADD <p>Help ?</p> -->
+            <!-- TO ADD HELP BUTTON <p>Help ?</p> -->
           </div>
         </div>
 
-        <!-- Share Modal -->
+        <!-- SHARE MODAL -->
         <div id="link-modal" class="modal">
           <div id="copy-feedback" class="modal-content link">
               <p id="copy-feedback-text">URL of your scene has been copied to clipboard !</p>
           </div>
         </div>
-
-        <script>
-          {
-            const url = document.location.href;
-            if(url.includes('beta')){
-              document.getElementById('copy-feedback').classList.add('dark-mode');
-              document.getElementById('copy-feedback-text').classList.add('dark-mode');
-            }
-          }
-        </script>
-        <!-- End Share Modal -->
+        <!-- END SHARE MODAL -->
 
         <!-- VIEWPORT -->
         <div id="viewport">
@@ -74,24 +66,36 @@
               <span class="iconify" data-icon="fluent:zoom-in-16-filled"></span>
             </div>
           </div> -->
+
+          <!-- VIEWPORT BUTTONS -->
           <div id="viewport-button" class="row center">
+            <!-- FRUSTUMS BUTTON -->
             <div id="display-frustums-button" data-button class="row active">
               <span class="iconify" data-icon="akar-icons:eye-open" style="color: white; padding:4px;"></span>
               <p id="display-frustums">Frustums</p>
             </div>
-            <!-- ADD BUTTON
+
+            <!-- ADD MEASURES BUTTON
             <div data-button  class="active">
               <p>Measures</p>
             </div> -->
+
+            <!-- UNITS BUTTON -->
             <div id="toggle-unit" class="row active" data-button>
               <span class="iconify" data-icon="codicon:arrow-both" style="color: white; padding: 4px;"></span>
               <p>m / ft</p>
             </div>
           </div>
+
+          <!-- DUMMIES BUTTONS -->
           <div id="dummies-buttons" class="row">
+
+            <!-- ADD BUTTON -->
             <div class="active" data-button>
               <p id="add-dummy">+ Add dummy</p>
             </div>
+
+            <!-- DELETE BUTTON -->
             <div data-button class="row">
               <span class="iconify" data-icon="fluent:delete-16-filled" style="color: #708EB0; padding:4px;"></span>
               <p id="remove-dummies">Remove dummies</p>
@@ -102,18 +106,28 @@
 
       <!-- INSPECTOR - RIGHT -->
       <div id="inspector">
+
         <!-- SCENE PANEL -->
         <div id="scene-info">
+
+          <!-- WIZARD BUTTON -->
           <div id="open-scene-form" class="row active" data-button>
             <span class="iconify" data-icon="fa:magic" style="color: white; padding: 4px;"></span>
             <p >Generate scene</p>
           </div>
-          <!-- The Modal -->
+
+          <!-- WIZARD MODAL -->
           <div id="generate-scene-modal" class="modal">
             <div id="scene-form-content" class="modal-content scene-form">
               <span id="close-form" class="close">&times;</span>
+
+              <!-- WIZARD CONTENT -->
               <div>
+
+                <!-- TRACKING SECTION -->
                 <div id="tracking-section" class="modal-section">
+
+                  <!-- TRACKING MODE -->
                   <div id="tracking-choice">
                     <h1>What do you want to track ?</h1>
                     <select id="tracking-mode" class="select select-form" name="camType">
@@ -121,6 +135,8 @@
                       <option value="hand-tracking">Table (hand tracking)</option>
                     </select>
                   </div>
+
+                  <!-- HEIGHT DETECTED FOR OVERLAPS -->
                   <div id="height-detection-choice" class="">
                     <p>Target overlap height detection</p>
                     <select id="given-height-detection" class="select select-form" name="camType">
@@ -132,36 +148,52 @@
                     </select>
                   </div>
                 </div>
+
+                <!-- SCENE SECTION -->
                 <div class="modal-section">
                   <h1>Scene size</h1>
+
+                  <!-- WIDTH INPUT -->
                   <div class="inputArea">
                     <p>Width (<span data-unittext="1">m</span>)</p>
                     <input class="" id="areaWantedWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
                   </div>
+
+                  <!-- HEIGHT INPUT -->
                   <div class="inputArea">
                     <p>Height (<span data-unittext="1">m</span>)</p>
                     <input class="" id="areaWantedHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
                   </div>
+
+                  <!-- HOOK HEIGHT INPUT -->
                   <div id="hook-height-input" class="inputArea">
                     <p>Camera hook height from scene (<span data-unittext="1">m</span>) </p>
                     <input class="" id="hook-node" type="number" placeholder="r" min="0" max="100" step = "0.1">
                   </div>
                 </div>
+
+                <!-- CAMERA TYPES SECTION -->
                 <div class="modal-section">
                   <div id="cam-types-checkboxes">
                     <h1>Choose the type.s of camera.s you want to use</h1>
+                    <!-- filled in javascript -->
                   </div>
                 </div>
               </div>
+
+              <!-- GENERATE SCENE BUTTON -->
               <div id="form-button" class="row active" data-button>
                 <span class="iconify" data-icon="fa:magic" style="color: white; padding: 4px;"></span>
                 <p id="generate-scene">Generate scene</p>
               </div>
             </div>
           </div>
-          <!-- End Modal -->
+          <!-- END WIZARD MODAL -->
 
+          <!-- TRACKING SECTION IN INSPECTOR -->
           <div id="tracking-section-inspector">
+
+            <!-- TRACKING MODE -->
             <div id="tracking-choice-inspector">
               <h1>What do you want to track ?</h1>
               <select id="tracking-mode-inspector" class="select select-form" name="camType">
@@ -169,6 +201,8 @@
                 <option value="hand-tracking">Table (hand tracking)</option>
               </select>
             </div>
+
+            <!-- HEIGHT DETECTED FOR OVERLAPS -->
             <div id="height-detection-choice-inspector" class="">
               <p>Target overlap height detection</p>
               <select id="given-height-detection-inspector" class="select select-form" name="camType">
@@ -176,33 +210,51 @@
                 <option value="0.6">Knees</option>
                 <option value="1" selected>Hips (recommended)</option>
                 <option value="1.6">Shoulders</option>
-                <option id="height-reference-inspector" value="2">Entire body</option>
+                <option value="2">Entire body</option>
               </select>
             </div>
           </div>
-          <h1>Scene size</h1>
-          <div  class="inputArea">
-            <p>Width (<span data-unittext="1">m</span>)</p>
-            <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+
+          <!-- SCENE SECTION IN INSPECTOR -->
+          <div>
+            <h1>Scene size</h1>
+
+            <!-- WIDTH INPUT -->
+            <div  class="inputArea">
+              <p>Width (<span data-unittext="1">m</span>)</p>
+              <input id="givenSceneWidth" type="number" placeholder="w" min="0" max="100" step = "0.1">
+            </div>
+
+            <!-- HEIGHT INPUT -->
+            <div  class="inputArea">
+              <p>Height (<span data-unittext="1">m</span>)</p>
+              <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
+            </div>
           </div>
-          <div  class="inputArea">
-            <p>Height (<span data-unittext="1">m</span>)</p>
-            <input id="givenSceneHeight" type="number" placeholder="h" min="0" max="100" step = "0.1">
-          </div>
+
+          <!-- SCENE COVERED FEEDBACK -->
           <div class="row">
             <p>Scene fully covered: </p><span id="covers-check" class="iconify-inline" data-icon="ion:checkmark-circle-sharp" style="color: #2b2;"></span>
           </div>
         </div>
 
-        <!-- SENSOR PANEL -->
+        <!-- SENSORS PANEL -->
         <div id="sensors">
+
+          <!-- NUMBER OF NODES FEEDBACK -->
           <div class="row">
             <p class="number-nodes">Number of nodes: <span id="nb-nodes">0</span></p>
           </div>
+
+          <!-- NODES BUTTONS -->
           <div id="nodes-buttons" class="row">
+
+            <!-- ADD BUTTON -->
             <div id="add-node" class="active" data-button>
               <p>+ New node</p>
             </div>
+
+            <!-- DELETE BUTTON -->
             <div id="remove-nodes" class="row" data-button>
               <span class="iconify" data-icon="fluent:delete-16-filled" style="color: #708EB0; padding:4px;"></span>
               <p>Delete all nodes</p>
@@ -210,11 +262,21 @@
           </div>
         </div>
 
+        <!-- Beta style management -->
         <script>
           {
             const url = document.location.href;
             if(url.includes('beta'))
             {
+              // TITLE
+              document.getElementById('website-title').innerHTML += ' (beta)';
+
+              /* DARK MODE */
+              // SHARE MODAL
+              document.getElementById('copy-feedback').classList.add('dark-mode');
+              document.getElementById('copy-feedback-text').classList.add('dark-mode');
+            
+              // INSPECTOR
               const inspectorChilds = document.getElementById('inspector').getElementsByTagName("*");
               for(let i = 0; i < inspectorChilds.length; i++)
               {
@@ -226,6 +288,7 @@
         </script>
       </div>
     </div>
+
   </body>
 
   <script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
