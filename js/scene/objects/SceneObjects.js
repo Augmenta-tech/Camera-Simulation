@@ -2,7 +2,7 @@ import { FontLoader } from 'three-loaders/FontLoader.js';
 
 import * as POLYBOOL from 'polybool';
 
-import { camerasTypes, units } from '/js/cameras.js'
+import { camerasTypes, units } from '/js/data.js'
 import { NodeUI } from '/js/UI/NodeUI.js';
 import { SceneManager } from '/js/scene/SceneManager.js';
 import { Dummy } from '/js/scene/objects/props/Dummy.js';

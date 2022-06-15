@@ -10,7 +10,7 @@ import {
 } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { camerasTypes, units } from '/js/cameras.js'
+import { camerasTypes, units } from '/js/data.js'
 
 import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 

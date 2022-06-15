@@ -103,5 +103,5 @@ const units = {
 };
 */
 
-export {units}
+export { units }
 export { camerasTypes }

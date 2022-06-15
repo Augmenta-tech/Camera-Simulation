@@ -1,4 +1,4 @@
-import { camerasTypes } from '/js/cameras.js'
+import { camerasTypes } from '/js/data.js'
 
 class Wizard{
     constructor()

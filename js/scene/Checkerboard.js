@@ -12,7 +12,7 @@ import {
 import { DoubleSide } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { units } from '/js/cameras.js'
+import { units } from '/js/data.js'
 import { SceneManager } from '/js/scene/SceneManager.js'
 
 class Checkerboard{

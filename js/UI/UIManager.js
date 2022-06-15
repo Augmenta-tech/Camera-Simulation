@@ -1,4 +1,4 @@
-import { camerasTypes, units } from '/js/cameras.js'
+import { camerasTypes, units } from '/js/data.js'
 import { SceneManager } from '/js/scene/SceneManager.js';
 
 import { Wizard } from '/js/UI/Wizard.js';
