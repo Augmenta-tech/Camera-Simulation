@@ -43,6 +43,9 @@ class SceneManager{
     static DEFAULT_WIDTH = 5;
     static DEFAULT_HEIGHT = 5;
 
+    static TABLE_ELEVATION = 0.75;
+    static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
+
     constructor(_transformControl)
     {
         this.scene = buildScene();
@@ -68,11 +71,12 @@ class SceneManager{
         this.checkerboard;
         this.objects = new SceneObjects(_transformControl, this);;
 
+        this.augmentaSceneLoaded = false;
+
         //DEBUG
         const spheres = [];
         const rays = [];
     
-
 
     /* SCENE INITIALISATION */
 
@@ -96,18 +100,23 @@ class SceneManager{
 
             //Origin
             const axesHelper = buildAxesHelper();
-            this.scene.add( axesHelper );
+            this.scene.add(axesHelper);
 
             // Grid Helper
             const gridHelper = buildGridHelper(this.size);
-            this.scene.add( gridHelper );
+            this.scene.add(gridHelper);
+        }
 
+        this.initAugmentaScene = function()
+        {
             // Scene Checkerboard
             this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
             this.checkerboard.addPlanesToScene(this.scene);
 
             //SceneObjects
             this.objects.initObjects();
+
+            this.augmentaSceneLoaded = true;
         }
 
     /* BUILDERS */
@@ -183,7 +192,7 @@ class SceneManager{
         {
             const unit = this.currentUnit === units.meters ? units.feets : units.meters;
 
-            this.checkerboard.toggleUnit(unit);
+            if(this.augmentaSceneLoaded) this.checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
                 if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
@@ -195,6 +204,9 @@ class SceneManager{
                 e.dataset.unittext = unit.value;
                 e.innerHTML = unit.label;
             });
+
+            document.getElementById('toggle-unit-button-' + this.currentUnit.label).style.fontWeight = "normal";
+            document.getElementById('toggle-unit-button-' + unit.label).style.fontWeight = "bold";
             
             this.currentUnit = unit;
         }
@@ -205,7 +217,7 @@ class SceneManager{
          * @param {*} givenWidthValue horizontal length value entered input in the current unit.
          * @param {*} givenHeightValue vertical length value entered input in the current unit.
          */
-        this.updateSceneBorder = function(givenWidthValue, givenHeightValue)
+        this.updateAugmentaSceneBorder = function(givenWidthValue, givenHeightValue)
         {
             if(givenWidthValue && givenHeightValue)
             {
@@ -216,7 +228,7 @@ class SceneManager{
                 this.sceneHeight = givenHeight;
 
                 //update checkerboard
-                this.checkerboard.setSize(givenWidth, givenHeight);
+                if(this.augmentaSceneLoaded) this.checkerboard.setSize(givenWidth, givenHeight);
 
                 this.objects.calculateScenePolygon(givenWidth, givenHeight);
             }
@@ -229,15 +241,15 @@ class SceneManager{
             switch(mode)
             {
                 case 'hand-tracking':
-                    this.heightDetected = 0.25;
-                    this.sceneElevation = 0.75;
-                    this.checkerboard.setSceneElevation(this.sceneElevation);
+                    this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                    this.sceneElevation = SceneManager.TABLE_ELEVATION;
+                    if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
                     break;
                 case 'human-tracking':
                 default:
                     this.heightDetected = 1;
                     this.sceneElevation = 0;
-                    this.checkerboard.setSceneElevation(this.sceneElevation);
+                    if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
                     break;
             }
 
@@ -246,6 +258,8 @@ class SceneManager{
 
 
         /* SCENE UPDATE */
+
+        /* NOES PROJECTION */ 
 
         /**
          * Calculate area covered by the node to draw it and display it
@@ -612,18 +626,21 @@ class SceneManager{
             return(areaCovered);
         }
 
+        /* UPDATE */
+        this.update = function ()
+        {
+            this.objects.update();
+        }
+
+        // initialize three js scene
+        this.initScene();
 
         // DEBUG
         this.debug = function()
         {
-            console.log(document.getElementById("given-height-detection-inspector").value)
+            console.log(document.getElementById("overlap-height-selection-inspector").value)
             console.log(this.heightDetected);
             this.objects.debug();
-        }
-
-        this.update = function ()
-        {
-            this.objects.update();
         }
     }
 }

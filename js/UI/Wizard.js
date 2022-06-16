@@ -1,4 +1,6 @@
-import { camerasTypes } from '/js/data.js'
+import { camerasTypes, units } from '/js/data.js'
+
+import { SceneManager } from '/js/scene/SceneManager.js'
 
 class Wizard{
     constructor()
@@ -7,29 +9,35 @@ class Wizard{
 
         this.bindEventListeners = function(sceneManager, uiManager)
         {
-            const formModal = document.getElementById('generate-scene-modal');
-            document.getElementById('open-scene-form').addEventListener('click', () => {
-                initFormValues(sceneManager);
-                formModal.style.display = "block"
+            const formModal = document.getElementById('wizard-modal');
+            document.getElementById('open-wizard-button').addEventListener('click', () => {
+                if(sceneManager.augmentaSceneLoaded)
+                {
+                    initWizardValues(sceneManager);
+                    formModal.style.display = "block";
+                }
             });
-            document.getElementById('close-form').addEventListener('click', () => formModal.style.display = "none");
+            document.getElementById('close-wizard').addEventListener('click', () => formModal.style.display = "none");
             
             window.addEventListener('mousedown', () => {
                 if(event.target === formModal) formModal.style.display = "none";
             });
 
-            document.getElementById('tracking-mode').addEventListener('change', () => changeTrackingMode(sceneManager, document.getElementById('tracking-mode').value));
+            document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => changeTrackingMode(sceneManager, document.getElementById('tracking-mode-selection-wizard').value));
 
-            const camCheckboxes = document.querySelectorAll('[data-checkcam]');
-            camCheckboxes.forEach(c => c.addEventListener('change', () => checkFormCoherence(sceneManager)));
-            document.getElementById('tracking-mode').addEventListener('change', () => checkFormCoherence(sceneManager));
-            document.getElementById('hook-node').addEventListener('change', () => checkFormCoherence(sceneManager));
+            const camCheckboxes = document.getElementsByClassName('checkbox-camera-type');
+            for(let i = 0; i < camCheckboxes.length; i++)
+            {
+                camCheckboxes[i].addEventListener('change', () => checkFormCoherence(sceneManager));
+            }
+            document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => checkFormCoherence(sceneManager));
+            document.getElementById('input-hook-height-wizard').addEventListener('change', () => checkFormCoherence(sceneManager));
 
             function checkFormCoherence(sceneManager)
             {
-                if(document.getElementById('hook-node').value / sceneManager.currentUnit.value > getMaxFarFromCheckedCam(document.getElementById('tracking-mode').value))
+                if(document.getElementById('input-hook-height-wizard').value / sceneManager.currentUnit.value > getMaxFarFromCheckedCam(document.getElementById('tracking-mode-selection-wizard').value))
                 {
-                    document.getElementById('hook-node').style.color = "red";
+                    document.getElementById('input-hook-height-wizard').style.color = "red";
                     const warningElem = document.getElementById('warning-hook-height');
                     if(!warningElem)
                     {
@@ -42,14 +50,14 @@ class Wizard{
                 }
                 else
                 {
-                    document.getElementById('hook-node').style.color = "black";
+                    document.getElementById('input-hook-height-wizard').style.color = "black";
                     const warningElem = document.getElementById('warning-hook-height');
                     if(warningElem) warningElem.remove();
                 }
             }
 
-            document.getElementById('generate-scene').addEventListener('click', () => {
-                createSceneFromForm(sceneManager);
+            document.getElementById('generate-scene-wizard-button').addEventListener('click', () => {
+                createSceneFromWizard(sceneManager);
                 uiManager.displayWarning(sceneManager);
             });
         }
@@ -59,12 +67,12 @@ class Wizard{
             switch(mode)
             {
                 case 'hand-tracking':
-                    document.getElementById('height-detection-choice').style.display = "none";
+                    document.getElementById('overlap-height-wizard').style.display = "none";
                     break;
                 case 'human-tracking':
                 default:
-                    document.getElementById('height-detection-choice').style.display = "block";
-                    document.getElementById('given-height-detection').value = "1";
+                    document.getElementById('overlap-height-wizard').style.display = "block";
+                    document.getElementById('overlap-height-selection-wizard').value = "1";
                     break;
             }
 
@@ -75,9 +83,9 @@ class Wizard{
                 {
                     const newInfoTableElem = document.createElement("p");
                     newInfoTableElem.id = 'info-table-height';
-                    newInfoTableElem.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (sceneManager.sceneElevation*sceneManager.currentUnit.value) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
+                    newInfoTableElem.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (SceneManager.TABLE_ELEVATION*sceneManager.currentUnit.value) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
                     newInfoTableElem.style.color = "orange";
-                    document.getElementById('tracking-section').appendChild(newInfoTableElem);
+                    document.getElementById('tracking-section-wizard').appendChild(newInfoTableElem);
                 }
             }
             else
@@ -87,19 +95,21 @@ class Wizard{
             }
         }
 
-        function initFormValues(sceneManager)
+        function initWizardValues(sceneManager)
         {
-            document.getElementById('areaWantedWidth').value = sceneManager.sceneWidth;
-            document.getElementById('areaWantedHeight').value = sceneManager.sceneHeight;
-            document.getElementById('hook-node').value = document.getElementById('hook-node').value ? document.getElementById('hook-node').value : 4.5;
+            document.getElementById('input-scene-width-wizard').value = sceneManager.sceneWidth;
+            document.getElementById('input-scene-height-wizard').value = sceneManager.sceneHeight;
+            document.getElementById('input-hook-height-wizard').value = document.getElementById('input-hook-height-wizard').value ? document.getElementById('input-hook-height-wizard').value : 4.5;
 
-            document.getElementById('tracking-mode').value = sceneManager.trackingMode;
-            if(sceneManager.trackingMode === 'human-tracking') document.getElementById('given-height-detection').value = sceneManager.heightDetected;
+            document.getElementById('tracking-mode-selection-wizard').value = sceneManager.trackingMode;
+
+            changeTrackingMode(sceneManager, sceneManager.trackingMode);
+            if(sceneManager.trackingMode === 'human-tracking') document.getElementById('overlap-height-selection-wizard').value = sceneManager.heightDetected;
 
         }
 
         function addCamTypesToForm(){
-            const camTypesForm = document.getElementById('cam-types-checkboxes');
+            const camTypesForm = document.getElementById('cam-types-checkboxes-wizard');
             /*while (camTypesForm.firstChild) {
                 camTypesForm.removeChild(camTypesForm.firstChild);
             }
@@ -107,15 +117,15 @@ class Wizard{
             title.innerHTML = "Choose the type.s of camera.s you want to use";
             camTypesForm.appendChild(title);*/
             camerasTypes.filter(c => c.recommended).forEach(c => {
-                //const hookHeight = parseFloat(document.getElementById('hook-node').value);
-                //if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById('tracking-mode').value))
+                //const hookHeight = parseFloat(document.getElementById('input-hook-height-wizard').value);
+                //if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById('tracking-mode-selection-wizard').value))
                 //{
                     const camTypeChoice = document.createElement("div");
                     const camTypeCheckbox = document.createElement("input");
                     camTypeCheckbox.setAttribute("type", "checkbox");
                     if(c.checkedDefault) camTypeCheckbox.setAttribute("checked", "true");
                     camTypeCheckbox.id = "check-" + c.id;
-                    camTypeCheckbox.dataset.checkcam = "";
+                    camTypeCheckbox.classList.add('checkbox-camera-type');
                     const label = document.createElement("label");
                     label.setAttribute("for", "check-" + c.id)
                     label.innerHTML = c.name;
@@ -132,7 +142,7 @@ class Wizard{
 
         function getMaxFarFromCheckedCam(mode)
         {
-            const camCheckboxes = document.querySelectorAll('[data-checkcam]');
+            const camCheckboxes = document.getElementsByClassName('checkbox-camera-type');
             const camElementsChecked = [];
             for(let i = 0; i < camCheckboxes.length; i++)
             {
@@ -161,43 +171,40 @@ class Wizard{
             }
         }
 
-        function createSceneFromForm(sceneManager)
+        function createSceneFromWizard(sceneManager)
         {
-            const inputWidth = parseFloat(document.getElementById('areaWantedWidth').value);
-            const inputHeight = parseFloat(document.getElementById('areaWantedHeight').value);
+            const inputWidth = parseFloat(document.getElementById('input-scene-width-wizard').value);
+            const inputHeight = parseFloat(document.getElementById('input-scene-height-wizard').value);
+            const camsHeight = Math.round(parseFloat(document.getElementById('input-hook-height-wizard').value) / sceneManager.currentUnit.value * 100) / 100;
+            
+            const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
+            let sceneElevation, overlapHeightDetection;
+            switch(trackingMode)
+            {
+                case 'hand-tracking':
+                    sceneElevation = SceneManager.TABLE_ELEVATION;
+                    overlapHeightDetection = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                    break;
+                case 'human-tracking':
+                default:
+                    sceneElevation = sceneManager.sceneElevation;
+                    overlapHeightDetection = parseFloat(document.getElementById('overlap-height-selection-wizard').value);
+                    break;
+            }
 
-            const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit.value * 100) / 100;
-            const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit.value * 100) / 100;
-            const camsHeight = Math.round(parseFloat(document.getElementById('hook-node').value) / sceneManager.currentUnit.value * 100) / 100;
-
-            const trackingMode = document.getElementById('tracking-mode').value;
-
-            if(!givenWidth || !givenHeight)
+            if(!inputWidth || !inputHeight)
             {
                 alert("Please fill your scene horizontal and vertical length");
                 return;
             }
-
-            // update inspector infos
-            document.getElementById('givenSceneWidth').value = inputWidth;
-            document.getElementById('givenSceneHeight').value = inputHeight;
-
-            document.getElementById('tracking-mode-inspector').value = trackingMode;
-            switch(trackingMode)
+            if(!camsHeight)
             {
-                case 'hand-tracking':
-                    document.getElementById('height-detection-choice-inspector').style.display = "none"
-                    break;
-                case 'human-tracking':
-                default:
-                    document.getElementById('height-detection-choice-inspector').style.display = "block";
-                    document.getElementById('given-height-detection-inspector').value = document.getElementById('given-height-detection').value
-                    break;
+                alert("Please fill the hook height from your scene");
+                return;
             }
 
-            //set scene attributes
-            sceneManager.changeTrackingMode(trackingMode);
-            if(trackingMode === 'human-tracking') sceneManager.heightDetected = parseFloat(document.getElementById('given-height-detection').value);
+            const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit.value * 100) / 100;
+            const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit.value * 100) / 100;
 
             let configs = [];
 
@@ -213,10 +220,10 @@ class Wizard{
                         augmentaFar = type.rangeFar;
                         break;
                 }
-                if(document.getElementById('check-' + type.id).checked && camsHeight <= augmentaFar && camsHeight >= type.rangeNear + sceneManager.heightDetected)
+                if(document.getElementById('check-' + type.id).checked && camsHeight <= augmentaFar && camsHeight >= type.rangeNear + overlapHeightDetection)
                 {
-                    const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
-                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - sceneManager.heightDetected) * 2;
+                    const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
+                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
 
                     const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
                     const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
@@ -236,7 +243,7 @@ class Wizard{
             }
             else
             {
-                sceneManager.updateSceneBorder(inputWidth, inputHeight);
+                sceneManager.updateAugmentaSceneBorder(inputWidth, inputHeight);
 
                 configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                 configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
@@ -257,14 +264,36 @@ class Wizard{
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneManager.sceneElevation, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneManager.sceneElevation, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.h - oY));
 
                     }
                 }
+
+                // update inspector infos
+                document.getElementById('input-scene-width-inspector').value = inputWidth;
+                document.getElementById('input-scene-height-inspector').value = inputHeight;
+    
+                document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
+                switch(trackingMode)
+                {
+                    case 'hand-tracking':
+                        document.getElementById('overlap-height-inspector').style.display = "none"
+                        break;
+                    case 'human-tracking':
+                    default:
+                        document.getElementById('overlap-height-inspector').style.display = "block";
+                        document.getElementById('overlap-height-selection-inspector').value = document.getElementById('overlap-height-selection-wizard').value
+                        break;
+                }
+    
+                //set scene attributes
+                sceneManager.changeTrackingMode(trackingMode);
+                if(trackingMode === 'human-tracking') sceneManager.heightDetected = overlapHeightDetection;
+    
                 //placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
-                document.getElementById('generate-scene-modal').style.display = "none";
+                document.getElementById('wizard-modal').style.display = "none";
             }
         }
     }

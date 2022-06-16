@@ -20,14 +20,14 @@ function bindEventListeners()
     window.addEventListener('resize', onWindowResize);
 
     /* HANDLE BUTTONS */
-    document.getElementById('display-frustums').addEventListener('click', () => viewportManager.sceneManager.objects.displayFrustums());
-    document.getElementById('toggle-unit').addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
+    document.getElementById('display-frustums-button').addEventListener('click', () => viewportManager.sceneManager.objects.displayFrustums());
+    document.getElementById('toggle-unit-button').addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
 
-    document.getElementById('add-node').addEventListener('click', () => viewportManager.sceneManager.objects.addNode());
-    document.getElementById('remove-nodes').addEventListener('click', () => viewportManager.sceneManager.objects.removeNodes());
+    document.getElementById('add-node-button').addEventListener('click', () => viewportManager.sceneManager.objects.addNode());
+    document.getElementById('delete-all-nodes-button').addEventListener('click', () => viewportManager.sceneManager.objects.removeNodes());
 
-    document.getElementById('add-dummy').addEventListener('click', () => viewportManager.sceneManager.objects.addDummy());
-    document.getElementById('remove-dummies').addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
+    document.getElementById('add-dummy-button').addEventListener('click', () => viewportManager.sceneManager.objects.addDummy());
+    document.getElementById('delete-all-dummies-button').addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
 
     //DEBUG
     document.addEventListener( 'keydown', onKeyDown );

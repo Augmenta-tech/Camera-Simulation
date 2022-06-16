@@ -135,9 +135,9 @@ class Node{
             this.cameraPerspective.visible = value;
             this.cameraPerspectiveHelper.visible = value;
             this.nameText.visible = value;
-            const iconElem = document.getElementById('node-' + (this.id) + '-visible').firstElementChild;
-            iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
             this.areaValueText.visible = value;
+
+            this.uiElement.changeVisibility(value);
         }
 
         this.updatePosition = function(currentUnitValue)
@@ -146,10 +146,8 @@ class Node{
             this.yPos = this.mesh.position.y;
             this.zPos = this.mesh.position.z;
             this.cameraPerspective.position.set(this.xPos, this.yPos, this.zPos);
-    
-            document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.xPos * currentUnitValue * 100)/100.0;
-            document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.zPos * currentUnitValue * 100)/100.0;
-            document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.yPos * currentUnitValue * 100)/100.0;
+
+            this.uiElement.updatePosition(this.xPos, this.yPos, this.zPos, currentUnitValue)
         }
 
         this.updateAreaText = function(currentUnit)
@@ -188,7 +186,7 @@ class Node{
                     break;
             }
 
-            node.uiElement.changeFar(node);
+            node.uiElement.changeFar();
         }
 
         this.update = function()

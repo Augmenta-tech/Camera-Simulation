@@ -67,11 +67,11 @@ class SceneObjects{
                     switch(key)
                     {
                         case "L":
-                            document.getElementById("givenSceneWidth").value = parseFloat(val);
+                            document.getElementById("input-scene-width-inspector").value = parseFloat(val);
                             sceneWidth = val;
                             break;
                         case "l":
-                            document.getElementById("givenSceneHeight").value = parseFloat(val);
+                            document.getElementById("input-scene-height-inspector").value = parseFloat(val);
                             sceneHeight = val;
                             break;
                         case "m":
@@ -82,16 +82,16 @@ class SceneObjects{
                         case "h":
                             mode === 'human-tracking'
                                 ?
-                                document.getElementById('given-height-detection-inspector').value = val
+                                document.getElementById('overlap-height-selection-inspector').value = val
                                 :
-                                document.getElementById('height-detection-choice-inspector').style.display = 'none';
+                                document.getElementById('overlap-height-inspector').style.display = 'none';
                             sceneManager.heightDetected = parseFloat(val);
                             break;
                         default:
                             break;
                     }
                 });
-                sceneManager.updateSceneBorder(sceneWidth, sceneHeight);
+                sceneManager.updateAugmentaSceneBorder(sceneWidth, sceneHeight);
                 
                 cams.forEach(c => {
                     const props = c.split(',');
@@ -239,14 +239,14 @@ class SceneObjects{
         {
             const visibles = nodes.filter(n => n.areaAppear);
             nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
-            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
+            const iconElem = document.getElementById('display-frustums-button-icon');
             iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.updateFrustumIcon = function()
         {
             const visibles = nodes.filter(n => n.areaAppear);
-            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
+            const iconElem = document.getElementById('display-frustums-button-icon');
             iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
@@ -385,7 +385,7 @@ class SceneObjects{
                 sceneManager.drawProjection(n);
             });
         }
-        SceneObjects.loadFont(() => SceneManager.loadFont(() => sceneManager.initScene()));
+        SceneObjects.loadFont(() => SceneManager.loadFont(() => sceneManager.initAugmentaScene()));
     }
 }
 
