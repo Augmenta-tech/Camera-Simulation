@@ -14,13 +14,13 @@ class Wizard{
                 if(sceneManager.augmentaSceneLoaded)
                 {
                     initWizardValues(sceneManager);
-                    formModal.style.display = "block";
+                    formModal.classList.remove('hidden');
                 }
             });
-            document.getElementById('close-wizard').addEventListener('click', () => formModal.style.display = "none");
+            document.getElementById('close-wizard').addEventListener('click', () => formModal.classList.add('hidden'));
             
             window.addEventListener('mousedown', () => {
-                if(event.target === formModal) formModal.style.display = "none";
+                if(event.target === formModal) formModal.classList.add('hidden');
             });
 
             document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => changeTrackingMode(sceneManager, document.getElementById('tracking-mode-selection-wizard').value));
@@ -67,11 +67,11 @@ class Wizard{
             switch(mode)
             {
                 case 'hand-tracking':
-                    document.getElementById('overlap-height-wizard').style.display = "none";
+                    document.getElementById('overlap-height-wizard').classList.add('hidden');
                     break;
                 case 'human-tracking':
                 default:
-                    document.getElementById('overlap-height-wizard').style.display = "block";
+                    document.getElementById('overlap-height-wizard').classList.remove('hidden');
                     document.getElementById('overlap-height-selection-wizard').value = "1";
                     break;
             }
@@ -113,7 +113,7 @@ class Wizard{
             /*while (camTypesForm.firstChild) {
                 camTypesForm.removeChild(camTypesForm.firstChild);
             }
-            let title = document.createElement("h1");
+            let title = document.createElement("h3");
             title.innerHTML = "Choose the type.s of camera.s you want to use";
             camTypesForm.appendChild(title);*/
             camerasTypes.filter(c => c.recommended).forEach(c => {
@@ -279,11 +279,11 @@ class Wizard{
                 switch(trackingMode)
                 {
                     case 'hand-tracking':
-                        document.getElementById('overlap-height-inspector').style.display = "none"
+                        document.getElementById('overlap-height-inspector').classList.add('hidden');
                         break;
                     case 'human-tracking':
                     default:
-                        document.getElementById('overlap-height-inspector').style.display = "block";
+                        document.getElementById('overlap-height-inspector').classList.remove('hidden');
                         document.getElementById('overlap-height-selection-inspector').value = document.getElementById('overlap-height-selection-wizard').value
                         break;
                 }
@@ -293,7 +293,7 @@ class Wizard{
                 if(trackingMode === 'human-tracking') sceneManager.heightDetected = overlapHeightDetection;
     
                 //placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
-                document.getElementById('wizard-modal').style.display = "none";
+                document.getElementById('wizard-modal').classList.add('hidden');
             }
         }
     }

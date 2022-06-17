@@ -10,13 +10,12 @@ class UIManager{
 
         this.bindEventListeners = function(sceneManager)
         {
-            const copyUrlModal = document.getElementById("share-modal")
+            const copyUrlModal = document.getElementById("share-modal");
             document.getElementById('generate-link').addEventListener('click', () => {
                 copyLink(sceneManager.objects.generateLink());
-                copyUrlModal.style.display = "block";
             });
             window.addEventListener('click', () => {
-                if(event.target == copyUrlModal) copyUrlModal.style.display = "none"
+                if(event.target == copyUrlModal) copyUrlModal.classList.add('hidden');
             });
 
             document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
@@ -51,8 +50,10 @@ class UIManager{
         function copyLink(link)
         {
             navigator.clipboard.writeText(link);
-            document.getElementById('copy-feedback').style.display = "block flex";
-            window.setTimeout(() => document.getElementById("share-modal").style.display = "none", 1500);
+
+            document.getElementById("share-modal").classList.remove('hidden');
+            //document.getElementById('share-modal-content').style.display = "block flex";
+            window.setTimeout(() => document.getElementById("share-modal").classList.add('hidden'), 1500);
         }
 
         function changeTrackingMode(trackingMode)
@@ -60,11 +61,11 @@ class UIManager{
             switch(trackingMode)
             {
                 case 'hand-tracking':
-                    document.getElementById('overlap-height-inspector').style.display = 'none';
+                    document.getElementById('overlap-height-inspector').classList.add('hidden');
                     break;
                 case 'human-tracking':
                 default:
-                    document.getElementById('overlap-height-inspector').style.display = 'block';
+                    document.getElementById('overlap-height-inspector').classList.remove('hidden');
                     document.getElementById('overlap-height-selection-inspector').value = "1";
                     break;
             }

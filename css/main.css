@@ -1,11 +1,12 @@
 :root {
   --color-dark-purple: #0E021C;
-  --color-viewport: #DDDDDD;
+  --color-grey: #E1E1E1;
   --color-grey-p: #9A9A9A;
   --color-blue :#708EB0;
   --color-blue-2 :#57718F;
-  --color-white :white;
-  --color-select-camera : #fff;
+  --color-white :#fefefe;
+  --color-darkmode-main: #2c3541;
+  --color-darkmode-secondary: #1c2229;
 }
 
 *{
@@ -21,24 +22,28 @@ body {
 }
 
 h1 {
-  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: initial;
+}
+
+h3 {
   font-style: normal;
   font-weight: bold;
-  font-size: 13px;
-  line-height: 14px;
+  font-size: 14px;
+  line-height: 15px;
   color: var(--color-dark-purple);
 }
 
 p {
   font-style: normal;
-  font-weight: 400;
+  font-weight: normal;
   font-size: 12px;
   line-height: 15px;
   color: var(--color-grey-p);
 }
 
-h1.dark-mode, p.dark-mode, label.dark-mode {
-  color: white;
+h3.dark-mode, p.dark-mode, label.dark-mode {
+  color: var(--color-white);
 }
 
 strong {
@@ -60,6 +65,7 @@ canvas {
   height: 100vh;
 }
 
+/** FLEXBOXES **/
 .row {
   display: flex;
   flex-direction: row;
@@ -70,16 +76,21 @@ canvas {
   flex-direction: column;
 }
 
-.center-spaced-content {
+.row.center-x-spaced, .column.center-y-spaced {
   justify-content: space-between;
 }
 
-.center-content {
+.row.center-x, .column.center-y {
   justify-content: center;
 }
 
-.align-items-center {
+.row.center-y, .column.center-x {
   align-items: center;
+}
+
+
+.hidden {
+  display: none !important;
 }
 
 .column-2 {
@@ -89,6 +100,7 @@ canvas {
 .node-color {
   width: 10px;
   height: 10px;
+  margin-right: 8px;
 }
 
 .number-nodes {
@@ -109,10 +121,10 @@ canvas {
 }
 
 .camera-type {
-  background-color: white;
+  background-color: var(--color-white);
   font-weight: bold;
-  margin-top: 4%;
-  height: 30px;
+  margin: 5px 0;
+  height: 40px;
 }
 
 .select-form {
@@ -121,7 +133,7 @@ canvas {
 }
 
 .select:hover {
-  background-color: var(--color-viewport);
+  background-color: var(--color-grey);
 }
 
 .draggable {
@@ -132,32 +144,30 @@ canvas {
   margin: 7px;
   width: 40%;
 }
-/* The Modal (background) */
+
+/** MODALS **/
 .modal {
-  display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 100; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
-
 
 /* Modal Content */
 .modal-content {
   background-color: #fefefe;
-  margin: auto;
   padding: 20px;
-  border: 2px solid #fefefe;
+  border: 4px solid var(--color-grey);
   justify-content: space-between;
 }
+
 .modal-content.dark-mode {
-  background-color: #2c3541 !important;
+  background-color: var(--color-darkmode-main) !important;
+  border-color: var(--color-darkmode-secondary) !important;
 }
 
 .modal-section {
@@ -166,11 +176,6 @@ canvas {
 
 .scene-form {
   width: 50%;
-}
-
-.link {
-  width: 15%;
-  display: flex;
 }
 
 .close {
@@ -212,33 +217,27 @@ canvas {
 
 /*** DATASETS ***/
 
-.nodeUI .node-color {
-  margin: 2px 8px 0 0;
-}
-
+/** Node UI **/
 .nodeUI {
   padding: 20px 29px 29px;
-  border-bottom: 2px solid var(--color-viewport);
+  background-color: var(--color-white);
+  border-bottom: 2px solid var(--color-grey);
 }
+
 .nodeUI p {
     line-height:25px;
 
-}
-.nodeUI.active {
-  background-color: var(--color-select-camera);
 }
 
 .nodeUI [data-icon] {
   width: 13px;
   height: 13px;
-  margin: 5px 8px 0 8px;
+  margin: 0 8px;
   color: var(--color-dark-purple);
   cursor: pointer;
 }
-.nodeUI [data-icon="gg:lock"] {
-  margin: 2px 0px 0 0;
-}
 
+/** **/
 [data-tool] [data-icon] {
   width : 24px;
   height : 24px;
@@ -271,39 +270,48 @@ canvas {
 }
 
 .button {
-  transition: .2s all ease;
-  border: 1px solid var(--color-blue);
-  width: 130px;
-  height: 24px;
   box-sizing: border-box;
-  cursor: pointer;
+  width: 140px;
+  height: 24px;
+  border: 1px solid var(--color-blue);
   border-radius: 2px;
-  margin: 0 20px 0 20px;
-  text-align: center;
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
-}
+  cursor: pointer;
 
-.button.active:hover {
-  background:  var(--color-blue-2);
-}
-
-.button.active {
-  background:  var(--color-blue);
-}
-
-.button {
+  display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
+  margin: 0 20px 0 20px;
+  text-align: center;
+
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  transition: .2s all ease;
 }
 
-.button.active p {
-  color:  var(--color-white);
+.default-button {
+  background-color: var(--color-white);
 }
-.button p {
-  color:  var(--color-blue);
-  margin: 0;
-  line-height: 24px;
+
+.default-button:hover {
+  background-color: var(--color-grey);
 }
+
+.default-button p {
+  color: var(--color-blue);
+}
+
+.main-button {
+  background-color: var(--color-blue);
+}
+
+.main-button:hover {
+  background-color: var(--color-blue-2);
+}
+
+.main-button p {
+  color: var(--color-white);
+}
+
 
 #inspector .button {
   margin: 20px auto 20px auto;
@@ -327,9 +335,11 @@ canvas {
 
 /** HEADER **/
 #header {
+  box-sizing: border-box;
   height: 46px;
-  background-color: var(--color-dark-purple);
   width: 100%;
+  padding: 0 35px;
+  background-color: var(--color-dark-purple);
 }
 
 #header img {
@@ -337,18 +347,14 @@ canvas {
   height: 20px;
 }
 
-#augmenta-link-logo-img {
-  margin-left: 33px;
-}
-
 #website-title {
   color: var(--color-white);
-  font-weight: bold;
-  font-size: initial;
 }
 
-#generate-link {
-  margin-right: 40px;
+/* SHARE MODAL */
+#share-modal-content {
+  width: 15%;
+  height: 40px;
 }
 
 
@@ -357,11 +363,11 @@ canvas {
   position: relative;
   height : calc( 100vh - 46px);
   width: 100%;
-  background-color:var(--color-viewport);
+  background-color:var(--color-grey);
 }
 
 #inspector.dark-mode {
-  background-color: #2c3541 !important;
+  background-color: var(--color-darkmode-main) !important;
 }
 
 #scene-infos {
@@ -370,7 +376,7 @@ canvas {
 }
 
 #scene-infos.dark-mode {
-  background-color: #1c2229 !important;
+  background-color: var(--color-darkmode-secondary) !important;
 }
 
 #toolbar {
@@ -390,18 +396,6 @@ canvas {
 
 #select-camera {
   width:100%;
-}
-
-/* COPY LINK MODAL */
-#copy-link {
-  width: auto;
-  height: auto;
-}
-
-#copy-feedback {
-  justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 10px;
 }
 
 #dummies-buttons {

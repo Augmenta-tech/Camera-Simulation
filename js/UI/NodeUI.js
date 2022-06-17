@@ -18,17 +18,16 @@ class NodeUI{
             });
         
             const nodeUIdiv = document.createElement('div');
-            nodeUIdiv.classList.add("active");
             nodeUIdiv.classList.add("nodeUI");
             
             nodeUIdiv.id = 'node-' + (node.id) + '-UI';
             nodeUIdiv.innerHTML = `
-                <div id="node-` + (node.id) + `-UI-header" class="row center-spaced-content align-items-center">
-                    <div class="row align-items-center">
+                <div id="node-` + (node.id) + `-UI-header" class="row center-x-spaced center-y">
+                    <div class="row center-y">
                         <div class="node-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
-                        <h1>Node + Sensor ` + (node.id + 1) + `</h1>
+                        <h3>Node + Sensor ` + (node.id + 1) + `</h3>
                     </div>
-                    <div class="row">
+                    <div class="row center-y">
                         <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
                         <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                         <div id="node-` + (node.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
@@ -36,34 +35,34 @@ class NodeUI{
                     </div>
                 </div>
                 <div id="node-infos-` + (node.id) + `-UI">
-                    <div id="select-camera" class="row calign-items-center">
+                    <div id="select-camera" class="row center-y">
                         <select id="cam-type-` + (node.id) + `" class="select camera-type" name="camType">
                         ` + cameraTypesOptions + `
                         </select>
                     </div>
                     <div id = "node-` + (node.id) + `-transformations">
-                        <div class="row center-spaced-content">
+                        <div class="row center-x-spaced">
                             <div class="2-column ">
                                 <p>  Position </p>
                             </div>
-                            <div class="row center-spaced-content column-2">
+                            <div class="row center-x-spaced column-2">
                                 <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit.value + `>` + Math.round(node.xPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
                                 <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit.value + `>` + Math.round(-node.zPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
                                 <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit.value + `>` + Math.round(node.yPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
                             </div>
                         </div>
-                        <div  class="row center-spaced-content">
+                        <div  class="row center-x-spaced">
                             <div class="2-column ">
                                 <p>  Rotation </p>
                             </div>
-                            <div class="row center-spaced-content column-2">
+                            <div class="row center-x-spaced column-2">
                                 <p id="x-rot-`+ node.id +`" class="draggable">X <strong>` + Math.round(node.xRot*180/Math.PI) + `</strong>°</p>
                                 <p id="y-rot-`+ node.id +`" class="draggable">Y <strong>` + Math.round(node.yRot*180/Math.PI) + `</strong>°</p>
                                 <p id="z-rot-`+ node.id +`" class="draggable">Z <strong>` + Math.round(node.zRot*180/Math.PI) + `</strong>° </p>
                             </div>
                         </div>
                     </div>
-                    <div class="row center-spaced-content column-2">
+                    <div class="row center-x-spaced column-2">
                         <div>
                             <p id="hfov` + node.id + `">FOV H: ` + node.cameraType.HFov + `°</p>
                             <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
@@ -238,8 +237,8 @@ class NodeUI{
         {
             const camInfosUI = document.getElementById('node-infos-' + (node.id) + '-UI');
             const camUIheader = document.getElementById('node-' + (node.id) + '-UI-header');
-            const hidden = camInfosUI.style.display === "none";
-            camInfosUI.style.display = hidden ?  "block" : "none";
+            const hidden = camInfosUI.classList.contains('hidden');
+            hidden ? camInfosUI.classList.remove('hidden') : camInfosUI.classList.add('hidden');
             camUIheader.style.marginBottom = hidden ? "0px" : "-100px"
             camUIheader.style.marginTop = hidden ? "0px" : "-4px"
             const iconElem = document.getElementById('node-' + (node.id) + '-hide-UI').firstChild;

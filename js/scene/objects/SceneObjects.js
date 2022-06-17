@@ -84,7 +84,7 @@ class SceneObjects{
                                 ?
                                 document.getElementById('overlap-height-selection-inspector').value = val
                                 :
-                                document.getElementById('overlap-height-inspector').style.display = 'none';
+                                document.getElementById('overlap-height-inspector').classList.add('hidden');
                             sceneManager.heightDetected = parseFloat(val);
                             break;
                         default:
