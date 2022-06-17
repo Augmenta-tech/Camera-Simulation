@@ -78,6 +78,21 @@ const camerasTypes =
         ],
         checkedDefault : false,
         recommended: false
+    },
+    {
+        id:5, 
+        name:"Helios2", 
+        HFov:69, 
+        VFov:51, 
+        rangeNear: 0.3,
+        rangeFar: 8.3,
+        handFar: 3,
+        suitable: [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        checkedDefault : false,
+        recommended: true
     }
 ];
 
