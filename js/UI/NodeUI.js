@@ -25,7 +25,7 @@ class NodeUI{
                 <div id="node-` + (node.id) + `-UI-header" class="row center-x-spaced center-y">
                     <div class="row center-y">
                         <div class="node-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
-                        <h3>Node + Sensor ` + (node.id + 1) + `</h3>
+                        <p class="main-text">Node + Sensor ` + (node.id + 1) + `</p>
                     </div>
                     <div class="row center-y">
                         <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
@@ -36,40 +36,46 @@ class NodeUI{
                 </div>
                 <div id="node-infos-` + (node.id) + `-UI">
                     <div id="select-camera" class="row center-y">
-                        <select id="cam-type-` + (node.id) + `" class="select camera-type" name="camType">
+                        <select id="cam-type-` + (node.id) + `" class="select-camera-type main-text" name="camType">
                         ` + cameraTypesOptions + `
                         </select>
                     </div>
                     <div id = "node-` + (node.id) + `-transformations">
-                        <div class="row center-x-spaced">
-                            <div class="2-column ">
-                                <p>  Position </p>
-                            </div>
-                            <div class="row center-x-spaced column-2">
+                        <div class="row node-transformations">
+                            <p class="main-text">Position</p>
+                            <div>
                                 <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit.value + `>` + Math.round(node.xPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            </div>
+                            <div>
                                 <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit.value + `>` + Math.round(-node.zPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            </div>
+                            <div>
                                 <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit.value + `>` + Math.round(node.yPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
                             </div>
                         </div>
-                        <div  class="row center-x-spaced">
-                            <div class="2-column ">
-                                <p>  Rotation </p>
-                            </div>
-                            <div class="row center-x-spaced column-2">
+                        <div class="row node-transformations">
+                            <p class="main-text">Rotation</p>
+                            <div>
                                 <p id="x-rot-`+ node.id +`" class="draggable">X <strong>` + Math.round(node.xRot*180/Math.PI) + `</strong>°</p>
+                            </div>
+                            <div>
                                 <p id="y-rot-`+ node.id +`" class="draggable">Y <strong>` + Math.round(node.yRot*180/Math.PI) + `</strong>°</p>
+                            </div>
+                            <div>
                                 <p id="z-rot-`+ node.id +`" class="draggable">Z <strong>` + Math.round(node.zRot*180/Math.PI) + `</strong>° </p>
                             </div>
                         </div>
                     </div>
-                    <div class="row center-x-spaced column-2">
-                        <div>
-                            <p id="hfov` + node.id + `">FOV H: ` + node.cameraType.HFov + `°</p>
-                            <p id="near` + node.id + `">NEAR: <span  data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
+                    <div class="cam-specs">
+                        <div class="row">
+                            <p class="spec-title main-text">FOV</p>
+                            <p>H</p><p id="hfov` + node.id + `">` + node.cameraType.HFov + `°</p>
+                            <p>V</p><p id="vfov` + node.id + `">` + node.cameraType.VFov + `°</p>
                         </div>
-                        <div>
-                            <p id="vfov` + node.id + `">FOV V: ` + node.cameraType.VFov + `°</p>
-                            <p id="far` + node.id + `">FAR: <span  data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
+                        <div class="row">
+                            <p class="spec-title main-text">Distance</p>
+                            <p>Near</p><p><span id="near` + node.id + `" data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
+                            <p>Far</p><p><span id="far` + node.id + `" data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
                         </div>
                     </div>
                 </div>`;
@@ -268,15 +274,15 @@ class NodeUI{
                     node.cameraPerspective.far = node.cameraType.rangeFar;
                     break;
             }
-            document.getElementById('hfov' + node.id).innerHTML = 'FOV H: ' + node.cameraType.HFov + '°';
-            document.getElementById('vfov' + node.id).innerHTML = 'FOV V: ' + node.cameraType.VFov + '°';
-            document.getElementById('near' + node.id).innerHTML = 'NEAR: <span data-unit=' + currentUnit.value + '>' + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit.value + '>' + currentUnit.label + '</span>';
-            document.getElementById('far' + node.id).innerHTML = 'FAR: <span data-unit=' + currentUnit.value + '>' + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit.value + '>' + currentUnit.label + '</span>';
+            document.getElementById('hfov' + node.id).innerHTML = node.cameraType.HFov + '°';
+            document.getElementById('vfov' + node.id).innerHTML = node.cameraType.VFov + '°';
+            document.getElementById('near' + node.id).innerHTML = (Math.round(node.cameraPerspective.near*document.getElementById('near' + node.id).dataset.unit * 100) / 100.0);
+            document.getElementById('far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('far' + node.id).dataset.unit * 100) / 100.0);
         }
 
         this.changeFar = function()
         {
-            document.getElementById('far' + node.id).innerHTML = 'FAR: <span data-unit=' + currentUnit.value + '>' + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + '</span> <span data-unittext=' + currentUnit.value + '>' + currentUnit.label + '</span>';
+            document.getElementById('far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('far' + node.id).dataset.unit * 100) / 100.0);
         }
 
         this.changeVisibility = function(visible)

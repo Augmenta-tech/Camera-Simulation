@@ -115,9 +115,11 @@
           <div id="scene-infos">
 
             <!-- WIZARD BUTTON -->
-            <div id="open-wizard-button" class="button main-button">
-              <span class="iconify" data-icon="fa:magic" style="color: white; padding: 4px;"></span>
-              <p >Generate scene</p>
+            <div id="open-wizard" class="row center-x center-y">
+              <div id="open-wizard-button" class="button main-button">
+                <span class="iconify" data-icon="fa:magic" style="color: white; padding: 4px;"></span>
+                <p >Generate scene</p>
+              </div>
             </div>
 
             <!-- WIZARD MODAL -->
@@ -134,7 +136,7 @@
                     <!-- TRACKING MODE -->
                     <div id="tracking-mode-wizard">
                       <h3>What do you want to track ?</h3>
-                      <select id="tracking-mode-selection-wizard" class="select select-form" name="camType">
+                      <select id="tracking-mode-selection-wizard" class="select-form" name="camType">
                         <option value="human-tracking" selected>Floor (people tracking)</option>
                         <option value="hand-tracking">Table (hand tracking)</option>
                       </select>
@@ -143,7 +145,7 @@
                     <!-- HEIGHT DETECTED FOR OVERLAPS -->
                     <div id="overlap-height-wizard">
                       <p>Target overlap height detection</p>
-                      <select id="overlap-height-selection-wizard" class="select select-form" name="camType">
+                      <select id="overlap-height-selection-wizard" class="select-form" name="camType">
                         <option value="0.2">Feets</option>
                         <option value="0.6">Knees</option>
                         <option value="0.8">Kart</option>
@@ -201,7 +203,7 @@
               <!-- TRACKING MODE -->
               <div id="tracking-mode-inspector">
                 <h3>What do you want to track ?</h3>
-                <select id="tracking-mode-selection-inspector" class="select select-form" name="camType">
+                <select id="tracking-mode-selection-inspector" class="select-form" name="camType">
                   <option value="human-tracking" selected>Floor (people tracking)</option>
                   <option value="hand-tracking">Table (hand tracking)</option>
                 </select>
@@ -210,7 +212,7 @@
               <!-- HEIGHT DETECTED FOR OVERLAPS -->
               <div id="overlap-height-inspector" class="">
                 <p>Target overlap height detection</p>
-                <select id="overlap-height-selection-inspector" class="select select-form" name="camType">
+                <select id="overlap-height-selection-inspector" class="select-form" name="camType">
                   <option value="0.2">Feets</option>
                   <option value="0.6">Knees</option>
                   <option value="0.8">Kart</option>
@@ -247,12 +249,12 @@
           <!-- SENSORS PANEL -->
           <div id="sensors-infos">
             <!-- NUMBER OF NODES FEEDBACK -->
-            <div class="row">
-              <p class="number-nodes">Number of nodes: <span id="number-nodes-value">0</span></p>
+            <div id="number-sensors" class="row center-x center-y">
+              <p class="main-text">Number of nodes: <span id="number-nodes-value">0</span></p>
             </div>
 
             <!-- NODES BUTTONS -->
-            <div id="nodes-buttons" class="row">
+            <div id="nodes-buttons" class="row center-x">
               <!-- ADD BUTTON -->
               <div id="add-node-button" class="button main-button" >
                 <p>+ New node</p>

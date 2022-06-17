@@ -26,10 +26,9 @@ h1 {
   font-size: initial;
 }
 
-h3 {
-  font-style: normal;
+h3, .main-text {
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 15px;
   color: var(--color-dark-purple);
 }
@@ -50,6 +49,17 @@ strong {
   margin-left: 4px;
   color: var(--color-blue-2);
   font-weight:bold;
+}
+
+select {
+  transition: .2s all ease;
+  cursor: pointer;
+  border: none;
+  border-radius: 2px;
+}
+
+select:hover {
+  background-color: var(--color-grey);
 }
 
 canvas {
@@ -93,14 +103,9 @@ canvas {
   display: none !important;
 }
 
-.column-2 {
-  width: 70%;
-}
-
-.node-color {
-  width: 10px;
-  height: 10px;
-  margin-right: 8px;
+.select-form {
+  background-color: #ccc;
+  margin-bottom: 4px;
 }
 
 .number-nodes {
@@ -110,34 +115,41 @@ canvas {
   margin-top: 20px;
 }
 
-.select {
-  transition: .2s all ease;
-  cursor: pointer;
-  border: none;
-  border-radius: 2px;
-  /* padding-left: 5px;
-  margin-left: -5px; */
-  height: 70%;
+/** NODE UI **/
+.node-color {
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
 }
 
-.camera-type {
+.select-camera-type {
   background-color: var(--color-white);
   font-weight: bold;
   margin: 5px 0;
   height: 40px;
 }
 
-.select-form {
-  background-color: #ccc;
-  margin-bottom: 4px;
-}
-
-.select:hover {
-  background-color: var(--color-grey);
-}
-
 .draggable {
   cursor: ew-resize;
+}
+
+.node-transformations > * {
+  flex-basis: 25%;
+}
+
+.cam-specs {
+  width: 75%;
+}
+
+.cam-specs p {
+  flex-grow: 1;
+  flex-basis: 10%;
+  text-align: end;
+}
+
+.spec-title {
+  flex-grow: 2 !important;
+  text-align: left !important;
 }
 
 .inputArea {
@@ -192,7 +204,7 @@ canvas {
   cursor: pointer;
 }
 
-/* GIZMO */ 
+/** GIZMO **/ 
 .orbit-controls-gizmo {
   position: absolute;
   top: 2em;
@@ -214,61 +226,7 @@ canvas {
   background-color: #FFF0  !important;
 }
 
-
-/*** DATASETS ***/
-
-/** Node UI **/
-.nodeUI {
-  padding: 20px 29px 29px;
-  background-color: var(--color-white);
-  border-bottom: 2px solid var(--color-grey);
-}
-
-.nodeUI p {
-    line-height:25px;
-
-}
-
-.nodeUI [data-icon] {
-  width: 13px;
-  height: 13px;
-  margin: 0 8px;
-  color: var(--color-dark-purple);
-  cursor: pointer;
-}
-
-/** **/
-[data-tool] [data-icon] {
-  width : 24px;
-  height : 24px;
-  margin: 7px;
-  color : var(--color-white);
-}
-
-[data-tool] {
-  width: 40px;
-  height: 40px;
-  background-color: var(--color-grey-p);
-  transition: 0.2s all ease;
-}
-
-[data-tool]:hover:not(.active) {
-    background-color: var(--color-blue-2);
-    cursor: pointer;
-}
-
-[data-tool]:nth-child(1) {
-  border-radius: 2px 2px 0px 0px;
-
-}
-[data-tool]:nth-child(4) {
-  border-radius: 0px 0px 2px 2px;
-}
-
-[data-tool].active {
-  background: var(--color-blue); ;
-}
-
+/** BUTTONS **/
 .button {
   box-sizing: border-box;
   width: 140px;
@@ -312,9 +270,57 @@ canvas {
   color: var(--color-white);
 }
 
+/** Node UI **/
+.nodeUI {
+  padding: 20px 29px 29px;
+  background-color: var(--color-white);
+  border-bottom: 2px solid var(--color-grey);
+}
 
-#inspector .button {
-  margin: 20px auto 20px auto;
+.nodeUI p {
+    line-height:25px;
+
+}
+
+.nodeUI [data-icon] {
+  width: 13px;
+  height: 13px;
+  margin: 0 8px;
+  color: var(--color-dark-purple);
+  cursor: pointer;
+}
+
+
+/*** DATASETS ***/
+[data-tool] [data-icon] {
+  width : 24px;
+  height : 24px;
+  margin: 7px;
+  color : var(--color-white);
+}
+
+[data-tool] {
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-grey-p);
+  transition: 0.2s all ease;
+}
+
+[data-tool]:hover:not(.active) {
+    background-color: var(--color-blue-2);
+    cursor: pointer;
+}
+
+[data-tool]:nth-child(1) {
+  border-radius: 2px 2px 0px 0px;
+
+}
+[data-tool]:nth-child(4) {
+  border-radius: 0px 0px 2px 2px;
+}
+
+[data-tool].active {
+  background: var(--color-blue); ;
 }
 
 
@@ -368,6 +374,14 @@ canvas {
 
 #inspector.dark-mode {
   background-color: var(--color-darkmode-main) !important;
+}
+
+#open-wizard {
+  height: 50px;
+}
+
+#number-sensors {
+  height: 50px;
 }
 
 #scene-infos {
