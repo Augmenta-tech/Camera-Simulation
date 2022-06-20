@@ -17,21 +17,15 @@ import {
     Color
 } from 'three';
 import { DoubleSide } from 'three';
+import { FontLoader } from 'three-loaders/FontLoader.js';
+
+import { camerasTypes, units } from '/js/data.js';
+import { Checkerboard } from '/js/scene/Checkerboard.js';
+import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
-
-import { FontLoader } from 'three-loaders/FontLoader.js';
-
-import * as POLYBOOL from 'polybool';
-
-import { Dummy } from './Dummy.js';
-import { Node } from './Node.js';
-import { NodeUI } from './NodeUI.js';
-import { Checkerboard } from './Checkerboard.js';
-
-import { units } from './cameras.js'
-
 
 class SceneManager{
     static loadFont(callback)
@@ -44,38 +38,45 @@ class SceneManager{
     }
     static font;
     static DEFAULT_UNIT = units.meters;
-    #scene;
+    static DEFAULT_TRACKING_MODE = 'human-tracking';
+    static DEFAULT_DETECTION_HEIGHT = 1;
+    static DEFAULT_WIDTH = 5;
+    static DEFAULT_HEIGHT = 5;
+
+    static TABLE_ELEVATION = 0.75;
+    static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
 
     constructor(_transformControl)
     {
-        this.#scene = buildScene();
-        const nodes = [];
-        const dummies = [];
-        this.nodeMeshes = [];
-        this.dummiesMeshes = [];
-
-        this.transformControl = _transformControl;
+        this.scene = buildScene();
 
         this.currentUnit = SceneManager.DEFAULT_UNIT;
 
-        this.size = 70;
-        this.heightDetected = 1;
-        this.wallXDepth = - this.size / 2.0;
-        this.wallZDepth = - this.size / 2.0;
+        this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
+
+        this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
+        this.sceneWidth = SceneManager.DEFAULT_WIDTH;
+        this.sceneHeight = SceneManager.DEFAULT_HEIGHT;
+        this.sceneElevation = 0;
+
+        this.size = 160;
+
+        this.wallXDepth = - 10;
+        this.wallZDepth = - 10;
 
         const floorNormal = new Vector3(0,1,0);
         const wallXNormal = new Vector3(1,0,0);
         const wallZNormal = new Vector3(0,0,1);
 
         this.checkerboard;
-        
-        const givenAreaPolygonRegions = [[]];
+        this.objects = new SceneObjects(_transformControl, this);;
+
+        this.augmentaSceneLoaded = false;
 
         //DEBUG
         const spheres = [];
         const rays = [];
     
-
 
     /* SCENE INITIALISATION */
 
@@ -83,36 +84,39 @@ class SceneManager{
         {
             // Lighting
             const ambient = new AmbientLight( 0xffffff, 0.5 );
-            this.#scene.add(ambient);
+            this.scene.add(ambient);
 
             // Floor
-            const floor = buildFloorMesh(this.size);
-            this.#scene.add(floor);
+            const floor = buildFloorMesh(this.size, this.wallXDepth, this.wallZDepth);
+            this.scene.add(floor);
 
             // WallX
-            const wallX = buildWallXMesh(this.size, this.wallXDepth);
-            this.#scene.add(wallX);
+            const wallX = buildWallXMesh(this.size, this.wallXDepth, this.wallZDepth);
+            this.scene.add(wallX);
         
             // WallZ
-            const wallZ = buildWallZMesh(this.size, this.wallZDepth);
-            this.#scene.add(wallZ);
+            const wallZ = buildWallZMesh(this.size, this.wallZDepth, this.wallXDepth);
+            this.scene.add(wallZ);
 
             //Origin
             const axesHelper = buildAxesHelper();
-            this.#scene.add( axesHelper );
+            this.scene.add(axesHelper);
 
             // Grid Helper
-            const gridHelper = buildGridHelper(this.size);
-            this.#scene.add( gridHelper );
+            const gridHelper = buildGridHelper();
+            this.scene.add(gridHelper);
+        }
 
+        this.initAugmentaScene = function()
+        {
             // Scene Checkerboard
-            this.checkerboard = new Checkerboard(this.currentUnit);
-            this.checkerboard.addPlanesToScene(this.#scene);
+            this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
+            this.checkerboard.addPlanesToScene(this.scene);
 
+            //SceneObjects
+            this.objects.initObjects();
 
-            this.#scene.add(this.transformControl);
-
-            createSceneFromURL(this);
+            this.augmentaSceneLoaded = true;
         }
 
     /* BUILDERS */
@@ -124,40 +128,40 @@ class SceneManager{
             return scene;
         }
 
-        function buildFloorMesh(size)
+        function buildFloorMesh(size, wallXDepth, wallZDepth)
         {
             const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
             
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( 0, - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            floor.position.set( size / 2.0 + wallXDepth, - 0.01, size / 2.0 + wallZDepth ); //to avoid z-fight with area covered by cam (y = sceneElevation for area covered)
             floor.rotation.x = - Math.PI / 2.0;
 
             return floor;
         }
 
-        function buildWallXMesh(size, wallXDepth)
+        function buildWallXMesh(size, wallXDepth, wallZDepth)
         {
             const materialWallX = new MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
         
             const geometryWallX = new PlaneGeometry( size + 0.02, size + 0.02 );
         
             const wallX = new Mesh(geometryWallX, materialWallX);
-            wallX.position.set( wallXDepth - 0.01, size / 2.0, 0 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            wallX.position.set(wallXDepth - 0.01, size / 2.0, size / 2.0 + wallZDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             wallX.rotation.y = Math.PI / 2.0;
 
             return wallX;
         }
 
-        function buildWallZMesh(size, wallZDepth)
+        function buildWallZMesh(size, wallZDepth, wallXDepth)
         {
             const materialWallZ = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
         
             const geometryWallZ = new PlaneGeometry( size + 0.02, size + 0.02 );
         
             const wallZ = new Mesh(geometryWallZ, materialWallZ);
-            wallZ.position.set( 0, size/2.0, wallZDepth - 0.01 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            wallZ.position.set(size / 2.0 + wallXDepth, size/2.0, wallZDepth - 0.01); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             
             return wallZ;
         }
@@ -165,7 +169,7 @@ class SceneManager{
         function buildAxesHelper()
         {
             const axesHelper = new AxesHelper( 0.5 );
-            axesHelper.position.y = 0.02;
+            axesHelper.position.set(-0.01,0,-0.01);
 
             axesHelper.material = new LineBasicMaterial( {
                 color: 0xffffff,
@@ -174,226 +178,13 @@ class SceneManager{
             return axesHelper;
         }
 
-        function buildGridHelper(size)
+        function buildGridHelper()
         {
-            const gridHelper = new GridHelper( size, size, 0x444444, 0x444444 );
-            gridHelper.position.y = -0.006
+            const gridHelper = new GridHelper( 2000, 2000, 0x444444, 0x444444 );
+            gridHelper.position.y = -0.001
 
             return gridHelper;
         }
-
-        /**
-         * Initialize a scene according to the url
-         * 
-         * @param {SceneManager} sceneManager this object
-         */
-        function createSceneFromURL(sceneManager)
-        {
-            let url = document.location.href;
-            const index = url.indexOf('&');
-            if(index === -1)
-            {
-                sceneManager.addNode(false, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
-            }
-            else
-            {
-                url = url.substring(url.indexOf('?') + 1);
-                const cams = url.split('&');
-                const sceneInfo = cams.shift();
-                const infos = sceneInfo.split(',');
-                infos.forEach(info => {
-                    const keyVal = info.split('=');
-                    const key = keyVal[0];
-                    const val = parseFloat(keyVal[1]);
-                    switch(key)
-                    {
-                        case "L":
-                            document.getElementById("givenSceneWidth").value = val
-                            break;
-                        case "l":
-                            document.getElementById("givenSceneHeight").value = val;
-                            break;
-                        case "h":
-                            sceneManager.heightDetected = val;
-                            break;
-                        default:
-                            break;
-                    }
-                });
-                
-                cams.forEach(c => {
-                    const props = c.split(',');
-                    let id, typeID;
-                    let x, y, z, p, a, r;
-
-                    props.forEach(prop => {
-                        const keyVal = prop.split('=');
-                        const key = keyVal[0];
-                        const stringVal = keyVal[1];
-                        if(key && stringVal)
-                        {
-                            const val = parseFloat(stringVal);
-                            switch(key)
-                            {
-                                case "id":
-                                    id = val
-                                    break;
-                                case "typeID":
-                                    typeID = val;
-                                    break;
-                                case "x":
-                                    x = val;
-                                    break;
-                                case "y":
-                                    y = val;
-                                    break;
-                                case "z":
-                                    z = val;
-                                    break;
-                                case "p":
-                                    p = val;
-                                    break;
-                                case "a":
-                                    a = val;
-                                    break;
-                                case "r":
-                                    r = val;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    });
-                    sceneManager.addNode(true, typeID, x, y, z, p, a, r)
-                })
-            }
-            sceneManager.updateSceneBorder(document.getElementById("givenSceneWidth").value, document.getElementById("givenSceneHeight").value);
-        }
-
-
-    /* SCENE SUBJECTS MANAGEMENT */
-
-        // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
-        /**
-         * Remove an object from the scene and free its memory
-         * 
-         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method. 
-         */
-        this.deleteObject = function(obj)
-        {
-            if (this.transformControl.object === obj.mesh) this.transformControl.detach();
-            obj.removeFromScene(this.#scene);
-            obj.dispose();
-        }
-
-        this.addDummy = function()
-        {
-            if(!Dummy.maleModel || !Dummy.femaleModel)
-            {
-                //TODO: Add UI to inform that button will work in few seconds
-                return;
-            }
-            const newDummy = new Dummy(dummies.length);
-
-            //Offset
-            for(let i = 0; i < dummies.length; i++)
-            {
-                if(newDummy.mesh.position.distanceTo(dummies[i].mesh.position) < 1.0)
-                {
-                    newDummy.mesh.position.x++;
-                    i = 0;
-                }
-            }
-            newDummy.updatePosition();
-
-            //Add to scene
-            newDummy.addToScene(this.#scene);
-
-            //Management
-            dummies.push(newDummy);
-            this.dummiesMeshes.push(newDummy.mesh);
-        }
-
-        this.removeDummies = function()
-        {
-            dummies.forEach(d => this.deleteObject(d));
-            dummies.length = 0;
-            this.dummiesMeshes.length = 0;
-        }
-
-        /**
-         * Add a node to the scene
-         * 
-         * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
-         * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
-         * @param {float} x x position at creation. Default is 0.
-         * @param {float} y y position at creation. Default is defined in Node.js.
-         * @param {float} z z position at creation. Default is 0.
-         * @param {float} p pitch rotation at creation. Default is 0.
-         * @param {float} a yaw rotation at creation. Default is 0.
-         * @param {float} r roll rotation at creation. Default is 0.
-         */
-        this.addNode = function(autoConstruct = false, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
-        {
-            if(!SceneManager.font)
-            {
-                //TODO: Add UI to inform that button will work in few seconds
-                return;
-            }
-            const newCamera = new Node(nodes.length, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new NodeUI(newCamera, this);
-            
-            //Offset
-            if(!autoConstruct)
-            {
-                for(let i = 0; i < nodes.length; i++)
-                {
-                    if(newCamera.mesh.position.distanceTo(nodes[i].mesh.position) < 0.5)
-                    {
-                        newCamera.mesh.position.x += 0.5;
-                        i = 0;
-                    }
-                }
-            }
-            newCamera.updatePosition(this.currentUnit);
-
-            newCamera.addToScene(this.#scene);
-
-            nodes.push(newCamera);
-            this.nodeMeshes.push(newCamera.mesh);
-        }
-
-        this.displayFrustums = function()
-        {
-            const visibles = nodes.filter(n => n.areaAppear);
-            nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
-            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
-            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
-        }
-
-        this.updateFrustumIcon = function()
-        {
-            const visibles = nodes.filter(n => n.areaAppear);
-            const iconElem = document.getElementById('display-frustums-button').firstElementChild;
-            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
-        }
-
-        this.removeNodes = function()
-        {
-            nodes.forEach(n => {
-                delete n.uiElement;
-                this.deleteObject(n);
-            });
-            nodes.length = 0;
-            this.nodeMeshes.length = 0;
-
-            const nodesUIdivs = document.getElementsByClassName("nodeUI");
-            for(let i = nodesUIdivs.length - 1; i >= 0; i--)
-            {
-                nodesUIdivs[i].remove();
-            }
-        }
-
 
     /* USER'S ACTIONS */
 
@@ -401,27 +192,21 @@ class SceneManager{
         {
             const unit = this.currentUnit === units.meters ? units.feets : units.meters;
 
-            this.checkerboard.toggleUnit(unit);
+            if(this.augmentaSceneLoaded) this.checkerboard.toggleUnit(unit);
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
-                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit * unit * 100) / 100.0;
-                else e.innerHTML = Math.round(e.innerHTML / this.currentUnit * unit * 100) / 100.0;
-                e.dataset.unit = unit;
+                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
+                else e.innerHTML = Math.round(e.innerHTML / this.currentUnit.value * unit.value * 100) / 100.0;
+                e.dataset.unit = unit.value;
             });
             const unitCharElements = document.querySelectorAll('[data-unittext]');
             unitCharElements.forEach(e => {
-                e.dataset.unittext = unit;
-                switch(unit)
-                {
-                    case units.feets:
-                        e.innerHTML = "ft";
-                        break;
-                    case units.meters:
-                    default:
-                        e.innerHTML = 'm';
-                        break;
-                }
+                e.dataset.unittext = unit.value;
+                e.innerHTML = unit.label;
             });
+
+            document.getElementById('toggle-unit-button-' + this.currentUnit.label).style.fontWeight = "normal";
+            document.getElementById('toggle-unit-button-' + unit.label).style.fontWeight = "bold";
             
             this.currentUnit = unit;
         }
@@ -432,76 +217,49 @@ class SceneManager{
          * @param {*} givenWidthValue horizontal length value entered input in the current unit.
          * @param {*} givenHeightValue vertical length value entered input in the current unit.
          */
-        this.updateSceneBorder = function(givenWidthValue, givenHeightValue)
+        this.updateAugmentaSceneBorder = function(givenWidthValue, givenHeightValue)
         {
             if(givenWidthValue && givenHeightValue)
             {
-                const givenWidth = parseFloat(givenWidthValue) / this.currentUnit;
-                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit;
+                const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
+                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
+
+                this.sceneWidth = givenWidth;
+                this.sceneHeight = givenHeight;
 
                 //update checkerboard
-                this.checkerboard.setSize(givenWidth, givenHeight);
-        
-                //Calculate area polygon
-                givenAreaPolygonRegions[0].length = 0;
-                givenAreaPolygonRegions[0].push([0, 0]);
-                givenAreaPolygonRegions[0].push([givenWidth, 0]);
-                givenAreaPolygonRegions[0].push([givenWidth, givenHeight]);
-                givenAreaPolygonRegions[0].push([0, givenHeight]);
+                if(this.augmentaSceneLoaded) this.checkerboard.setSize(givenWidth, givenHeight);
+
+                this.objects.calculateScenePolygon(givenWidth, givenHeight);
             }
         }
 
-        this.updateObjectsPosition = function()
+        this.changeTrackingMode = function(mode)
         {
-            nodes.forEach(n => n.updatePosition(this.currentUnit));
-            dummies.forEach(d => d.updatePosition());
-        }
+            this.trackingMode = mode;
 
-        /**
-         * Create an url containing all the informations of the scene
-         * 
-         * @returns the url of this scene
-         */
-        this.generateLink = function()
-        {
-            let url = document.location.href;
-            let index = url.indexOf('?');
-            if(index !== -1) url = url.substring(0, index);
-            if(url[url.length-1] != '/') url += '/';
-            url += '?';
-            url += "L=";
-            url += document.getElementById("givenSceneWidth").value ? Math.floor(document.getElementById("givenSceneWidth").value / this.currentUnit  * 100)/100: 0;
-            url += ",l=";
-            url += document.getElementById("givenSceneHeight").value ? Math.floor(document.getElementById("givenSceneHeight").value / this.currentUnit * 100)/100 : 0;
-            url += ",h=";
-            url += this.heightDetected;
-            url += '&';
-            nodes.forEach(n => {
-                url += "id=";
-                url += n.id;
-                url += ",typeID=";
-                url += n.cameraType.id;
-                url += ",x=";
-                url += Math.round(n.xPos*100)/100.0;
-                url += ",y=";
-                url += Math.round(n.yPos*100)/100.0;
-                url += ",z=";
-                url += Math.round(n.zPos*100)/100.0;
-                url += ",p=";
-                url += Math.round(n.xRot*10000)/10000.0;
-                url += ",a=";
-                url += Math.round(n.yRot*10000)/10000.0;
-                url += ",r=";
-                url += Math.round(n.zRot*10000)/10000.0;
-                url += '&';
-            });
-            url = url.slice(0, -1);
-        
-            return url;
+            switch(mode)
+            {
+                case 'hand-tracking':
+                    this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                    this.sceneElevation = SceneManager.TABLE_ELEVATION;
+                    if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
+                    break;
+                case 'human-tracking':
+                default:
+                    this.heightDetected = 1;
+                    this.sceneElevation = 0;
+                    if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
+                    break;
+            }
+
+            this.objects.changeSensorsTrackingMode(mode);
         }
 
 
         /* SCENE UPDATE */
+
+        /* NOES PROJECTION */ 
 
         /**
          * Calculate area covered by the node to draw it and display it
@@ -522,13 +280,13 @@ class SceneManager{
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
             
-            this.#scene.remove(node.areaCoveredFloor);
-            this.#scene.remove(node.areaCoveredAbove);
-            this.#scene.remove(node.areaCoveredWallX);
-            this.#scene.remove(node.areaCoveredWallZ);
+            this.scene.remove(node.areaCoveredFloor);
+            this.scene.remove(node.areaCoveredAbove);
+            this.scene.remove(node.areaCoveredWallX);
+            this.scene.remove(node.areaCoveredWallZ);
 
-            const floorPlane = new Plane(floorNormal, 0);
-            const abovePlane = new Plane(floorNormal, -this.heightDetected);
+            const floorPlane = new Plane(floorNormal, -this.sceneElevation);
+            const abovePlane = new Plane(floorNormal, -(this.sceneElevation + this.heightDetected));
             const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
             const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
 
@@ -602,9 +360,10 @@ class SceneManager{
                     frustumScaled.planes[i].constant += 0.01;
                 }
 
-                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
+
 
                 //filter points above, they must be in the frustum at heightDetected but also on the floor
                 let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
@@ -633,7 +392,7 @@ class SceneManager{
                     coveredPointsAbove = candidatesPoints.filter(p => {
                         const abovePoint = new Vector3().copy(p);
                         abovePoint.y += this.heightDetected;
-                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > - 0.01 && p.z > this.wallZDepth - 0.01;
+                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01;
                     })
                 }
                 else{
@@ -647,21 +406,22 @@ class SceneManager{
 
                 node.coveredPointsAbove = coveredPointsAbove;
 
-                coveredPointsFloor.forEach((p) => p.y += 0.01*node.id / nodes.length);
-                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / nodes.length);
-                coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / nodes.length);
-                coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / nodes.length);
+                coveredPointsFloor.forEach((p) => p.y += 0.01*node.id / this.objects.getNbNodes());
+                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / this.objects.getNbNodes());
+                coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / this.objects.getNbNodes());
+                coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / this.objects.getNbNodes());
+
 
                 //display area value 
                 const previousValue = node.areaValue;
-                node.areaValue = calculateArea(coveredPointsAbove, this.checkerboard.unit);
+                node.areaValue = calculateArea(coveredPointsAbove, this.currentUnit.value);
 
                 //Place text 
                 if(coveredPointsAbove.length > 2)
                 {
                     //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
                     const barycentre = getBarycentre(coveredPointsAbove);
-                    node.changeTextPosition(barycentre, this.currentUnit);
+                    node.changeTextPosition(barycentre, this.currentUnit.value);
                     if(previousValue != node.areaValue) node.updateAreaText(this.currentUnit);
                 }
                 else
@@ -686,10 +446,10 @@ class SceneManager{
                 node.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
                 node.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
 
-                this.#scene.add(node.areaCoveredFloor);
-                this.#scene.add(node.areaCoveredAbove);
-                this.#scene.add(node.areaCoveredWallX);
-                this.#scene.add(node.areaCoveredWallZ);
+                this.scene.add(node.areaCoveredFloor);
+                this.scene.add(node.areaCoveredAbove);
+                this.scene.add(node.areaCoveredWallX);
+                this.scene.add(node.areaCoveredWallZ);
             }
 
             //DEBUG SPHERES
@@ -698,14 +458,14 @@ class SceneManager{
             {
                 spheres[i].geometry.dispose();
                 spheres[i].material.dispose();
-                this.#scene.remove(spheres[i]);
+                this.scene.remove(spheres[i]);
             }
             for(let i = 0; i < intersectionPointsAbove.length; i++)
             {
                 const geometry = new SphereGeometry( 0.4, 32, 16 );
                 const material = new MeshBasicMaterial({ color: 0x00ff22 });
                 const sphere = new Mesh( geometry, material );
-                this.#scene.add( sphere );
+                this.scene.add( sphere );
                 sphere.translateOnAxis(intersectionPointsAbove[i],1);
                 spheres.push(sphere);
             }
@@ -799,7 +559,7 @@ class SceneManager{
          * @param {Array} borderPoints array of Vector3 vertices of a convex shape. They must be ordered
          * @returns {float} value of area of the shape delimited by borderPoints
          */
-        function calculateArea(borderPoints, unit)
+        function calculateArea(borderPoints, unitValue)
         {
             let areaValue = 0;
             /** MATH PARAGRAPH
@@ -823,7 +583,7 @@ class SceneManager{
                 areaValue += areaOfThisTriangle;
             }
 
-            return areaValue / (unit * unit);
+            return areaValue  * (unitValue * unitValue);
         }
 
         function getBarycentre(points)
@@ -866,60 +626,23 @@ class SceneManager{
             return(areaCovered);
         }
 
-
-        /**
-         * Calculate the area covered by node and compare it to the scene size
-         * 
-         * @returns {boolean} whether the scene is fully tracked by nodes or not
-         */
-        this.doesCoverArea = function()
+        /* UPDATE */
+        this.update = function ()
         {
-            const unionRegions = [...givenAreaPolygonRegions];
-            let union = {
-                regions: unionRegions,
-                inverted: true
-            };
-
-            nodes.forEach(c => {
-                const polyCam = {
-                    regions: [[]],
-                    inverted: false
-                };
-                c.coveredPointsAbove.forEach(p => {
-                    polyCam.regions[0].push([p.x, p.z]);
-                });
-
-                //union = PolyBool.union(union, polyCam);
-                
-                const segmentsCam = PolyBool.segments(polyCam);
-                const segmentsUnion = PolyBool.segments(union);
-                const comb = PolyBool.combine(segmentsCam, segmentsUnion);
-                union = PolyBool.polygon(PolyBool.selectUnion(comb))
-            });
-
-            return union.regions.length === 0;
+            this.objects.update();
         }
 
-        this.getNbNodes = () => nodes.length;
+        // initialize three js scene
+        this.initScene();
 
         // DEBUG
         this.debug = function()
         {
-            
+            console.log(document.getElementById("overlap-height-selection-inspector").value)
+            console.log(this.heightDetected);
+            this.objects.debug();
         }
-
-        this.update = function ()
-        {
-            nodes.forEach(c => {
-                c.update();
-                this.drawProjection(c);
-            });
-        }
-
-        SceneManager.loadFont(() => this.initScene());
     }
-
-    get scene(){ return this.#scene; }
 }
 
 export { SceneManager }

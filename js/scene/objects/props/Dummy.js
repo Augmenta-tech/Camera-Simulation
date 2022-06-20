@@ -10,7 +10,7 @@ import { OBJLoader } from 'three-loaders/OBJLoader.js';
 
 
 class Dummy {
-    static DEFAULT_DUMMIES_HEIGHT = document.getElementById('height-reference').value;
+    static DEFAULT_DUMMIES_HEIGHT = document.getElementById('dummy-height-reference').value;
     static maleModel;
     static femaleModel;
     

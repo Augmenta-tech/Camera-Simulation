@@ -10,11 +10,11 @@ import {
     sRGBEncoding
 } from 'three';
 
-import { OrbitControls } from './lib/OrbitControls.js';
-import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
-import { TransformControls } from './lib/TransformControls.js';
+import { OrbitControls } from '/js/lib/OrbitControls.js';
+import { OrbitControlsGizmo } from '/js/lib/OrbitControlsGizmo.js';
+import { TransformControls } from '/js/lib/TransformControls.js';
 
-import { SceneManager } from './SceneManager.js';
+import { SceneManager } from '/js/scene/SceneManager.js';
 
 
 class ViewportManager{
@@ -111,9 +111,9 @@ class ViewportManager{
             {
                 /* Change vue between perspective and orthographic */
                 this.activeCamera = this.activeCamera.isOrthographicCamera ? perspCam : orthoCam;
-                this.sceneManager.transformControl.camera = this.activeCamera;
+                this.sceneManager.objects.transformControl.camera = this.activeCamera;
             }
-            this.sceneManager.transformControl.detach();
+            this.sceneManager.objects.transformControl.detach();
 
             this.activeCamera.position.set(newPos.x, newPos.y, newPos.z);
 

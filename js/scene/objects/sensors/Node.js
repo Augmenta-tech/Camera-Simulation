@@ -7,12 +7,11 @@ import {
     Color,
     Vector3
 } from 'three';
-
 import { TextGeometry } from 'three-text-geometry';
 
-import { camerasTypes, units } from './cameras.js'
+import { camerasTypes, units } from '/js/data.js'
 
-import { SceneManager } from './SceneManager.js';
+import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;
@@ -20,10 +19,13 @@ class Node{
     static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
     static SIZE_TEXT_NODE = 0.4;
 
-    constructor(id, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = Node.DEFAULT_NODE_HEIGHT, p_z = 0, r_x = 0, r_y = 0, r_z = 0)
+    constructor(id, mode = document.getElementById("tracking-mode-inspector").value, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = Node.DEFAULT_NODE_HEIGHT, p_z = 0, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
+        this.trackingMode = mode;
+
         this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
+
         this.xPos = p_x;
         this.yPos = p_y;
         this.zPos = p_z;
@@ -31,7 +33,7 @@ class Node{
         this.yRot = r_y;
         this.zRot = r_z;
 
-        this.cameraPerspective = buildCamera(this.cameraType, this.xPos, this.yPos, this.zPos, this.xRot, this.yRot, this.zRot);
+        this.cameraPerspective = buildCamera(this.cameraType, this.trackingMode, this.xPos, this.yPos, this.zPos, this.xRot, this.yRot, this.zRot);
         this.cameraPerspectiveHelper = new CameraHelper( this.cameraPerspective );
     
         this.color = new Color(Math.random(), Math.random(), Math.random());
@@ -51,9 +53,20 @@ class Node{
         this.areaValueText = buildTextMesh("AREA VALUE", Node.SIZE_TEXT_NODE * 2/3.0, this.xPos - Node.SIZE_TEXT_NODE * 4/3.0, this.yPos - (this.cameraType.rangeFar - 1), this.zPos + 3*Node.SIZE_TEXT_NODE/2.0);
 
     /* BUILDERS */
-        function buildCamera(camType, pos_x, pos_y, pos_z, rot_x, rot_y, rot_z)
+        function buildCamera(camType, mode, pos_x, pos_y, pos_z, rot_x, rot_y, rot_z)
         {
-            const camPersp = new PerspectiveCamera( camType.VFov, camType.aspectRatio, camType.rangeNear, camType.rangeFar );
+            let augmentaFar = 0;
+            switch(mode)
+            {
+                case 'hand-tracking':
+                    augmentaFar = camType.handFar;
+                    break;
+                case 'human-tracking':
+                default:
+                    augmentaFar = camType.rangeFar;
+                    break;
+            }
+            const camPersp = new PerspectiveCamera( camType.VFov, camType.aspectRatio, camType.rangeNear, augmentaFar );
 
             camPersp.position.set(pos_x, pos_y, pos_z);
 
@@ -80,7 +93,7 @@ class Node{
 
         function buildTextMesh(text, size, initialXPos, initialYPos, initialZPos)
         {
-            const textGeometry = new TextGeometry(text, { font: SceneManager.font, size: size, height: 0.01 } );
+            const textGeometry = new TextGeometry(text, { font: SceneObjects.font, size: size, height: 0.01 } );
             const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ))
             textMesh.position.set(initialXPos, initialYPos, initialZPos);
             textMesh.rotation.x = -Math.PI / 2.0;
@@ -122,38 +135,58 @@ class Node{
             this.cameraPerspective.visible = value;
             this.cameraPerspectiveHelper.visible = value;
             this.nameText.visible = value;
-            const iconElem = document.getElementById('node-' + (this.id) + '-visible').firstElementChild;
-            iconElem.dataset.icon = value ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
             this.areaValueText.visible = value;
+
+            this.uiElement.changeVisibility(value);
         }
 
-        this.updatePosition = function(currentUnit)
+        this.updatePosition = function(currentUnitValue)
         {
             this.xPos = this.mesh.position.x;
             this.yPos = this.mesh.position.y;
             this.zPos = this.mesh.position.z;
             this.cameraPerspective.position.set(this.xPos, this.yPos, this.zPos);
-    
-            document.getElementById('x-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.xPos * currentUnit * 100)/100.0;
-            document.getElementById('y-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.zPos * currentUnit * 100)/100.0;
-            document.getElementById('z-pos-'+ this.id).getElementsByTagName('strong')[0].innerHTML = Math.round(this.yPos * currentUnit * 100)/100.0;
+
+            this.uiElement.updatePosition(this.xPos, this.yPos, this.zPos, currentUnitValue)
         }
 
         this.updateAreaText = function(currentUnit)
         {
             this.areaValueText.geometry.dispose();
-            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + (currentUnit === units.meters ? 'm²' : 'sqft'), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * 2/3.0 * Math.sqrt(this.areaValue) / 3 / currentUnit, height: 0.01 } );
-            //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft') + ", Y: " + Math.round(this.ZPos*currentUnit*100)/100 + (currentUnit === units.meters ? 'm' : 'ft'), { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
+            this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + currentUnit.squaredLabel, { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * 2/3.0 * Math.sqrt(this.areaValue) / 3 / currentUnit.value, height: 0.01 } );
+            //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit.value*100)/100 + currentUnit.label + ", Y: " + Math.round(this.ZPos*currentUnit.value*100)/100 + currentUnit.label, { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
         
             this.nameText.geometry.dispose();
-            this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneManager.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit, height: 0.01 } );
+            this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit.value, height: 0.01 } );
         }
 
-        this.changeTextPosition = function(center, currentUnit)
+        this.changeTextPosition = function(center, currentUnitValue)
         {
-            this.nameText.position.copy(center.add(new Vector3( - Node.SIZE_TEXT_NODE * 2 * Math.sqrt(this.areaValue) / 3 / currentUnit, 0.1, 0)));
-            this.areaValueText.position.copy(center.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit )));
+            this.nameText.position.copy(center.add(new Vector3( - Node.SIZE_TEXT_NODE * 2 * Math.sqrt(this.areaValue) / 3 / currentUnitValue, 0.1, 0)));
+            this.areaValueText.position.copy(center.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnitValue )));
             this.areaValueText.visible = this.areaAppear;
+        }
+
+        this.changeMode = function(mode)
+        {
+            this.trackingMode = mode;
+            changeFar(this);
+        }
+
+        function changeFar(node)
+        {
+            switch(node.trackingMode)
+            {
+                case 'hand-tracking':
+                    node.cameraPerspective.far = node.cameraType.handFar;
+                    break;
+                case 'human-tracking':
+                default:
+                    node.cameraPerspective.far = node.cameraType.rangeFar;
+                    break;
+            }
+
+            node.uiElement.changeFar();
         }
 
         this.update = function()

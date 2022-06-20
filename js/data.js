@@ -7,12 +7,13 @@ const camerasTypes =
         VFov:45, 
         rangeNear: 0.6,
         rangeFar: 6,
+        handFar: 2.2,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
         checkedDefault : true,
-        recommanded: true
+        recommended: true
     },
     {
         id:1, 
@@ -21,12 +22,13 @@ const camerasTypes =
         VFov:49.5, 
         rangeNear: 0.6,
         rangeFar: 6,
+        handFar: 2.2,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: true
+        recommended: true
     },
     {
         id:2, 
@@ -36,12 +38,13 @@ const camerasTypes =
         VFov:65, 
         rangeNear: 0.5,
         rangeFar: 5.46,
+        handFar: 1.5,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: false
+        recommended: false
     },
     {
         id:3, 
@@ -54,11 +57,12 @@ const camerasTypes =
         VFov: Math.round(2 * Math.atan((Math.sqrt(2) / 2) * Math.tan(120 * Math.PI/180 / 2)) * 180/Math.PI * 10) / 10, 
         rangeNear: 0.25,
         rangeFar: 2.21,
+        handFar: 2.21,
         suitable: [
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: false
+        recommended: false
     },
     {
         id:4, 
@@ -67,23 +71,40 @@ const camerasTypes =
         VFov:50.8, 
         rangeNear: 0.25,
         rangeFar: 5,
+        handFar: 1.75,
         suitable: [
             "human-tracking",
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommanded: false
+        recommended: false
+    },
+    {
+        id:5, 
+        name:"Helios2", 
+        HFov:69, 
+        VFov:51, 
+        rangeNear: 0.3,
+        rangeFar: 8.3,
+        handFar: 3,
+        suitable: [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        checkedDefault : false,
+        recommended: false
     }
 ];
 
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
-
+/*
 const units = {
     meters: 1,
     feets: 3.28084
 };
+*/
 
-/*
+
 const units = {
     meters: {
         value: 1,
@@ -96,7 +117,7 @@ const units = {
         squaredLabel: 'sqft'
     }
 };
-*/
 
-export {units}
+
+export { units }
 export { camerasTypes }
