@@ -44,7 +44,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: false
+        recommended: true
     },
     {
         id:3, 
@@ -62,7 +62,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: false
+        recommended: true
     },
     {
         id:4, 
@@ -92,7 +92,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: false
+        recommended: true
     }
 ];
 
