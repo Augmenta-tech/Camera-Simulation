@@ -52,7 +52,6 @@ class UIManager{
             navigator.clipboard.writeText(link);
 
             document.getElementById("share-modal").classList.remove('hidden');
-            //document.getElementById('share-modal-content').style.display = "block flex";
             window.setTimeout(() => document.getElementById("share-modal").classList.add('hidden'), 1500);
         }
 

@@ -59,10 +59,10 @@ class SceneManager{
         this.sceneHeight = SceneManager.DEFAULT_HEIGHT;
         this.sceneElevation = 0;
 
-        this.size = 70;
+        this.size = 160;
 
-        this.wallXDepth = - this.size / 2.0;
-        this.wallZDepth = - this.size / 2.0;
+        this.wallXDepth = - 10;
+        this.wallZDepth = - 10;
 
         const floorNormal = new Vector3(0,1,0);
         const wallXNormal = new Vector3(1,0,0);
@@ -87,15 +87,15 @@ class SceneManager{
             this.scene.add(ambient);
 
             // Floor
-            const floor = buildFloorMesh(this.size);
+            const floor = buildFloorMesh(this.size, this.wallXDepth, this.wallZDepth);
             this.scene.add(floor);
 
             // WallX
-            const wallX = buildWallXMesh(this.size, this.wallXDepth);
+            const wallX = buildWallXMesh(this.size, this.wallXDepth, this.wallZDepth);
             this.scene.add(wallX);
         
             // WallZ
-            const wallZ = buildWallZMesh(this.size, this.wallZDepth);
+            const wallZ = buildWallZMesh(this.size, this.wallZDepth, this.wallXDepth);
             this.scene.add(wallZ);
 
             //Origin
@@ -103,7 +103,7 @@ class SceneManager{
             this.scene.add(axesHelper);
 
             // Grid Helper
-            const gridHelper = buildGridHelper(this.size);
+            const gridHelper = buildGridHelper();
             this.scene.add(gridHelper);
         }
 
@@ -128,40 +128,40 @@ class SceneManager{
             return scene;
         }
 
-        function buildFloorMesh(size)
+        function buildFloorMesh(size, wallXDepth, wallZDepth)
         {
             const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
             
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( 0, - 0.01, 0 ); //to avoid z-fight with area covered by cam (y = sceneElevation for area covered)
+            floor.position.set( size / 2.0 + wallXDepth, - 0.01, size / 2.0 + wallZDepth ); //to avoid z-fight with area covered by cam (y = sceneElevation for area covered)
             floor.rotation.x = - Math.PI / 2.0;
 
             return floor;
         }
 
-        function buildWallXMesh(size, wallXDepth)
+        function buildWallXMesh(size, wallXDepth, wallZDepth)
         {
             const materialWallX = new MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
         
             const geometryWallX = new PlaneGeometry( size + 0.02, size + 0.02 );
         
             const wallX = new Mesh(geometryWallX, materialWallX);
-            wallX.position.set( wallXDepth - 0.01, size / 2.0, 0 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            wallX.position.set(wallXDepth - 0.01, size / 2.0, size / 2.0 + wallZDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             wallX.rotation.y = Math.PI / 2.0;
 
             return wallX;
         }
 
-        function buildWallZMesh(size, wallZDepth)
+        function buildWallZMesh(size, wallZDepth, wallXDepth)
         {
             const materialWallZ = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
         
             const geometryWallZ = new PlaneGeometry( size + 0.02, size + 0.02 );
         
             const wallZ = new Mesh(geometryWallZ, materialWallZ);
-            wallZ.position.set( 0, size/2.0, wallZDepth - 0.01 ); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            wallZ.position.set(size / 2.0 + wallXDepth, size/2.0, wallZDepth - 0.01); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             
             return wallZ;
         }
@@ -178,9 +178,9 @@ class SceneManager{
             return axesHelper;
         }
 
-        function buildGridHelper(size)
+        function buildGridHelper()
         {
-            const gridHelper = new GridHelper( size, size, 0x444444, 0x444444 );
+            const gridHelper = new GridHelper( 2000, 2000, 0x444444, 0x444444 );
             gridHelper.position.y = -0.001
 
             return gridHelper;

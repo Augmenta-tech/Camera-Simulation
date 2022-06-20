@@ -151,6 +151,11 @@ canvas {
 .draggable {
   cursor: ew-resize;
 }
+
+.underlined {
+  text-decoration: underline;
+}
+
 .cam-spec {
   width: 75%;
 }

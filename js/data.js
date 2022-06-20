@@ -92,7 +92,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     }
 ];
 

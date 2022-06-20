@@ -34,7 +34,7 @@ class NodeUI{
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
                     </div>
                 </div>
-                <div id="node-infos-` + (node.id) + `-UI" class="column sections-container node-infos space-y">
+                <div id="node-infos-` + (node.id) + `-UI" class="column sections-container space-y">
                     <div id="select-camera" class="row center-y">
                         <select id="cam-type-` + (node.id) + `" name="camType">
                         ` + cameraTypesOptions + `
@@ -113,7 +113,7 @@ class NodeUI{
             function dragMouseDown(e) {
                 valueElement = element.getElementsByTagName('strong')[0];
                 value = parseFloat(valueElement.innerHTML);
-                valueElement.style.textDecoration = "underline";
+                valueElement.classList.add('underlined');
                 dragged = false;
                 e = e || window.event;
                 e.preventDefault();
@@ -213,7 +213,7 @@ class NodeUI{
             }
         
             function closeDragElement() {
-                valueElement.style.textDecoration = "none";
+                if(valueElement.classList.contains('underlined')) valueElement.classList.remove('underlined');
                 /* stop changing when mouse button is released:*/
                 document.onmouseup = null;
                 document.onmousemove = null;
