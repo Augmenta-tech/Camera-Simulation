@@ -113,10 +113,10 @@ class SceneManager{
             this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
             this.checkerboard.addPlanesToScene(this.scene);
 
+            this.augmentaSceneLoaded = true;
+
             //SceneObjects
             this.objects.initObjects();
-
-            this.augmentaSceneLoaded = true;
         }
 
     /* BUILDERS */

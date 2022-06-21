@@ -3,7 +3,7 @@ import { Vector3 } from 'three'
 import { camerasTypes, units } from '/js/data.js'
 
 class NodeUI{
-    constructor(node, currentUnit, sceneObjects)
+    constructor(node, sceneManager)
     {
         buildUIDiv();
         bindEventListeners();
@@ -43,13 +43,13 @@ class NodeUI{
                     <div class="row node-transformations">
                         <p class="main-text">Position</p>
                         <div>
-                            <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit.value + `>` + Math.round(node.xPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.xPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                         <div>
-                            <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit.value + `>` + Math.round(-node.zPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(-node.zPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                         <div>
-                            <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit.value + `>` + Math.round(node.yPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.yPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                     </div>
                     <div class="row node-transformations">
@@ -71,8 +71,8 @@ class NodeUI{
                     </div>
                     <div class="row cam-spec">
                         <p class="spec-title main-text">Distance</p>
-                        <p>Near</p><p><span id="near` + node.id + `" data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
-                        <p>Far</p><p><span id="far` + node.id + `" data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
+                        <p>Near</p><p><span id="near` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
+                        <p>Far</p><p><span id="far` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
                     </div>
                 </div>`;
 
@@ -154,7 +154,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.xPos = value / currentUnit.value;
+                                node.xPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.x = node.xPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -171,7 +171,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.zPos = value / currentUnit.value;
+                                node.zPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.z = node.zPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -193,7 +193,7 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.yPos = value / currentUnit.value;
+                                node.yPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.y = node.yPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
@@ -249,7 +249,7 @@ class NodeUI{
         function changeVisibilityofCam()
         {
             node.changeVisibility();
-            sceneObjects.updateFrustumIcon();
+            sceneManager.objects.updateFrustumIcon();
         }
 
         function changeCameraType()

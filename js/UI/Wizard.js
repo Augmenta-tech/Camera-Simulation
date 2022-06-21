@@ -97,9 +97,9 @@ class Wizard{
 
         function initWizardValues(sceneManager)
         {
-            document.getElementById('input-scene-width-wizard').value = sceneManager.sceneWidth;
-            document.getElementById('input-scene-height-wizard').value = sceneManager.sceneHeight;
-            document.getElementById('input-hook-height-wizard').value = document.getElementById('input-hook-height-wizard').value ? document.getElementById('input-hook-height-wizard').value : 4.5;
+            document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-scene-height-wizard').value = Math.round(sceneManager.sceneHeight * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
 
             document.getElementById('tracking-mode-selection-wizard').value = sceneManager.trackingMode;
 
