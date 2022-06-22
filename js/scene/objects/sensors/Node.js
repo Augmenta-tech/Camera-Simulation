@@ -69,13 +69,7 @@ class Node{
             const camPersp = new PerspectiveCamera( camType.VFov, camType.aspectRatio, camType.rangeNear, augmentaFar );
 
             camPersp.position.set(pos_x, pos_y, pos_z);
-
-            camPersp.rotateX(Node.DEFAULT_NODE_ROTATION_X);
-            camPersp.rotateOnWorldAxis(new Vector3(1,0,0), rot_x);
-            camPersp.rotateOnAxis(new Vector3(0,1,0), -rot_y);
-            let rotationAxis = new Vector3();
-            camPersp.getWorldDirection(rotationAxis);
-            camPersp.rotateOnWorldAxis(rotationAxis, -rot_z);
+            camPersp.rotation.set(rot_x + Node.DEFAULT_NODE_ROTATION_X, - rot_y, rot_z);
 
             return camPersp;
         }
