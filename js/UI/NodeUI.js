@@ -1,6 +1,7 @@
 import { Vector3 } from 'three'
 
 import { camerasTypes, units } from '/js/data.js'
+import { Node } from '/js/scene/objects/sensors/Node.js'
 
 class NodeUI{
     constructor(node, sceneManager)
@@ -160,8 +161,8 @@ class NodeUI{
                                 break;
                             case "rot":
                                 /*node.cameraPerspective.rotateOnWorldAxis(node.xRotationAxis, value * (Math.PI / 180.0) - node.pitch);*/
-                                node.cameraPerspective.rotateOnWorldAxis(new Vector3(1,0,0), value * (Math.PI / 180.0) - node.xRot);
                                 node.xRot = value * (Math.PI / 180.0);
+                                node.cameraPerspective.rotation.x = node.xRot + Node.DEFAULT_NODE_ROTATION_X;
                                 break;
                             default:
                                 break;
@@ -173,17 +174,19 @@ class NodeUI{
                             case "pos" :
                                 node.zPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.z = node.zPos;
-                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                node.mesh.position.set(node.xPos, node.yPos, node.zPos);
                                 break;
                             case "rot":
                                 /*node.cameraPerspective.rotateOnWorldAxis(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
                                 node.xRotationAxis.applyAxisAngle(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
                                 node.xRotationAxis.normalize();
                                 node.yaw = value * (Math.PI / 180.0);*/
+                                /*
                                 const rotateYAxis = new Vector3(0,1,0);
                                 rotateYAxis.applyAxisAngle(new Vector3(0,0,- 1), - node.zRot);
-                                node.cameraPerspective.rotateOnAxis(rotateYAxis, -(value * (Math.PI / 180.0) - node.yRot));
+                                node.cameraPerspective.rotateOnAxis(rotateYAxis, -(value * (Math.PI / 180.0) - node.yRot));*/
                                 node.yRot = value * (Math.PI / 180.0);
+                                node.cameraPerspective.rotation.y = - node.yRot;
                                 break;
                             default:
                                 break;
@@ -198,10 +201,11 @@ class NodeUI{
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
                             case "rot":
-                                const rotateZAxis = new Vector3();
+                                /*const rotateZAxis = new Vector3();
                                 node.cameraPerspective.getWorldDirection(rotateZAxis);
-                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis,-(value * (Math.PI / 180.0) - node.zRot));
+                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis,-(value * (Math.PI / 180.0) - node.zRot));*/
                                 node.zRot = value * (Math.PI / 180.0);
+                                node.cameraPerspective.rotation.z = node.zRot;
                                 break;
                             default:
                                 break;
