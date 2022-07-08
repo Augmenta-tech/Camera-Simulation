@@ -52,6 +52,7 @@ class SceneObjects{
             if(index === -1)
             {
                 sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
+                sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
             }
             else
             {
