@@ -22,8 +22,6 @@ class Node{
     constructor(id, mode = document.getElementById("tracking-mode-inspector").value, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = Node.DEFAULT_NODE_HEIGHT, p_z = 0, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
-        this.trackingMode = mode;
-
         this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
 
         this.xPos = p_x;
@@ -33,7 +31,7 @@ class Node{
         this.yRot = r_y;
         this.zRot = r_z;
 
-        this.cameraPerspective = buildCamera(this.cameraType, this.trackingMode, this.xPos, this.yPos, this.zPos, this.xRot, this.yRot, this.zRot);
+        this.cameraPerspective = buildCamera(this.cameraType, mode, this.xPos, this.yPos, this.zPos, this.xRot, this.yRot, this.zRot);
         this.cameraPerspectiveHelper = new CameraHelper( this.cameraPerspective );
     
         this.color = new Color(Math.random(), Math.random(), Math.random());
@@ -154,33 +152,28 @@ class Node{
             this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit.value, height: 0.01 } );
         }
 
-        this.changeTextPosition = function(center, currentUnitValue)
+        this.changeTextPosition = function(position, currentUnitValue)
         {
-            this.nameText.position.copy(center.add(new Vector3( - Node.SIZE_TEXT_NODE * 2 * Math.sqrt(this.areaValue) / 3 / currentUnitValue, 0.1, 0)));
-            this.areaValueText.position.copy(center.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnitValue )));
+            this.nameText.scale.set(1, 1, 1);
+            this.nameText.position.copy(position.add(new Vector3( - Node.SIZE_TEXT_NODE * 2 * Math.sqrt(this.areaValue) / 3 / currentUnitValue, 0.1, 0)));
+            this.areaValueText.position.copy(position.add(new Vector3(0, 0, 1.5*Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnitValue )));
             this.areaValueText.visible = this.areaAppear;
         }
 
         this.changeMode = function(mode)
         {
-            this.trackingMode = mode;
-            changeFar(this);
-        }
-
-        function changeFar(node)
-        {
-            switch(node.trackingMode)
+            switch(mode)
             {
                 case 'hand-tracking':
-                    node.cameraPerspective.far = node.cameraType.handFar;
+                    this.cameraPerspective.far = this.cameraType.handFar;
                     break;
                 case 'human-tracking':
                 default:
-                    node.cameraPerspective.far = node.cameraType.rangeFar;
+                    this.cameraPerspective.far = this.cameraType.rangeFar;
                     break;
             }
 
-            node.uiElement.changeFar();
+            this.uiElement.changeFar();
         }
 
         this.update = function()
@@ -231,6 +224,8 @@ class Node{
             this.nameText.material.dispose();
             this.areaValueText.geometry.dispose();
             this.areaValueText.material.dispose();
+
+            this.uiElement.dispose();
         }
     }
 }

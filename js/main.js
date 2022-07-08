@@ -33,7 +33,7 @@ function bindEventListeners()
     document.addEventListener( 'keydown', onKeyDown );
     //END DEBUG
 
-    uiManager.bindEventListeners(viewportManager.sceneManager);
+    uiManager.bindEventListeners(viewportManager);
 
     /* HANDLE VIEWPORT ACTIONS */
     viewportManager.element.addEventListener( 'pointerdown', onPointerDown );

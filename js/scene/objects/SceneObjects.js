@@ -246,18 +246,9 @@ class SceneObjects{
 
         this.removeNodes = function()
         {
-            nodes.forEach(n => {
-                delete n.uiElement;
-                this.deleteObject(n);
-            });
+            nodes.forEach(n => this.deleteObject(n));
             nodes.length = 0;
             this.nodeMeshes.length = 0;
-
-            const nodesUIdivs = document.getElementsByClassName("nodeUI");
-            for(let i = nodesUIdivs.length - 1; i >= 0; i--)
-            {
-                nodesUIdivs[i].remove();
-            }
         }
 
 
