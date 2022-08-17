@@ -39,7 +39,7 @@ class SceneManager{
     static font;
     static DEFAULT_UNIT = units.meters;
     static DEFAULT_TRACKING_MODE = 'human-tracking';
-    static DEFAULT_DETECTION_HEIGHT = 1;
+    static DEFAULT_DETECTION_HEIGHT = parseFloat(document.getElementById('default-height-detected').value);
     static DEFAULT_WIDTH = 5;
     static DEFAULT_HEIGHT = 5;
 
@@ -113,10 +113,10 @@ class SceneManager{
             this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
             this.checkerboard.addPlanesToScene(this.scene);
 
+            this.augmentaSceneLoaded = true;
+
             //SceneObjects
             this.objects.initObjects();
-
-            this.augmentaSceneLoaded = true;
         }
 
     /* BUILDERS */
@@ -390,7 +390,7 @@ class SceneManager{
                     }
 
                     coveredPointsAbove = candidatesPoints.filter(p => {
-                        const abovePoint = new Vector3().copy(p);
+                        const abovePoint = p.clone();
                         abovePoint.y += this.heightDetected;
                         return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01;
                     })
@@ -426,7 +426,10 @@ class SceneManager{
                 }
                 else
                 {
-                    node.nameText.position.copy(node.cameraPerspective.position);
+                    //console.log(node.nameText);
+                    //node.nameText.position.copy(node.cameraPerspective.position);
+                    node.changeTextPosition(node.cameraPerspective.position.clone(), this.currentUnit.value);
+                    node.nameText.scale.set(Node.SIZE_TEXT_NODE / 1.7 / node.nameText.geometry.parameters.options.size, Node.SIZE_TEXT_NODE / 1.7 / node.nameText.geometry.parameters.options.size, 1);
                     node.areaValueText.visible = false;
                 }
 
@@ -535,7 +538,7 @@ class SceneManager{
                 const center = getBarycentre(coveredPoints);
                 const vector = new Vector3();
                 vector.subVectors(coveredPoints[0], center);
-                const vectorPerp = new Vector3().copy(vector);
+                const vectorPerp = vector.clone();
                 vectorPerp.applyAxisAngle(planeNormal, Math.PI/2.0);
 
                 coveredPoints.sort((A,B) => {

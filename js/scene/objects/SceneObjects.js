@@ -52,6 +52,7 @@ class SceneObjects{
             if(index === -1)
             {
                 sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
+                sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
             }
             else
             {
@@ -75,16 +76,10 @@ class SceneObjects{
                             sceneHeight = val;
                             break;
                         case "m":
-                            document.getElementById("tracking-mode-inspector").value = val;
-                            mode = val;
-                            sceneManager.changeTrackingMode(mode);
+                            document.getElementById("tracking-mode-selection-inspector").value = val;
+                            document.getElementById("tracking-mode-selection-inspector").dispatchEvent(new Event('change'));
                             break;
                         case "h":
-                            mode === 'human-tracking'
-                                ?
-                                document.getElementById('overlap-height-selection-inspector').value = val
-                                :
-                                document.getElementById('overlap-height-inspector').classList.add('hidden');
                             sceneManager.heightDetected = parseFloat(val);
                             break;
                         default:
@@ -213,7 +208,7 @@ class SceneObjects{
                 return;
             }
             const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new NodeUI(newCamera, sceneManager.currentUnit, this);
+            newCamera.uiElement = new NodeUI(newCamera, sceneManager);
             
             //Offset
             if(!autoConstruct)
@@ -252,18 +247,9 @@ class SceneObjects{
 
         this.removeNodes = function()
         {
-            nodes.forEach(n => {
-                delete n.uiElement;
-                this.deleteObject(n);
-            });
+            nodes.forEach(n => this.deleteObject(n));
             nodes.length = 0;
             this.nodeMeshes.length = 0;
-
-            const nodesUIdivs = document.getElementsByClassName("nodeUI");
-            for(let i = nodesUIdivs.length - 1; i >= 0; i--)
-            {
-                nodesUIdivs[i].remove();
-            }
         }
 
 
@@ -297,9 +283,9 @@ class SceneObjects{
             if(url[url.length-1] != '/') url += '/';
             url += '?';
             url += "L=";
-            url += Math.floor(sceneManager.sceneWidth / sceneManager.currentUnit.value  * 100)/100;
+            url += Math.floor(sceneManager.sceneWidth * 100)/100;
             url += ",l=";
-            url += Math.floor(sceneManager.sceneHeight / sceneManager.currentUnit.value * 100)/100;
+            url += Math.floor(sceneManager.sceneHeight * 100)/100;
             url += ",m=";
             url += sceneManager.trackingMode;
             url += ",h=";

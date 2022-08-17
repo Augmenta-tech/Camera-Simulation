@@ -7,8 +7,9 @@ class Wizard{
     {
         addCamTypesToForm();
 
-        this.bindEventListeners = function(sceneManager, uiManager)
+        this.bindEventListeners = function(viewportManager, uiManager)
         {
+            const sceneManager = viewportManager.sceneManager;
             const formModal = document.getElementById('wizard-modal');
             document.getElementById('open-wizard-button').addEventListener('click', () => {
                 if(sceneManager.augmentaSceneLoaded)
@@ -35,7 +36,8 @@ class Wizard{
 
             function checkFormCoherence(sceneManager)
             {
-                if(document.getElementById('input-hook-height-wizard').value / sceneManager.currentUnit.value > getMaxFarFromCheckedCam(document.getElementById('tracking-mode-selection-wizard').value))
+                const maxFar = getMaxFarFromCheckedCam(document.getElementById('tracking-mode-selection-wizard').value)
+                if(document.getElementById('input-hook-height-wizard').value / sceneManager.currentUnit.value > maxFar)
                 {
                     document.getElementById('input-hook-height-wizard').style.color = "red";
                     const warningElem = document.getElementById('warning-hook-height');
@@ -43,7 +45,7 @@ class Wizard{
                     {
                         const newWarningElem = document.createElement("p");
                         newWarningElem.id = 'warning-hook-height';
-                        newWarningElem.innerHTML = `The camera(s) you chose cannot see your tracking surface that far`;
+                        newWarningElem.innerHTML = `The camera(s) you chose cannot see your tracking surface that far (max = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round((maxFar * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>)`;
                         newWarningElem.style.color = "red";
                         document.getElementById('hook-height-input').appendChild(newWarningElem);
                     }
@@ -58,6 +60,7 @@ class Wizard{
 
             document.getElementById('generate-scene-wizard-button').addEventListener('click', () => {
                 createSceneFromWizard(sceneManager);
+                viewportManager.placeCamera();
                 uiManager.displayWarning(sceneManager);
             });
         }
@@ -72,7 +75,7 @@ class Wizard{
                 case 'human-tracking':
                 default:
                     document.getElementById('overlap-height-wizard').classList.remove('hidden');
-                    document.getElementById('overlap-height-selection-wizard').value = "1";
+                    document.getElementById('overlap-height-selection-wizard').value = document.getElementById('default-height-detected').value;
                     break;
             }
 
@@ -83,7 +86,7 @@ class Wizard{
                 {
                     const newInfoTableElem = document.createElement("p");
                     newInfoTableElem.id = 'info-table-height';
-                    newInfoTableElem.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (SceneManager.TABLE_ELEVATION*sceneManager.currentUnit.value) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
+                    newInfoTableElem.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(SceneManager.TABLE_ELEVATION*sceneManager.currentUnit.value * 100) / 100) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
                     newInfoTableElem.style.color = "orange";
                     document.getElementById('tracking-section-wizard').appendChild(newInfoTableElem);
                 }
@@ -97,9 +100,9 @@ class Wizard{
 
         function initWizardValues(sceneManager)
         {
-            document.getElementById('input-scene-width-wizard').value = sceneManager.sceneWidth;
-            document.getElementById('input-scene-height-wizard').value = sceneManager.sceneHeight;
-            document.getElementById('input-hook-height-wizard').value = document.getElementById('input-hook-height-wizard').value ? document.getElementById('input-hook-height-wizard').value : 4.5;
+            document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-scene-height-wizard').value = Math.round(sceneManager.sceneHeight * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
 
             document.getElementById('tracking-mode-selection-wizard').value = sceneManager.trackingMode;
 

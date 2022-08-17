@@ -1,9 +1,10 @@
 import { Vector3 } from 'three'
 
 import { camerasTypes, units } from '/js/data.js'
+import { Node } from '/js/scene/objects/sensors/Node.js'
 
 class NodeUI{
-    constructor(node, currentUnit, sceneObjects)
+    constructor(node, sceneManager)
     {
         buildUIDiv();
         bindEventListeners();
@@ -43,13 +44,13 @@ class NodeUI{
                     <div class="row node-transformations">
                         <p class="main-text">Position</p>
                         <div>
-                            <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + currentUnit.value + `>` + Math.round(node.xPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.xPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                         <div>
-                            <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + currentUnit.value + `>` + Math.round(-node.zPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(-node.zPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                         <div>
-                            <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + currentUnit.value + `>` + Math.round(node.yPos * currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + currentUnit.value + `>` + currentUnit.label +`</span></p>
+                            <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.yPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                     </div>
                     <div class="row node-transformations">
@@ -71,8 +72,8 @@ class NodeUI{
                     </div>
                     <div class="row cam-spec">
                         <p class="spec-title main-text">Distance</p>
-                        <p>Near</p><p><span id="near` + node.id + `" data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
-                        <p>Far</p><p><span id="far` + node.id + `" data-unit=` + currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + currentUnit.value + `>` + currentUnit.label + `</span></p>
+                        <p>Near</p><p><span id="near` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
+                        <p>Far</p><p><span id="far` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
                     </div>
                 </div>`;
 
@@ -154,14 +155,14 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.xPos = value / currentUnit.value;
+                                node.xPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.x = node.xPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
                             case "rot":
                                 /*node.cameraPerspective.rotateOnWorldAxis(node.xRotationAxis, value * (Math.PI / 180.0) - node.pitch);*/
-                                node.cameraPerspective.rotateOnWorldAxis(new Vector3(1,0,0), value * (Math.PI / 180.0) - node.xRot);
                                 node.xRot = value * (Math.PI / 180.0);
+                                node.cameraPerspective.rotation.x = node.xRot + Node.DEFAULT_NODE_ROTATION_X;
                                 break;
                             default:
                                 break;
@@ -171,19 +172,21 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.zPos = value / currentUnit.value;
+                                node.zPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.z = node.zPos;
-                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                node.mesh.position.set(node.xPos, node.yPos, node.zPos);
                                 break;
                             case "rot":
                                 /*node.cameraPerspective.rotateOnWorldAxis(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
                                 node.xRotationAxis.applyAxisAngle(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
                                 node.xRotationAxis.normalize();
                                 node.yaw = value * (Math.PI / 180.0);*/
+                                /*
                                 const rotateYAxis = new Vector3(0,1,0);
                                 rotateYAxis.applyAxisAngle(new Vector3(0,0,- 1), - node.zRot);
-                                node.cameraPerspective.rotateOnAxis(rotateYAxis, -(value * (Math.PI / 180.0) - node.yRot));
+                                node.cameraPerspective.rotateOnAxis(rotateYAxis, -(value * (Math.PI / 180.0) - node.yRot));*/
                                 node.yRot = value * (Math.PI / 180.0);
+                                node.cameraPerspective.rotation.y = - node.yRot;
                                 break;
                             default:
                                 break;
@@ -193,15 +196,16 @@ class NodeUI{
                         switch(element.id.split('-')[1])
                         {
                             case "pos" :
-                                node.yPos = value / currentUnit.value;
+                                node.yPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.y = node.yPos;
                                 node.mesh.position.set( node.xPos, node.yPos, node.zPos );
                                 break;
                             case "rot":
-                                const rotateZAxis = new Vector3();
+                                /*const rotateZAxis = new Vector3();
                                 node.cameraPerspective.getWorldDirection(rotateZAxis);
-                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis,-(value * (Math.PI / 180.0) - node.zRot));
+                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis,-(value * (Math.PI / 180.0) - node.zRot));*/
                                 node.zRot = value * (Math.PI / 180.0);
+                                node.cameraPerspective.rotation.z = node.zRot;
                                 break;
                             default:
                                 break;
@@ -249,7 +253,7 @@ class NodeUI{
         function changeVisibilityofCam()
         {
             node.changeVisibility();
-            sceneObjects.updateFrustumIcon();
+            sceneManager.objects.updateFrustumIcon();
         }
 
         function changeCameraType()
@@ -259,7 +263,7 @@ class NodeUI{
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;
             node.cameraPerspective.near = node.cameraType.rangeNear;
-            switch(node.trackingMode)
+            switch(sceneManager.trackingMode)
             {
                 case 'hand-tracking':
                     node.cameraPerspective.far = node.cameraType.handFar;
@@ -291,6 +295,11 @@ class NodeUI{
             document.getElementById('x-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(x * currentUnitValue * 100)/100.0;
             document.getElementById('y-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(z * currentUnitValue * 100)/100.0;
             document.getElementById('z-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(y * currentUnitValue * 100)/100.0;
+        }
+
+        this.dispose = function()
+        {
+            document.getElementById('node-' + node.id + '-UI').remove();
         }
     }
 }

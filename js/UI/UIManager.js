@@ -8,8 +8,9 @@ class UIManager{
         this.wizard = new Wizard();
         resetValues();
 
-        this.bindEventListeners = function(sceneManager)
+        this.bindEventListeners = function(viewportManager)
         {
+            const sceneManager = viewportManager.sceneManager
             const copyUrlModal = document.getElementById("share-modal");
             document.getElementById('generate-link').addEventListener('click', () => {
                 copyLink(sceneManager.objects.generateLink());
@@ -31,7 +32,7 @@ class UIManager{
             document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-inspector").value));
             
 
-            this.wizard.bindEventListeners(sceneManager, this);
+            this.wizard.bindEventListeners(viewportManager, this);
         }
 
         function resetValues()
@@ -65,7 +66,7 @@ class UIManager{
                 case 'human-tracking':
                 default:
                     document.getElementById('overlap-height-inspector').classList.remove('hidden');
-                    document.getElementById('overlap-height-selection-inspector').value = "1";
+                    document.getElementById('overlap-height-selection-inspector').value = document.getElementById('default-height-detected').value;
                     break;
             }
         }
@@ -79,7 +80,7 @@ class UIManager{
                 {
                     const newInfoTableElemInspector = document.createElement('p');
                     newInfoTableElemInspector.id = 'info-table-height-inspector';
-                    newInfoTableElemInspector.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (sceneManager.sceneElevation*sceneManager.currentUnit.value) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
+                    newInfoTableElemInspector.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(sceneManager.sceneElevation*sceneManager.currentUnit.value * 100) / 100.0) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
                     newInfoTableElemInspector.style.color = 'orange';
                     document.getElementById('tracking-section-inspector').appendChild(newInfoTableElemInspector);
                 }
