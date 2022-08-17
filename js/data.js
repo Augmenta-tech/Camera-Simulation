@@ -41,7 +41,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Azure Kinect (WFOV)", 
@@ -58,7 +58,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Orbbec Femto", 
@@ -72,7 +72,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Orbbec Femto W", 
