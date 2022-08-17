@@ -109,6 +109,7 @@ function loadModel(genre)
 
     new MTLLoader()
     .setPath( 'models/'+ genre +'02/' )
+    .setRequestHeader({ "Content-Type" : "model/mtl"})
     .load( genre +'02.mtl', function ( materials ) {
 
         materials.preload();
@@ -116,6 +117,7 @@ function loadModel(genre)
         new OBJLoader()
             .setMaterials( materials )
             .setPath( 'models/'+ genre +'02/' )
+            .setRequestHeader({ "Content-Type" : "model/obj"})
             .load( genre +'02.obj', function ( object ) {
 
                 if(genre === 'male') Dummy.maleModel = object;

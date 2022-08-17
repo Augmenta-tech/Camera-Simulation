@@ -2,7 +2,9 @@ import {
     WebGLRenderer,
     PerspectiveCamera,
     OrthographicCamera,
-    Vector3
+    Vector2,
+    Vector3,
+    Raycaster
 } from 'three';
 
 import {
@@ -21,6 +23,8 @@ class ViewportManager{
     static DEFAULT_CAM_POSITION = new Vector3(12,8,12);
     constructor(viewportElement)
     {
+        const scope = this;
+
         let viewportWidth = viewportElement.offsetWidth;
         let viewportHeight = viewportElement.offsetHeight;
         
@@ -35,10 +39,103 @@ class ViewportManager{
 
         this.activeCamera = perspCam;
 
-        let orbitControls = buildOrbitControls(this);
-        let controlsGizmo = buildGuizmo(orbitControls, this);
-        this.sceneManager = new SceneManager(buildTransformControl(this));
+        let orbitControls = buildOrbitControls();
+        let controlsGizmo = buildGuizmo(orbitControls);
+        this.sceneManager = new SceneManager(buildTransformControl());
 
+    /* HANDLE VIEWPORT EVENTS */
+
+        this.bindEventListeners = function()
+        {
+            this.element.addEventListener( 'pointerdown', onPointerDown);
+            this.element.addEventListener( 'pointerup', onPointerUp);
+            this.element.addEventListener( 'pointermove', onPointerMove);
+        
+            this.sceneManager.objects.transformControl.addEventListener( 'objectChange', function () {
+                scope.element.removeEventListener( 'pointermove', onDrag);
+                scope.sceneManager.objects.updateObjectsPosition();
+            });
+
+            //DEBUG
+            document.addEventListener( 'keydown', onKeyDown);
+            //END DEBUG
+        }
+
+        /* MOUSE CONTROLS */
+        const onDownPosition = new Vector2();
+        const onUpPosition = new Vector2();
+
+        function onPointerDown(event) {
+            onDownPosition.x = event.clientX;
+            onDownPosition.y = event.clientY;
+
+            if(event.button === 0) scope.element.addEventListener( 'pointermove', onDrag);
+            scope.element.removeEventListener( 'pointermove', onPointerMove);
+        }
+
+        function onDrag()
+        {
+            if(scope.activeCamera.isOrthographicCamera) scope.setupCameraChangement();
+        }
+
+        function onPointerUp(event) {
+            onUpPosition.x = event.clientX;
+            onUpPosition.y = event.clientY;
+
+            if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) scope.sceneManager.objects.transformControl.detach();
+
+            scope.element.removeEventListener( 'pointermove', onDrag);
+            scope.element.addEventListener( 'pointermove', onPointerMove);
+        }
+
+        function onPointerMove(event)
+        {
+            const pointer = new Vector2(
+                (event.clientX / viewportElement.offsetWidth) * 2 - 1,
+                - ((event.clientY - document.getElementById('header').offsetHeight) / viewportElement.offsetHeight) * 2 + 1
+            );
+            
+            const raycaster = new Raycaster()
+            raycaster.setFromCamera( pointer, scope.activeCamera );
+            
+            const meshes = scope.sceneManager.objects.nodeMeshes.concat(scope.sceneManager.objects.dummiesMeshes);
+
+            const intersect = raycaster.intersectObjects( meshes, false );
+
+            if(intersect.length > 0) {
+                const object = intersect[0].object;
+                if (object !== scope.sceneManager.objects.transformControl.object)
+                {
+                    scope.sceneManager.objects.transformControl.attach(object);
+                    if(scope.activeCamera.isOrthographicCamera)
+                    {
+                        let dir = new Vector3();
+                        scope.activeCamera.getWorldDirection(dir);
+                        scope.sceneManager.objects.transformControl.showX = 1 - Math.abs(dir.dot(new Vector3(1, 0, 0))) < 0.001 ? false : true;
+                        scope.sceneManager.objects.transformControl.showZ = 1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001 ? false : true;
+                        scope.sceneManager.objects.transformControl.showY = (1 - Math.abs(dir.dot(new Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true;
+                    }
+                    else
+                    {
+                        scope.sceneManager.objects.transformControl.showX = true;
+                        scope.sceneManager.objects.transformControl.showZ = true;
+                        scope.sceneManager.objects.transformControl.showY = object.name === 'Dummy' ? false : true;
+                    }
+                }
+            }
+        }
+
+        /* DEBUG */
+        function onKeyDown(event) {
+
+            switch ( event.keyCode ) {
+
+                case 80: /*P*/
+                    scope.sceneManager.debug();
+                    break;
+
+            }
+        }
 
     /* BUILDERS */
 
@@ -80,20 +177,20 @@ class ViewportManager{
     
 
         /* CONTROLS */
-        function buildOrbitControls(viewportManager)
+        function buildOrbitControls()
         {
-            const controls = new OrbitControls( viewportManager.activeCamera, renderer.domElement );
+            const controls = new OrbitControls( scope.activeCamera, renderer.domElement );
             controls.damping = 0.2;
-            controls.enableRotate = viewportManager.activeCamera.isOrthographicCamera ? false : true;
+            controls.enableRotate = scope.activeCamera.isOrthographicCamera ? false : true;
 
-            controls.addEventListener( 'change',() => viewportManager.render());
+            controls.addEventListener( 'change',() => scope.render());
 
             return controls;
         }
 
-        function buildGuizmo(controls, viewportManager)
+        function buildGuizmo(controls)
         {
-            const gizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff", colors: { x: ['#bf4747', '#662626'], y: ['#708eb0', '#405063'], z: ['#37a48a', '#1c5446'] } }, viewportManager);
+            const gizmo = new OrbitControlsGizmo(controls, { size:  100, padding:  8, fontColor: "#ffffff", colors: { x: ['#bf4747', '#662626'], y: ['#708eb0', '#405063'], z: ['#37a48a', '#1c5446'] } }, scope);
             viewportElement.appendChild(gizmo.domElement);
 
             return gizmo;
@@ -125,10 +222,10 @@ class ViewportManager{
         }
 
         /* ALLOW TO TRANSFORM SCENE SUBJECTS IN THE VIEWPORT */
-        function buildTransformControl(viewportManager)
+        function buildTransformControl()
         {
-            const transformControl = new TransformControls(viewportManager.activeCamera, renderer.domElement );
-            transformControl.addEventListener('change', () => viewportManager.render());
+            const transformControl = new TransformControls(scope.activeCamera, renderer.domElement );
+            transformControl.addEventListener('change', () => scope.render());
             transformControl.addEventListener('dragging-changed', function (event) {
                 orbitControls.enabled = ! event.value;
             });
