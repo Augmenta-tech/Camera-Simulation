@@ -86,7 +86,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Helios2", 
@@ -100,7 +100,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Kinect 1", 
@@ -114,7 +114,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Kinect 2", 
@@ -128,7 +128,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     }
 ];
 
