@@ -205,8 +205,10 @@ class SceneManager{
                 e.innerHTML = unit.label;
             });
 
-            document.getElementById('toggle-unit-button-' + this.currentUnit.label).style.fontWeight = "normal";
-            document.getElementById('toggle-unit-button-' + unit.label).style.fontWeight = "bold";
+            document.getElementById('toggle-unit-button-' + this.currentUnit.label).classList.remove("bold-font");
+            document.getElementById('toggle-unit-button-' + this.currentUnit.label).classList.add("normal-font");
+            document.getElementById('toggle-unit-button-' + unit.label).classList.remove("normal-font");
+            document.getElementById('toggle-unit-button-' + unit.label).classList.add("bold-font");
             
             this.currentUnit = unit;
         }
