@@ -2,7 +2,8 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="pragma" content="no-cache"> 
+    <meta http-equiv="pragma" content="no-store"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/main.css">
     <link rel="shortcut icon" href="#">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,7 +136,7 @@
                     <!-- TRACKING MODE -->
                     <div id="tracking-mode-wizard">
                       <h3>What do you want to track ?</h3>
-                      <select id="tracking-mode-selection-wizard" name="camType">
+                      <select title="tracking-mode-wizard" name="tracking-mode-wizard" id="tracking-mode-selection-wizard">
                         <option value="human-tracking" selected>Floor (people tracking)</option>
                         <option value="hand-tracking">Table (hand tracking)</option>
                       </select>
@@ -144,10 +145,23 @@
                     <!-- HEIGHT DETECTED FOR OVERLAPS -->
                     <div id="overlap-height-wizard">
                       <p>Target overlap height detection</p>
+<<<<<<< Updated upstream
                       <select id="overlap-height-selection-wizard" name="camType">
+<<<<<<< HEAD
                         <option value="0.3">Feets</option>
                         <option value="0.7">Knees</option>
                         <option value="1.2" selected>Hips (recommended)</option>
+=======
+                        <option value="0.2">Feets</option>
+                        <option value="0.6">Knees</option>
+                        <option value="1" selected>Hips (recommended)</option>
+=======
+                      <select title="overlap-height-wizard" name="overlap-height-wizard" id="overlap-height-selection-wizard">
+                        <option value="0.3">Feets</option>
+                        <option value="0.7">Knees</option>
+                        <option value="1.2" selected>Hips (recommended)</option>
+>>>>>>> Stashed changes
+>>>>>>> hotfix-warnings
                         <option value="1.6">Shoulders</option>
                         <option value="2">Entire body</option>
                       </select>
@@ -201,7 +215,7 @@
               <!-- TRACKING MODE -->
               <div id="tracking-mode-inspector">
                 <h3>What do you want to track ?</h3>
-                <select id="tracking-mode-selection-inspector" name="camType">
+                <select title="tracking-mode-inspector" name="tracking-mode-inspector" id="tracking-mode-selection-inspector">
                   <option value="human-tracking" selected>Floor (people tracking)</option>
                   <option value="hand-tracking">Table (hand tracking)</option>
                 </select>
@@ -210,10 +224,23 @@
               <!-- HEIGHT DETECTED FOR OVERLAPS -->
               <div id="overlap-height-inspector" class="">
                 <p>Target overlap height detection</p>
+<<<<<<< Updated upstream
                 <select id="overlap-height-selection-inspector" name="camType">
+<<<<<<< HEAD
                   <option value="0.3">Feets</option>
                   <option value="0.7">Knees</option>
                   <option id="default-height-detected" value="1.2" selected>Hips (recommended)</option>
+=======
+                  <option value="0.2">Feets</option>
+                  <option value="0.6">Knees</option>
+                  <option value="1" selected>Hips (recommended)</option>
+=======
+                <select title="overlap-height-inspector" name="overlap-height-inspector" id="overlap-height-selection-inspector">
+                  <option value="0.3">Feets</option>
+                  <option value="0.7">Knees</option>
+                  <option id="default-height-detected" value="1.2" selected>Hips (recommended)</option>
+>>>>>>> Stashed changes
+>>>>>>> hotfix-warnings
                   <option value="1.6">Shoulders</option>
                   <option id="dummy-height-reference" value="2">Entire body</option>
                 </select>
@@ -299,17 +326,17 @@
   <!-- Import maps polyfill -->
   <!-- Remove this when import maps will be widely supported -->
   <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>
-  <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+  <script async src="https://unpkg.com/es-module-shims@latest/dist/es-module-shims.js"></script>
   
-  <script type="importmap">
+  <script async type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.139.2/build/three.module.js",
-        "three-libs/": "https://unpkg.com/three@0.139.2/examples/jsm/libs/",
-        "three-controls/": "https://unpkg.com/three@0.139.2/examples/jsm/controls/",
-        "three-loaders/": "https://unpkg.com/three@0.139.2/examples/jsm/loaders/",
-        "three-text-geometry": "https://unpkg.com/three@0.139.2/examples/jsm/geometries/TextGeometry.js",
-        "polybool": "https://unpkg.com/polybooljs@1.2.0/dist/polybool.min.js"
+        "three": "https://unpkg.com/three@latest/build/three.module.js",
+        "three-libs/": "https://unpkg.com/three@latest/examples/jsm/libs/",
+        "three-controls/": "https://unpkg.com/three@latest/examples/jsm/controls/",
+        "three-loaders/": "https://unpkg.com/three@latest/examples/jsm/loaders/",
+        "three-text-geometry": "https://unpkg.com/three@latest/examples/jsm/geometries/TextGeometry.js",
+        "polybool": "https://unpkg.com/polybooljs@latest/dist/polybool.min.js"
       }
     }
   </script> 

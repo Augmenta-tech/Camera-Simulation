@@ -1,7 +1,6 @@
 const camerasTypes = 
 [
     {
-        id:0, 
         name:"Orbbec Astra +", 
         HFov:56.5, 
         VFov:45, 
@@ -16,7 +15,6 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:1, 
         name:"Orbbec Astra Pro", 
         HFov:60, 
         VFov:49.5, 
@@ -31,7 +29,6 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:3, 
         name:"Azure Kinect (NFOV)", 
         // inscribed square. 75°x65° are official FOV for the hexagon
         HFov: Math.round(2 * (Math.atan((1/3) * ( - Math.tan(75/2 * Math.PI/180) + Math.sqrt(3*Math.tan(65/2 * Math.PI/180)*Math.tan(65/2 * Math.PI/180) + 4*Math.tan(75/2 * Math.PI/180)*Math.tan(75/2 * Math.PI/180))))) * 180/Math.PI * 10) / 10, 
@@ -47,7 +44,6 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:4, 
         name:"Azure Kinect (WFOV)", 
         // inscribed square. 120° are the FOV for the circle. 
         // tan(squareFOV / 2) = sqrt(2)/2 * tan(circleFOV/2)
@@ -65,7 +61,6 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:5, 
         name:"Orbbec Femto", 
         HFov:64.6, 
         VFov:50.8, 
@@ -80,7 +75,20 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:2, 
+        name:"Orbbec Femto W", 
+        HFov:90, 
+        VFov:74, 
+        rangeNear: 0.25,
+        rangeFar: 2.5,
+        handFar: 2.5,
+        suitable: [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        checkedDefault : false,
+        recommended: true
+    },
+    {
         name:"Helios2", 
         HFov:69, 
         VFov:51, 
@@ -95,37 +103,6 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:4, 
-        name:"Orbbec Femto W", 
-        HFov:90, 
-        VFov:74, 
-        rangeNear: 0.25,
-        rangeFar: 2.5,
-        handFar: 2.5,
-        suitable: [
-            "human-tracking",
-            "hand-tracking" 
-        ],
-        checkedDefault : false,
-        recommended: true
-    },
-    {
-        id:6, 
-        name:"Orbbec Femto W", 
-        HFov:90, 
-        VFov:74, 
-        rangeNear: 0.25,
-        rangeFar: 2.5,
-        handFar: 2.5,
-        suitable: [
-            "human-tracking",
-            "hand-tracking" 
-        ],
-        checkedDefault : false,
-        recommended: true
-    },
-    {
-        id:7, 
         name:"Kinect 1", 
         HFov:57, 
         VFov:43, 
@@ -140,7 +117,6 @@ const camerasTypes =
         recommended: true
     },
     {
-        id:8, 
         name:"Kinect 2", 
         HFov:70, 
         VFov:60, 
@@ -156,8 +132,8 @@ const camerasTypes =
     }
 ];
 
-// let i = 0;
-// camerasTypes.forEach(type => type.id = i++);
+let i = 0;
+camerasTypes.forEach(type => type.id = i++);
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
 const units = {

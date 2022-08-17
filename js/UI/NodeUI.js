@@ -37,7 +37,7 @@ class NodeUI{
                 </div>
                 <div id="node-infos-` + (node.id) + `-UI" class="column sections-container space-y">
                     <div id="select-camera" class="row center-y">
-                        <select id="cam-type-` + (node.id) + `" name="camType">
+                        <select title="camType-` + (node.id) + `" name="camType-` + (node.id) + `" id="cam-type-` + (node.id) + `">
                         ` + cameraTypesOptions + `
                         </select>
                     </div>
