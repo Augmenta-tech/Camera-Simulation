@@ -197,6 +197,18 @@ class ViewportManager{
         }
 
         /**
+         * Change the position of the active camera
+         * 
+         * @param {Vector3} newPos 
+         */
+        this.placeCamera = function(newPos = ViewportManager.DEFAULT_CAM_POSITION)
+        {
+            const pos = this.activeCamera.isPerspectiveCamera ? newPos.clone().add(new Vector3(this.sceneManager.sceneWidth, 0, this.sceneManager.sceneHeight)) : newPos;
+            this.activeCamera.position.set(pos.x, pos.y, pos.z);
+            this.activeCamera.lookAt(0,0,0);
+        }
+
+        /**
          * Change the postion of the camera and allow to switch from perspective to orthogaphic.
          * 
          * @param {Vector3} newPos 
@@ -212,7 +224,8 @@ class ViewportManager{
             }
             this.sceneManager.objects.transformControl.detach();
 
-            this.activeCamera.position.set(newPos.x, newPos.y, newPos.z);
+            //this.activeCamera.position.set(newPos.x, newPos.y, newPos.z);
+            this.placeCamera(newPos);
 
             orbitControls.dispose();
             orbitControls = buildOrbitControls(this);

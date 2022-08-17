@@ -25,7 +25,7 @@ function bindEventListeners()
     document.getElementById('add-dummy-button').addEventListener('click', () => viewportManager.sceneManager.objects.addDummy());
     document.getElementById('delete-all-dummies-button').addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
 
-    uiManager.bindEventListeners(viewportManager.sceneManager);
+    uiManager.bindEventListeners(viewportManager);
     viewportManager.bindEventListeners();
 }
 

@@ -41,7 +41,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: false
+        recommended: true
     },
     {
         name:"Azure Kinect (WFOV)", 
@@ -58,7 +58,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: false
+        recommended: true
     },
     {
         name:"Orbbec Femto", 
@@ -72,7 +72,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: false
+        recommended: true
     },
     {
         name:"Orbbec Femto W", 
@@ -135,13 +135,6 @@ const camerasTypes =
 let i = 0;
 camerasTypes.forEach(type => type.id = i++);
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
-/*
-const units = {
-    meters: 1,
-    feets: 3.28084
-};
-*/
-
 
 const units = {
     meters: {

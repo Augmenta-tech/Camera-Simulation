@@ -263,7 +263,7 @@ class NodeUI{
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;
             node.cameraPerspective.near = node.cameraType.rangeNear;
-            switch(node.trackingMode)
+            switch(sceneManager.trackingMode)
             {
                 case 'hand-tracking':
                     node.cameraPerspective.far = node.cameraType.handFar;
@@ -295,6 +295,11 @@ class NodeUI{
             document.getElementById('x-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(x * currentUnitValue * 100)/100.0;
             document.getElementById('y-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(z * currentUnitValue * 100)/100.0;
             document.getElementById('z-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(y * currentUnitValue * 100)/100.0;
+        }
+
+        this.dispose = function()
+        {
+            document.getElementById('node-' + node.id + '-UI').remove();
         }
     }
 }
