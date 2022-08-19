@@ -156,6 +156,14 @@ canvas {
   text-decoration: underline;
 }
 
+.bold-font {
+  font-weight: bold;
+}
+
+.normal-font{
+  font-weight: normal;
+}
+
 .cam-spec {
   width: 75%;
 }
@@ -412,4 +420,22 @@ canvas {
 /** WIZARD MODAL **/
 #wizard-content {
   width: 35%;
+}
+
+
+
+/*** ICONS ***/
+
+.main-icon{
+  color: white;
+  padding: 4px;
+}
+
+.secondary-icon{
+  color: #708EB0;
+  padding:4px;
+}
+
+#scene-fully-covered-icon{
+  color: #2b2
 }
