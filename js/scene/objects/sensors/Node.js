@@ -6,8 +6,8 @@ import {
     Mesh,
     Color,
     Vector3
-} from 'three';
-import { TextGeometry } from 'three-text-geometry';
+} from '/js/lib/three-js/build/three.module.js';
+import { TextGeometry } from '/js/lib/three-js/examples/jsm/geometries/TextGeometry.js';
 
 import { camerasTypes, units } from '/js/data.js'
 

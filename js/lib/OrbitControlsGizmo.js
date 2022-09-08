@@ -22,7 +22,7 @@ import {
   Vector2,
   Vector3,
   Matrix4
-} from "three";
+} from "/js/lib/three-js/build/three.module.js";
 
 class OrbitControlsGizmo {
 	constructor(orbitControls, options, _viewportManager) {

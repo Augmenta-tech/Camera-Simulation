@@ -5,12 +5,12 @@ import {
     Vector2,
     Vector3,
     Raycaster
-} from 'three';
+} from '/js/lib/three-js/build/three.module.js';
 
 import {
     PCFSoftShadowMap,
     sRGBEncoding
-} from 'three';
+} from '/js/lib/three-js/build/three.module.js';
 
 import { OrbitControls } from '/js/lib/OrbitControls.js';
 import { OrbitControlsGizmo } from '/js/lib/OrbitControlsGizmo.js';
