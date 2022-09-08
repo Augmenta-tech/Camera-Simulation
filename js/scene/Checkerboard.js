@@ -8,9 +8,9 @@ import {
     MeshPhongMaterial,
     LineBasicMaterial,
     Mesh
-} from '/js/lib/three-js/build/three.module.js';
-import { DoubleSide } from '/js/lib/three-js/build/three.module.js';
-import { TextGeometry } from '/js/lib/three-js/examples/jsm/geometries/TextGeometry.js';
+} from 'three';
+import { DoubleSide } from 'three';
+import { TextGeometry } from 'three-text-geometry';
 
 import { units } from '/js/data.js'
 import { SceneManager } from '/js/scene/SceneManager.js'

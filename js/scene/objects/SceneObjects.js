@@ -1,6 +1,6 @@
-import { FontLoader } from '/js/lib/three-js/examples/jsm/loaders/FontLoader.js';
+import { FontLoader } from 'three-loaders/FontLoader.js';
 
-import * as POLYBOOL from '/js/lib/polybooljs/dist/polybool.min.js';
+import * as POLYBOOL from 'polybool';
 
 import { NodeUI } from '/js/UI/NodeUI.js';
 import { SceneManager } from '/js/scene/SceneManager.js';

@@ -15,9 +15,9 @@ import {
     Plane,
     Frustum,
     Color
-} from '/js/lib/three-js/build/three.module.js';
-import { DoubleSide } from '/js/lib/three-js/build/three.module.js';
-import { FontLoader } from '/js/lib/three-js/examples/jsm/loaders/FontLoader.js';
+} from 'three';
+import { DoubleSide } from 'three';
+import { FontLoader } from 'three-loaders/FontLoader.js';
 
 import { camerasTypes, units } from '/js/data.js';
 import { Checkerboard } from '/js/scene/Checkerboard.js';

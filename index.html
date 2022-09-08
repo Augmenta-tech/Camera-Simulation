@@ -305,15 +305,13 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "/js/lib/three-js/build/three.module.js"
+        "three": "./js/lib/three-js/build/three.module.js",
+        "three-loaders/": "./js/lib/three-js/examples/jsm/loaders/",
+        "three-text-geometry": "./js/lib/three-js/examples/jsm/geometries/TextGeometry.js",
+        "polybool": "./js/lib/polybooljs/dist/polybool.min.js"
       }
     }
-  </script>
-  <script type="module" src="js/lib/three-js/build/three.module.js"></script>
-  <script type="module" src="js/lib/three-js/examples/jsm/loaders/MTLLoader.js"></script>
-  <script type="module" src="js/lib/three-js/examples/jsm/loaders/OBJLoader.js"></script>
-  <script type="module" src="js/lib/three-js/examples/jsm/loaders/FontLoader.js"></script>
-  <script type="module" src="js/lib/three-js/examples/jsm/geometries/TextGeometry.js"></script>
-  <script type="module" src="js/lib/polybooljs/dist/polybool.min.js"></script>
+  </script> 
+
   <script type="module" src="js/main.js"></script>
 </html>

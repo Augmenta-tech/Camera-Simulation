@@ -1,4 +1,4 @@
-import { Vector3 } from '/js/lib/three-js/build/three.module.js'
+import { Vector3 } from 'three'
 
 import { camerasTypes, units } from '/js/data.js'
 import { Node } from '/js/scene/objects/sensors/Node.js'

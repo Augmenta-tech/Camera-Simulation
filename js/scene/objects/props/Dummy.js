@@ -3,10 +3,10 @@ import {
     BoxGeometry,
     Mesh,
     Object3D
-} from '/js/lib/three-js/build/three.module.js';
+} from 'three';
 
-import { MTLLoader } from '/js/lib/three-js/examples/jsm/loaders/MTLLoader.js';
-import { OBJLoader } from '/js/lib/three-js/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three-loaders/MTLLoader.js';
+import { OBJLoader } from 'three-loaders/OBJLoader.js';
 
 
 class Dummy {
