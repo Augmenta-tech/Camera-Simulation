@@ -19,7 +19,7 @@ class Node{
     static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
     static SIZE_TEXT_NODE = 0.4;
 
-    constructor(id, mode = document.getElementById("tracking-mode-inspector").value, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = Node.DEFAULT_NODE_HEIGHT, p_z = 0, r_x = 0, r_y = 0, r_z = 0)
+    constructor(id, mode = document.getElementById("tracking-mode-inspector").value, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = 0, p_z = Node.DEFAULT_NODE_HEIGHT, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
         this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
@@ -47,8 +47,8 @@ class Node{
         this.areaAppear = true;
         this.areaValue = 0;
 
-        this.nameText = buildTextMesh("Node " + (this.id+1), Node.SIZE_TEXT_NODE, this.xPos - Node.SIZE_TEXT_NODE * 2, this.yPos - (this.cameraType.rangeFar - 1), this.zPos + Node.SIZE_TEXT_NODE/2.0)
-        this.areaValueText = buildTextMesh("AREA VALUE", Node.SIZE_TEXT_NODE * 2/3.0, this.xPos - Node.SIZE_TEXT_NODE * 4/3.0, this.yPos - (this.cameraType.rangeFar - 1), this.zPos + 3*Node.SIZE_TEXT_NODE/2.0);
+        this.nameText = buildTextMesh("Node " + (this.id+1), Node.SIZE_TEXT_NODE, this.xPos - Node.SIZE_TEXT_NODE * 2, this.yPos + Node.SIZE_TEXT_NODE/2.0, this.zPos - (this.cameraType.rangeFar - 1))
+        this.areaValueText = buildTextMesh("AREA VALUE", Node.SIZE_TEXT_NODE * 2/3.0, this.xPos - Node.SIZE_TEXT_NODE * 4/3.0, this.yPos + 3*Node.SIZE_TEXT_NODE/2.0, this.zPos - (this.cameraType.rangeFar - 1));
 
     /* BUILDERS */
         function buildCamera(camType, mode, pos_x, pos_y, pos_z, rot_x, rot_y, rot_z)
@@ -66,7 +66,7 @@ class Node{
             }
             const camPersp = new PerspectiveCamera( camType.VFov, camType.aspectRatio, camType.rangeNear, augmentaFar );
 
-            camPersp.position.set(pos_x, pos_y, pos_z);
+            camPersp.position.set(pos_x, pos_z, pos_y);
             camPersp.rotation.set(rot_x + Node.DEFAULT_NODE_ROTATION_X, - rot_y, rot_z);
 
             return camPersp;
@@ -77,7 +77,7 @@ class Node{
             const material = new MeshPhongMaterial( { color: color, dithering: true } );
             const geometry = new BoxGeometry( 0.2,0.2,0.2 );
             const mesh = new Mesh( geometry, material );
-            mesh.position.set(x, y, z);
+            mesh.position.set(x, z, y);
             mesh.name = 'Camera';
 
             return mesh;
@@ -87,7 +87,7 @@ class Node{
         {
             const textGeometry = new TextGeometry(text, { font: SceneObjects.font, size: size, height: 0.01 } );
             const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ))
-            textMesh.position.set(initialXPos, initialYPos, initialZPos);
+            textMesh.position.set(initialXPos, initialZPos, initialYPos);
             textMesh.rotation.x = -Math.PI / 2.0;
 
             return textMesh;
@@ -135,9 +135,9 @@ class Node{
         this.updatePosition = function(currentUnitValue)
         {
             this.xPos = this.mesh.position.x;
-            this.yPos = this.mesh.position.y;
-            this.zPos = this.mesh.position.z;
-            this.cameraPerspective.position.set(this.xPos, this.yPos, this.zPos);
+            this.yPos = this.mesh.position.z;
+            this.zPos = this.mesh.position.y;
+            this.cameraPerspective.position.set(this.xPos, this.zPos, this.yPos);
 
             this.uiElement.updatePosition(this.xPos, this.yPos, this.zPos, currentUnitValue)
         }

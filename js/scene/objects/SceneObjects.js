@@ -51,7 +51,7 @@ class SceneObjects{
             
             if(index === -1)
             {
-                sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
+                sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
                 sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
             }
             else
@@ -200,7 +200,7 @@ class SceneObjects{
          * @param {float} a yaw rotation at creation. Default is 0.
          * @param {float} r roll rotation at creation. Default is 0.
          */
-        this.addNode = function(autoConstruct = false, mode = sceneManager.trackingMode, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+        this.addNode = function(autoConstruct = false, mode = sceneManager.trackingMode, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = 0, z = Node.DEFAULT_NODE_HEIGHT, p = 0, a = 0, r = 0)
         {
             if(!SceneObjects.font)
             {

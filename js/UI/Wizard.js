@@ -267,9 +267,9 @@ class Wizard{
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), offsetY + j*(chosenConfig.h - oY), camsHeight + sceneElevation, 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), offsetY + j*(chosenConfig.h - oY), camsHeight + sceneElevation);
 
                     }
                 }
