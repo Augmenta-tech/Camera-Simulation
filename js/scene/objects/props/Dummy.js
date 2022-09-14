@@ -22,13 +22,13 @@ class Dummy {
         this.yPos = 0;
         this.zPos = 0;
 
-        this.mesh = buildMesh(this.xPos, this.zPos)
+        this.mesh = buildMesh(this.xPos, this.yPos)
         
         //this.model = new Object3D();
 
         this.model = buildModel();
 
-        function buildMesh(initialPosX, initialPosZ)
+        function buildMesh(initialPosX, initialPosY)
         {
             const geometry = new BoxGeometry( 0.7, Dummy.DEFAULT_DUMMIES_HEIGHT* 4/5.0, 0.8 );
             const material = new MeshPhongMaterial( { color: 0x000000 } );
@@ -36,7 +36,7 @@ class Dummy {
             material.opacity = 0;
             material.alphaTest = 0.5;
             const dummyMesh = new Mesh( geometry, material );
-            dummyMesh.position.set(initialPosX, Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0, initialPosZ);
+            dummyMesh.position.set(initialPosX, Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0, initialPosY);
             dummyMesh.name = 'Dummy';
 
             return dummyMesh;
@@ -47,7 +47,7 @@ class Dummy {
             const model = new Object3D().copy((Math.random() < 0.5) ? Dummy.maleModel : Dummy.femaleModel);
             const scaling = Dummy.DEFAULT_DUMMIES_HEIGHT / 180.0; 
             model.scale.set(scaling, scaling, scaling);
-            //model.position.set(dummy.xPos, dummy.yPos, dummy.zPos);
+            //model.position.set(dummy.xPos, dummy.zPos, dummy.yPos);
 
             return model;
         }
@@ -69,9 +69,9 @@ class Dummy {
         this.updatePosition = function()
         {
             this.xPos = this.mesh.position.x;
-            this.yPos = this.mesh.position.y - Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0;
-            this.zPos = this.mesh.position.z;
-            this.model.position.set(this.xPos, this.yPos, this.zPos);
+            this.yPos = this.mesh.position.z;
+            this.zPos = this.mesh.position.y - Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0;
+            this.model.position.set(this.xPos, this.zPos, this.yPos);
         }
 
         this.dispose = function()

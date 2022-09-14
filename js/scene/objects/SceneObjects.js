@@ -193,9 +193,9 @@ class SceneObjects{
          * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
          * @param {string} mode 'human-tracking', 'hand-tracking', ...
          * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
-         * @param {float} x x position at creation. Default is 0.
-         * @param {float} y y position at creation. Default is defined in Node.js.
-         * @param {float} z z position at creation. Default is 0.
+         * @param {float} x x (horizontal) position at creation. Default is 0.
+         * @param {float} y y (-depth) position at creation. Default is defined in Node.js.
+         * @param {float} z z (up) position at creation. Default is 0.
          * @param {float} p pitch rotation at creation. Default is 0.
          * @param {float} a yaw rotation at creation. Default is 0.
          * @param {float} r roll rotation at creation. Default is 0.

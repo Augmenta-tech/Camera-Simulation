@@ -42,7 +42,7 @@ class Node{
         this.areaCoveredFloor = new Mesh();
         this.areaCoveredAbove = new Mesh();
         this.areaCoveredWallX = new Mesh();
-        this.areaCoveredWallZ = new Mesh();
+        this.areaCoveredWallY = new Mesh();
 
         this.areaAppear = true;
         this.areaValue = 0;
@@ -113,7 +113,7 @@ class Node{
             scene.remove(this.areaCoveredFloor);
             scene.remove(this.areaCoveredAbove);
             scene.remove(this.areaCoveredWallX);
-            scene.remove(this.areaCoveredWallZ);
+            scene.remove(this.areaCoveredWallY);
             scene.remove(this.nameText);
             scene.remove(this.areaValueText);
         }
@@ -217,8 +217,8 @@ class Node{
             this.areaCoveredAbove.material.dispose();
             this.areaCoveredWallX.geometry.dispose();
             this.areaCoveredWallX.material.dispose();
-            this.areaCoveredWallZ.geometry.dispose();
-            this.areaCoveredWallZ.material.dispose();
+            this.areaCoveredWallY.geometry.dispose();
+            this.areaCoveredWallY.material.dispose();
 
             this.nameText.geometry.dispose();
             this.nameText.material.dispose();
