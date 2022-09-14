@@ -249,7 +249,7 @@ class SceneManager{
                     break;
                 case 'human-tracking':
                 default:
-                    this.heightDetected = 1;
+                    this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
                     break;
