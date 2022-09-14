@@ -136,6 +136,42 @@ let i = 0;
 camerasTypes.forEach(type => type.id = i++);
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
+const lidarsTypes = [
+    {
+        name:"10LX - H01", 
+        angularResolution: 0.125, 
+        fov: 270,
+        steps: 2161, 
+        rangeNear: 0.06,
+        rangeFar: 10,
+        checkedDefault : true,
+        recommended: true
+    },
+    {
+        name:"10LX - H02", 
+        angularResolution: 0.125, 
+        fov: 270,
+        steps: 2161, 
+        rangeNear: 0.06,
+        rangeFar: 10,
+        checkedDefault : false,
+        recommended: true
+    },
+    {
+        name:"20LX", 
+        angularResolution: 0.25, 
+        fov: 270,
+        steps: 1081, 
+        rangeNear: 0.06,
+        rangeFar: 20,
+        checkedDefault : false,
+        recommended: true
+    }
+];
+
+let j = 0;
+lidarsTypes.forEach(type => type.id = j++);
+
 const units = {
     meters: {
         value: 1,
@@ -152,3 +188,4 @@ const units = {
 
 export { units }
 export { camerasTypes }
+export { lidarsTypes }

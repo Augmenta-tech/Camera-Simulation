@@ -98,7 +98,7 @@ class ViewportManager{
             const raycaster = new Raycaster()
             raycaster.setFromCamera( pointer, scope.activeCamera );
             
-            const meshes = scope.sceneManager.objects.nodeMeshes.concat(scope.sceneManager.objects.dummiesMeshes);
+            const meshes = scope.sceneManager.objects.nodeMeshes.concat(scope.sceneManager.objects.dummiesMeshes).concat(scope.sceneManager.objects.lidarsMeshes);
 
             const intersect = raycaster.intersectObjects( meshes, false );
 
@@ -112,13 +112,13 @@ class ViewportManager{
                         let dir = new Vector3();
                         scope.activeCamera.getWorldDirection(dir);
                         scope.sceneManager.objects.transformControl.showX = 1 - Math.abs(dir.dot(new Vector3(1, 0, 0))) < 0.001 ? false : true;
-                        scope.sceneManager.objects.transformControl.showZ = 1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001 ? false : true;
+                        scope.sceneManager.objects.transformControl.showZ = (1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001) || object.name === 'Lidar' ? false : true;
                         scope.sceneManager.objects.transformControl.showY = (1 - Math.abs(dir.dot(new Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true;
                     }
                     else
                     {
                         scope.sceneManager.objects.transformControl.showX = true;
-                        scope.sceneManager.objects.transformControl.showZ = true;
+                        scope.sceneManager.objects.transformControl.showZ = object.name === 'Lidar' ? false : true;
                         scope.sceneManager.objects.transformControl.showY = object.name === 'Dummy' ? false : true;
                     }
                 }

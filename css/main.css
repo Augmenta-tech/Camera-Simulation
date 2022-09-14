@@ -120,19 +120,19 @@ canvas {
   margin-top: 20px;
 }
 
-/** NODE UI **/
-.nodeUI {
+/** SENSORS UI **/
+.sensorUI {
   background-color: var(--color-white);
   border-bottom: 2px solid var(--color-dark-grey);
 }
 
-.node-color {
+.sensor-color {
   width: 10px;
   height: 10px;
   margin-right: 8px;
 }
 
-.nodeUI [data-icon] {
+.sensorUI [data-icon] {
   width: 13px;
   height: 13px;
   margin: 0 8px;
@@ -140,11 +140,11 @@ canvas {
   cursor: pointer;
 }
 
-.nodeUI > .sections-container {
+.sensorUI > .sections-container {
   gap: 10px;
 }
 
-.node-transformations > * {
+.sensor-transformations > * {
   flex-basis: 25%;
 }
 

@@ -3,9 +3,11 @@ import { FontLoader } from 'three-loaders/FontLoader.js';
 import * as POLYBOOL from 'polybool';
 
 import { NodeUI } from '/js/UI/NodeUI.js';
+import { LidarUI } from '/js/UI/LidarUI.js';
 import { SceneManager } from '/js/scene/SceneManager.js';
 import { Dummy } from '/js/scene/objects/props/Dummy.js';
 import { Node } from '/js/scene/objects/sensors/Node.js';
+import { Lidar } from '/js/scene/objects/sensors/Lidar.js';
 
 
 class SceneObjects{
@@ -22,8 +24,10 @@ class SceneObjects{
     constructor(_transformControl, sceneManager)
     {
         const nodes = [];
+        const lidars = [];
         const dummies = [];
         this.nodeMeshes = [];
+        this.lidarsMeshes = [];
         this.dummiesMeshes = [];
 
         this.transformControl = _transformControl;
@@ -252,6 +256,58 @@ class SceneObjects{
             this.nodeMeshes.length = 0;
         }
 
+        this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, y = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
+        {
+            if(!SceneObjects.font)
+            {
+                //TODO: Add UI to inform that button will work in few seconds
+                return;
+            }
+            const newLidar = new Lidar(lidars.length, typeID, x, y, r);
+            newLidar.uiElement = new LidarUI(newLidar, sceneManager);
+            
+            //Offset
+            if(!autoConstruct)
+            {
+                for(let i = 0; i < lidars.length; i++)
+                {
+                    if(newLidar.mesh.position.distanceTo(lidars[i].mesh.position) < 1)
+                    {
+                        newLidar.mesh.position.x += 1;
+                        i = 0;
+                    }
+                }
+            }
+            newLidar.updatePosition(sceneManager.currentUnit.value);
+
+            newLidar.addToScene(sceneManager.scene);
+
+            lidars.push(newLidar);
+            this.lidarsMeshes.push(newLidar.mesh);
+        }
+
+        this.displayRays = function()
+        {
+            const visibles = lidars.filter(l => l.raysAppear);
+            lidars.forEach(l => l.changeVisibility(visibles.length != lidars.length));
+            const iconElem = document.getElementById('display-lidars-rays-button-icon');
+            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+        }
+
+        this.updateRaysIcon = function()
+        {
+            const visibles = lidars.filter(l => l.raysAppear);
+            const iconElem = document.getElementById('display-lidars-rays-button-icon');
+            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+        }
+
+        this.removeLidars = function()
+        {
+            lidars.forEach(l => this.deleteObject(l));
+            lidars.length = 0;
+            this.lidarsMeshes.length = 0;
+        }
+
 
     /* USER'S ACTIONS */
 
@@ -267,6 +323,7 @@ class SceneObjects{
         this.updateObjectsPosition = function()
         {
             nodes.forEach(n => n.updatePosition(sceneManager.currentUnit.value));
+            lidars.forEach(l => l.updatePosition(sceneManager.currentUnit.value));
             dummies.forEach(d => d.updatePosition());
         }
 
