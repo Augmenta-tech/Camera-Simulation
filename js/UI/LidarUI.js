@@ -1,7 +1,4 @@
-import { Vector3 } from 'three'
-
-import { lidarsTypes, units } from '/js/data.js'
-import { Lidar } from '/js/scene/objects/sensors/Lidar.js'
+import { lidarsTypes, units } from '../data.js'
 
 class LidarUI{
     constructor(lidar, sceneManager)

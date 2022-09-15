@@ -9,9 +9,9 @@ import {
 } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { camerasTypes, units } from '/js/data.js'
+import { camerasTypes, units } from '../../../data.js'
 
-import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
+import { SceneObjects } from '../SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;

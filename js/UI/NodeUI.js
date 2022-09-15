@@ -1,7 +1,5 @@
-import { Vector3 } from 'three'
-
-import { camerasTypes, units } from '/js/data.js'
-import { Node } from '/js/scene/objects/sensors/Node.js'
+import { camerasTypes, units } from '../data.js'
+import { Node } from '../scene/objects/sensors/Node.js'
 
 class NodeUI{
     constructor(node, sceneManager)

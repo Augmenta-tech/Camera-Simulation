@@ -1,5 +1,5 @@
-import { ViewportManager } from '/js/ViewportManager.js';
-import { UIManager } from '/js/UI/UIManager.js';
+import { ViewportManager } from './ViewportManager.js';
+import { UIManager } from './UI/UIManager.js';
 
 const viewportElement = document.getElementById('viewport');
 

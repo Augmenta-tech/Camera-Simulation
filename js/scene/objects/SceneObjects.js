@@ -2,12 +2,12 @@ import { FontLoader } from 'three-loaders/FontLoader.js';
 
 import * as POLYBOOL from 'polybool';
 
-import { NodeUI } from '/js/UI/NodeUI.js';
-import { LidarUI } from '/js/UI/LidarUI.js';
-import { SceneManager } from '/js/scene/SceneManager.js';
-import { Dummy } from '/js/scene/objects/props/Dummy.js';
-import { Node } from '/js/scene/objects/sensors/Node.js';
-import { Lidar } from '/js/scene/objects/sensors/Lidar.js';
+import { NodeUI } from '../../UI/NodeUI.js';
+import { LidarUI } from '../../UI/LidarUI.js';
+import { SceneManager } from '../SceneManager.js';
+import { Dummy } from './props/Dummy.js';
+import { Node } from './sensors/Node.js';
+import { Lidar } from './sensors/Lidar.js';
 
 
 class SceneObjects{

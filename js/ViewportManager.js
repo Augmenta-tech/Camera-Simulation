@@ -12,11 +12,11 @@ import {
     sRGBEncoding
 } from 'three';
 
-import { OrbitControls } from '/js/lib/OrbitControls.js';
-import { OrbitControlsGizmo } from '/js/lib/OrbitControlsGizmo.js';
-import { TransformControls } from '/js/lib/TransformControls.js';
+import { OrbitControls } from './lib/OrbitControls.js';
+import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
+import { TransformControls } from './lib/TransformControls.js';
 
-import { SceneManager } from '/js/scene/SceneManager.js';
+import { SceneManager } from './scene/SceneManager.js';
 
 
 class ViewportManager{

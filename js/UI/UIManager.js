@@ -1,6 +1,6 @@
-import { SceneManager } from '/js/scene/SceneManager.js';
+import { SceneManager } from '../scene/SceneManager.js';
 
-import { Wizard } from '/js/UI/Wizard.js';
+import { Wizard } from './Wizard.js';
 
 class UIManager{
     constructor()

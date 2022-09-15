@@ -19,10 +19,10 @@ import {
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
 
-import { camerasTypes, units } from '/js/data.js';
-import { Checkerboard } from '/js/scene/Checkerboard.js';
-import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
-import { Node } from '/js/scene/objects/sensors/Node.js';
+import { camerasTypes, units } from '../data.js';
+import { Checkerboard } from './Checkerboard.js';
+import { SceneObjects } from './objects/SceneObjects.js';
+import { Node } from './objects/sensors/Node.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';

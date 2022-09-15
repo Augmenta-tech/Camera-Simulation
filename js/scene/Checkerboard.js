@@ -8,14 +8,13 @@ import {
     MeshPhongMaterial,
     LineBasicMaterial,
     Mesh,
-    Vector3,
-    Object3D
+    Vector3
 } from 'three';
 import { DoubleSide } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { units } from '/js/data.js'
-import { SceneManager } from '/js/scene/SceneManager.js'
+import { units } from '../data.js'
+import { SceneManager } from './SceneManager.js'
 
 class Checkerboard{
     static SIZE_TEXT_SCENE = 0.3;
