@@ -6,17 +6,16 @@ import {
     MeshBasicMaterial,
     Mesh,
     LineSegments,
-    Color
+    Color,
+    Group
 } from 'three';
-import { TextGeometry } from 'three-text-geometry';
 
 import { lidarsTypes, units } from '/js/data.js'
 
-import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 
 class Lidar{
     static DEFAULT_LIDAR_TYPE_ID = 0;
-    static DEFAULT_LIDAR_HOOK_HEIGHT = 4.5;
+    static DEFAULT_LIDAR_HOOK_HEIGHT = 8;
     static DEFAULT_LIDAR_SIZE = 0.1;
     
     constructor(id, lidarTypeID = Lidar.DEFAULT_LIDAR_TYPE_ID, p_x = 0, p_z = Lidar.DEFAULT_LIDAR_HOOK_HEIGHT, r_y = 0)
@@ -25,13 +24,16 @@ class Lidar{
         this.lidarType = lidarsTypes.find(t => t.id === lidarTypeID);
 
         this.xPos = p_x;
-        this.yPos = -10 + Lidar.DEFAULT_LIDAR_SIZE + 0.01*this.id;
+        this.yPos = Lidar.DEFAULT_LIDAR_SIZE + 0.01*this.id;
         this.zPos = p_z;
         this.xRot = 0;
         this.yRot = r_y;
         this.zRot = 0;
     
         this.color = new Color(0.5*Math.random(), 0.5*Math.random(), 0.5*Math.random());
+
+        this.mesh = buildMesh(this.color, this.xPos, this.yPos - 0.01*this.id, this.zPos);
+        this.rays = new Group();
 
         this.raysAppear = true;
 
@@ -51,9 +53,7 @@ class Lidar{
 
         this.buildRays = function()
         {
-            console.log(this.lidarType);
-            const rays =[];
-            const material = new MeshBasicMaterial( {color: this.color });//, transparent: true, opacity: 0.6, alphaTest: 0.5 } );
+            const material = new MeshBasicMaterial( {color: this.color, transparent: true, opacity: 0.4, alphaTest: 0.3 } );
 
             const firstRayAngle = - Math.PI / 2 - (this.lidarType.fov / 2 * Math.PI / 180);
             for(let angle = firstRayAngle; angle <= firstRayAngle + this.lidarType.fov * Math.PI / 180; angle += this.lidarType.angularResolution * Math.PI / 180)
@@ -75,28 +75,24 @@ class Lidar{
                 
                 const ray = new LineSegments( geometry, material );
 
-                ray.position.set(this.xPos, this.zPos, this.yPos);
-
-                rays.push(ray);
+                this.rays.add(ray);
             }
 
-            return rays;
+            this.rays.position.set(this.xPos, this.zPos, this.yPos);
+            this.rays.rotation.z = this.yRot;
         }
-
-        this.mesh = buildMesh(this.color, this.xPos, this.yPos - 0.01*this.id, this.zPos);
-        this.rays = this.buildRays();
 
     /* SCENE MANAGEMENT */
         this.addToScene = function(scene)
         {
             scene.add(this.mesh);
-            this.rays.forEach(m => scene.add(m));
+            scene.add(this.rays);
         }
 
         this.removeFromScene = function(scene)
         {
             scene.remove(this.mesh);
-            this.rays.forEach(m => scene.remove(m));
+            scene.remove(this.rays);
         }
 
     /* USER'S ACTION */
@@ -105,7 +101,7 @@ class Lidar{
         {
             const value = display;
             this.raysAppear = value;
-            this.rays.forEach(m => m.visible = value);
+            this.rays.visible = value;
 
             this.uiElement.changeVisibility(value);
         }
@@ -114,7 +110,7 @@ class Lidar{
         {
             this.xPos = this.mesh.position.x;
             this.zPos = this.mesh.position.y;
-            this.rays.forEach(m => m.position.set(this.xPos, this.zPos, this.yPos));
+            this.rays.position.set(this.xPos, this.zPos, this.yPos);
 
             this.uiElement.updatePosition(this.xPos, this.zPos, currentUnitValue)
         }
@@ -129,14 +125,16 @@ class Lidar{
             this.mesh.geometry.dispose();
             this.mesh.material.dispose();
 
-            this.rays.forEach(m => {
+            this.rays.children.forEach(m => {
                 m.geometry.dispose();
                 m.material.dispose();
             });
-            this.rays.length = [];
+            this.rays.clear();
 
             this.uiElement.dispose();
         }
+
+        this.buildRays();
     }
 }
 

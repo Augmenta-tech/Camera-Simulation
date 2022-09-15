@@ -246,7 +246,7 @@ class Wizard{
             }
             else
             {
-                sceneManager.updateAugmentaSceneBorder(inputWidth, inputHeight);
+                sceneManager.updateFloorAugmentaSceneBorder(inputWidth, inputHeight);
 
                 configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                 configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);

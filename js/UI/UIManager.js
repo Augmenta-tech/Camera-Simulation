@@ -19,14 +19,16 @@ class UIManager{
                 if(event.target == copyUrlModal) copyUrlModal.classList.add('hidden');
             });
 
-            document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
-            document.getElementById("input-scene-height-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
+            document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateFloorAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
+            document.getElementById("input-scene-height-inspector").addEventListener('change', () => sceneManager.updateFloorAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
 
+            document.getElementById("input-wall-y-scene-width-inspector").addEventListener('change', () => sceneManager.updateWallYAugmentaSceneBorder(parseFloat(document.getElementById("input-wall-y-scene-width-inspector").value), parseFloat(document.getElementById("input-wall-y-scene-height-inspector").value)));
+            document.getElementById("input-wall-y-scene-height-inspector").addEventListener('change', () => sceneManager.updateWallYAugmentaSceneBorder(parseFloat(document.getElementById("input-wall-y-scene-width-inspector").value), parseFloat(document.getElementById("input-wall-y-scene-height-inspector").value)));
 
             document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {
                 const mode = document.getElementById("tracking-mode-selection-inspector").value;
-                sceneManager.changeTrackingMode(mode);
                 changeTrackingMode(mode);
+                sceneManager.changeTrackingMode(mode);
                 this.displayWarning(sceneManager);
             });
             document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-inspector").value));
@@ -62,11 +64,40 @@ class UIManager{
             {
                 case 'hand-tracking':
                     document.getElementById('overlap-height-inspector').classList.add('hidden');
+
+                    document.getElementById('floor-scene-size-inspector').classList.remove('hidden');
+                    document.getElementById('floor-scene-size-title').innerHTML = "Table scene size";
+                    document.getElementById('wall-y-scene-size-inspector').classList.add('hidden');
+
+                    document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
+
+                    document.getElementById('nodes-buttons').classList.remove('hidden');
+                    document.getElementById('lidars-buttons').classList.add('hidden');
+                    break;
+                case 'wall-tracking':
+                    document.getElementById('overlap-height-inspector').classList.add('hidden');
+
+                    document.getElementById('wall-y-scene-size-inspector').classList.remove('hidden');
+                    document.getElementById('floor-scene-size-inspector').classList.add('hidden');
+
+                    document.getElementById("delete-all-nodes-button").dispatchEvent(new Event('click'));
+
+                    document.getElementById('lidars-buttons').classList.remove('hidden');
+                    document.getElementById('nodes-buttons').classList.add('hidden');
                     break;
                 case 'human-tracking':
                 default:
                     document.getElementById('overlap-height-inspector').classList.remove('hidden');
                     document.getElementById('overlap-height-selection-inspector').value = document.getElementById('default-height-detected').value;
+
+                    document.getElementById('floor-scene-size-inspector').classList.remove('hidden');
+                    document.getElementById('floor-scene-size-title').innerHTML = "Floor scene size";
+                    document.getElementById('wall-y-scene-size-inspector').classList.add('hidden');
+
+                    document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
+
+                    document.getElementById('nodes-buttons').classList.remove('hidden');
+                    document.getElementById('lidars-buttons').classList.add('hidden');
                     break;
             }
         }

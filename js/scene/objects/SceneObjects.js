@@ -56,7 +56,7 @@ class SceneObjects{
             if(index === -1)
             {
                 sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
-                sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
+                sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
             }
             else
             {
@@ -90,7 +90,7 @@ class SceneObjects{
                             break;
                     }
                 });
-                sceneManager.updateAugmentaSceneBorder(sceneWidth, sceneHeight);
+                sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneHeight);
                 
                 cams.forEach(c => {
                     const props = c.split(',');

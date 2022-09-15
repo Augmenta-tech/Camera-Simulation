@@ -212,6 +212,7 @@
                 <select title="tracking-mode-inspector" name="tracking-mode-inspector" id="tracking-mode-selection-inspector">
                   <option value="human-tracking" selected>Floor (people tracking)</option>
                   <option value="hand-tracking">Table (hand tracking)</option>
+                  <option value="wall-tracking">Wall (hand tracking)</option>
                 </select>
               </div>
 
@@ -229,8 +230,10 @@
             </div>
 
             <!-- SCENE SECTION IN INSPECTOR -->
-            <div>
-              <h3>Scene size</h3>
+
+            <!-- FLOOR SCENE -->
+            <div id="floor-scene-size-inspector" >
+              <h3 id="floor-scene-size-title">Floor scene size</h3>
 
               <!-- WIDTH INPUT -->
               <div>
@@ -243,11 +246,27 @@
                 <p>Height (<span data-unittext="1">m</span>)</p>
                 <input id="input-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
               </div>
+              <!-- SCENE COVERED FEEDBACK -->
+              <div class="row">
+                <p>Scene fully covered: </p><span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
+              </div>
             </div>
 
-            <!-- SCENE COVERED FEEDBACK -->
-            <div class="row">
-              <p>Scene fully covered: </p><span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
+            <!-- WALL Y SCENE -->
+            <div id="wall-y-scene-size-inspector" class="hidden">
+              <h3>Front wall scene size</h3>
+
+              <!-- WIDTH INPUT -->
+              <div>
+                <p>Width (<span data-unittext="1">m</span>)</p>
+                <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1">
+              </div>
+
+              <!-- HEIGHT INPUT -->
+              <div>
+                <p>Height (<span data-unittext="1">m</span>)</p>
+                <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
+              </div>
             </div>
           </div>
 
@@ -273,7 +292,7 @@
             </div>
 
             <!-- LIDARS BUTTONS -->
-            <div id="lidars-buttons" class="row center-x">
+            <div id="lidars-buttons" class="row center-x hidden">
               <!-- ADD BUTTON -->
               <div id="add-lidar-button" class="button main-button" >
                 <p>+ New lidar</p>

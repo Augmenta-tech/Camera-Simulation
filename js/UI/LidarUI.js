@@ -141,7 +141,7 @@ class LidarUI{
                             case "pos" :
                                 lidar.xPos = value / sceneManager.currentUnit.value;
                                 lidar.mesh.position.set(lidar.xPos, lidar.zPos, lidar.yPos);
-                                lidar.rays.forEach(r => r.position.set(lidar.xPos, lidar.zPos, lidar.yPos));
+                                lidar.rays.position.set(lidar.xPos, lidar.zPos, lidar.yPos);
                                 break;
                             default:
                                 break;
@@ -153,7 +153,7 @@ class LidarUI{
                             case "pos" :
                                 lidar.zPos = value / sceneManager.currentUnit.value;
                                 lidar.mesh.position.set(lidar.xPos, lidar.zPos, lidar.yPos);
-                                lidar.rays.forEach(r => r.position.set(lidar.xPos, lidar.zPos, lidar.yPos));
+                                lidar.rays.position.set(lidar.xPos, lidar.zPos, lidar.yPos);
                                 break;
                             default:
                                 break;
@@ -164,7 +164,7 @@ class LidarUI{
                         {
                             case "rot":
                                 lidar.yRot = value * (Math.PI / 180.0);
-                                lidar.rays.forEach(r => r.rotation.z = lidar.yRot);
+                                lidar.rays.rotation.z = lidar.yRot;
                                 break;
                             default:
                                 break;
@@ -213,18 +213,17 @@ class LidarUI{
         {
             lidar.lidarType = lidarsTypes.find(type => type.name === document.getElementById('lidar-type-' + lidar.id).value);
 
-            // TODO : Change rays size
-            lidar.rays.forEach(r => {
+            sceneManager.scene.remove(lidar.rays);
+            lidar.rays.children.forEach(r => {
                 if(r.isLineSegments)
                 {
-                    sceneManager.scene.remove(r);
                     r.geometry.dispose();
                     r.material.dispose();
                 }
             });
-            lidar.rays.length = 0;
-            lidar.rays = lidar.buildRays();
-            lidar.rays.forEach(r => sceneManager.scene.add(r));
+            lidar.rays.clear();
+            lidar.buildRays();
+            sceneManager.scene.add(lidar.rays);
 
             document.getElementById('lidar-fov' + lidar.id).innerHTML = lidar.lidarType.fov + '°';
             document.getElementById('lidar-res' + lidar.id).innerHTML = lidar.lidarType.angularResolution + '°';
@@ -251,7 +250,5 @@ class LidarUI{
         }
     }
 }
-
-///////////////////////////////////////////////////////////////////////////APPLY COMMIT MODIFS TO THIS FILE
 
 export { LidarUI }
