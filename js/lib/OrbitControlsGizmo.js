@@ -235,7 +235,7 @@ class OrbitControlsGizmo {
       }
       
       loop();*/
-      viewportManager.setupCameraChangement(vec, !!camera.isPerspectiveCamera);
+      viewportManager.setupCameraChangement(!!camera.isPerspectiveCamera, vec);
       
       selectedAxis = null;
     }

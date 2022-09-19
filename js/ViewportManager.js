@@ -214,7 +214,7 @@ class ViewportManager{
          * @param {Vector3} newPos 
          * @param {boolean} changeCameraType 
          */
-        this.setupCameraChangement = function (newPos = ViewportManager.DEFAULT_CAM_POSITION, changeCameraType = true)
+        this.setupCameraChangement = function (changeCameraType = true, newPos = ViewportManager.DEFAULT_CAM_POSITION)
         {
             if(changeCameraType)
             {

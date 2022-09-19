@@ -516,7 +516,10 @@ class Wizard{
 
             document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
             sceneManager.changeTrackingMode(trackingMode);
-            viewportManager.placeCamera();
+
+            //viewportManager.placeCamera();
+            viewportManager.setupCameraChangement(!!viewportManager.activeCamera.isOrthographicCamera);
+
             document.getElementById('wizard-modal').classList.add('hidden');
 
             return true;
