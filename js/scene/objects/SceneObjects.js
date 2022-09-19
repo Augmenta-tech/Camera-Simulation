@@ -256,14 +256,14 @@ class SceneObjects{
             this.nodeMeshes.length = 0;
         }
 
-        this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, y = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
+        this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, z = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
         {
             if(!SceneObjects.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
                 return;
             }
-            const newLidar = new Lidar(lidars.length, typeID, x, y, r);
+            const newLidar = new Lidar(lidars.length, typeID, x, z, r);
             newLidar.uiElement = new LidarUI(newLidar, sceneManager);
             
             //Offset
@@ -306,6 +306,13 @@ class SceneObjects{
             lidars.forEach(l => this.deleteObject(l));
             lidars.length = 0;
             this.lidarsMeshes.length = 0;
+        }
+        
+
+        this.removeSensors = function()
+        {
+            this.removeNodes();
+            this.removeLidars();
         }
 
 

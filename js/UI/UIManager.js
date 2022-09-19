@@ -27,7 +27,7 @@ class UIManager{
 
             document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {
                 const mode = document.getElementById("tracking-mode-selection-inspector").value;
-                changeTrackingMode(mode);
+                this.changeTrackingMode(mode);
                 sceneManager.changeTrackingMode(mode);
                 this.displayWarning(sceneManager);
             });
@@ -58,7 +58,7 @@ class UIManager{
             window.setTimeout(() => document.getElementById("share-modal").classList.add('hidden'), 1500);
         }
 
-        function changeTrackingMode(trackingMode)
+        this.changeTrackingMode = function(trackingMode)
         {
             switch(trackingMode)
             {
@@ -66,7 +66,7 @@ class UIManager{
                     document.getElementById('overlap-height-inspector').classList.add('hidden');
 
                     document.getElementById('floor-scene-size-inspector').classList.remove('hidden');
-                    document.getElementById('floor-scene-size-title').innerHTML = "Table scene size";
+                    document.getElementById('floor-scene-size-title-inspector').innerHTML = "Table scene size";
                     document.getElementById('wall-y-scene-size-inspector').classList.add('hidden');
 
                     document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
@@ -91,7 +91,7 @@ class UIManager{
                     document.getElementById('overlap-height-selection-inspector').value = document.getElementById('default-height-detected').value;
 
                     document.getElementById('floor-scene-size-inspector').classList.remove('hidden');
-                    document.getElementById('floor-scene-size-title').innerHTML = "Floor scene size";
+                    document.getElementById('floor-scene-size-title-inspector').innerHTML = "Floor scene size";
                     document.getElementById('wall-y-scene-size-inspector').classList.add('hidden');
 
                     document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));

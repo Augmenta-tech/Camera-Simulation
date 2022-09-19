@@ -164,7 +164,7 @@ const lidarsTypes = [
         steps: 1081, 
         rangeNear: 0.06,
         rangeFar: 20,
-        checkedDefault : false,
+        checkedDefault : true,
         recommended: true
     }
 ];
