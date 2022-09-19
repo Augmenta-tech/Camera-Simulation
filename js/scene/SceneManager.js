@@ -237,6 +237,9 @@ class SceneManager{
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
                 const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
 
+                this.sceneWidth = givenWidth;
+                this.sceneHeight = givenHeight;
+
                 //update checkerboard
                 if(this.augmentaSceneLoaded) this.checkerboardFloor.setSize(givenWidth, givenHeight);
 
@@ -250,9 +253,6 @@ class SceneManager{
             {
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
                 const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
-
-                this.sceneWidth = givenWidth;
-                this.sceneHeight = givenHeight;
 
                 //update checkerboard
                 if(this.augmentaSceneLoaded) this.checkerboardWallY.setSize(givenWidth, givenHeight);
