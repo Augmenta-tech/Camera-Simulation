@@ -59,11 +59,15 @@ class Wizard{
                 {
                     case 'wall-tracking':
                     {
-                        /** Min dist between lidar  = rangeFar / 2.0 (arbitrary)
-                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/4) * (rangeFar/4))
-                         * lidarMaxHeight = sqrt(15) / 4 * rangeFar
+                        /** 
+                         * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
+                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
+                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
+                         * lidarMaxHeight = sqrt(1 - 1/(4*RATIO*RATIO)) * rangeFar
                          */
-                        if (document.getElementById('input-wall-y-scene-height-wizard').value / sceneManager.currentUnit.value > Math.sqrt(15) / 4 * maxFar &&
+
+                        const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
+                        if (document.getElementById('input-wall-y-scene-height-wizard').value / sceneManager.currentUnit.value > Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar &&
                             document.getElementById('input-wall-y-scene-width-wizard').value / sceneManager.currentUnit.value > 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
                         {
                             document.getElementById('input-wall-y-scene-width-wizard').style.color = "red";
@@ -345,19 +349,25 @@ class Wizard{
                     let configs = []; 
 
                     lidarsTypes.filter(l => l.recommended).filter(l => document.getElementById('check-lidar-' + l.id).checked).forEach(l => {
-                        /** Min dist between lidar  = rangeFar / 2.0 (arbitrary)
-                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/4) * (rangeFar/4))
-                         * lidarMaxHeight = sqrt(15) / 4 * rangeFar
+                        /** 
+                         * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
+                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
+                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
+                         * lidarMaxHeight = sqrt(1 - 1/(4*RATIO*RATIO)) * rangeFar
                          */
+
+                        const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
                         //if possible, put above
-                        if(givenHeight <= Math.sqrt(15) / 4 * l.rangeFar)
+                        if(givenHeight <= Math.sqrt(1 - 1 / (4 * sqRatio)) * l.rangeFar)
                         {
                             const widthCoveredByOneLidar = 2 * Math.sqrt(l.rangeFar * l.rangeFar - givenHeight*givenHeight);
                             const nbLidars = Math.ceil(givenWidth / widthCoveredByOneLidar);
                             const pos = [];
+                            const distBetweenLidars = Math.max(givenWidth / nbLidars, l.rangeFar / Lidar.DEFAULT_RATIO_FAR_MINDIST);
+                            const offsetX = (givenWidth - distBetweenLidars * (nbLidars - 1)) / 2.0;
                             for(let i = 0; i < nbLidars; i++)
                             {
-                                pos.push(new Vector2((i + 0.5) * givenWidth / nbLidars, givenHeight));
+                                pos.push(new Vector2(offsetX + i* distBetweenLidars, givenHeight));
                             }
                             configs.push({ typeID: l.id, positions: pos });
                         }
@@ -371,7 +381,22 @@ class Wizard{
                             }
                             else if(Math.abs(maxRayAngle % (Math.PI / 2.0)) > 0.001)
                             {
-                                configs.push({ typeID: l.id, positions: [new Vector2(0, givenHeight / Math.tan(maxRayAngle)), new Vector2(givenWidth, givenHeight / Math.tan(maxRayAngle))] });
+                                // Highest possible
+                                // const height = Math.sqrt(l.rangeFar * l.rangeFar - (givenWidth/2) * (givenWidth/2));
+                                
+                                // Bottommost possible
+                                // const height = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
+                                //                 givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
+                                //                 0;
+
+                                //Average between two 
+                                const heighest = Math.sqrt(l.rangeFar * l.rangeFar - (givenWidth/2) * (givenWidth/2));
+                                const bottommost = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
+                                                givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
+                                                0;
+                                const height = (heighest + bottommost) / 2.0;
+
+                                configs.push({ typeID: l.id, positions: [new Vector2(0, height), new Vector2(givenWidth, height)] });
                             }
                         }
                     });

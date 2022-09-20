@@ -18,6 +18,7 @@ class Lidar{
     static DEFAULT_LIDAR_HOOK_HEIGHT = 8;
     static DEFAULT_LIDAR_SIZE = 0.1;
     static DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION = Math.PI/180 * 60;
+    static DEFAULT_RATIO_FAR_MINDIST = 2;
     
     constructor(id, lidarTypeID = Lidar.DEFAULT_LIDAR_TYPE_ID, p_x = 0, p_z = Lidar.DEFAULT_LIDAR_HOOK_HEIGHT, r_y = 0)
     {
