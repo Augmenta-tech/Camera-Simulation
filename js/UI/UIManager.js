@@ -39,15 +39,20 @@ class UIManager{
 
         function resetValues()
         {
-            const inputs = document.getElementsByTagName('input');
-            for(let i = 0; i < inputs.length; i++)
-            {
-                inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value;
-                if(inputs[i].id != 'input-hook-height-wizard') inputs[i].value = 5*SceneManager.DEFAULT_UNIT.value;
-                else inputs[i].value = '';
-            }
+            //INSPECTOR INPUTS
+            document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
+            document.getElementById('overlap-height-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
+            document.getElementById("input-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
+            document.getElementById("input-scene-height-inspector").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-wall-y-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
+            document.getElementById("input-wall-y-scene-height-inspector").value = SceneManager.DEFAULT_HEIGHT;
 
-            document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
+            //WIZARD INPUTS
+            document.getElementById("input-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
+            document.getElementById("input-scene-height-wizard").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-wall-y-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
+            document.getElementById("input-wall-y-scene-height-wizard").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-hook-height-wizard").value = '';
         }
 
         function copyLink(link)

@@ -189,8 +189,8 @@ class Wizard{
 
         function initWizardValues(sceneManager)
         {
-            document.getElementById('input-scene-width-wizard').value = Math.round(document.getElementById('input-scene-width-wizard').value * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-scene-height-wizard').value = Math.round(document.getElementById('input-scene-height-wizard').value * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-scene-height-wizard').value = Math.round(sceneManager.sceneHeight * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-wall-y-scene-width-wizard').value = Math.round(document.getElementById('input-wall-y-scene-width-inspector').value * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-wall-y-scene-height-wizard').value = Math.round(document.getElementById('input-wall-y-scene-height-inspector').value * sceneManager.currentUnit.value * 100) / 100.0;
