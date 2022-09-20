@@ -460,10 +460,12 @@ class SceneManager{
 
                 node.coveredPointsAbove = coveredPointsAbove;
 
-                coveredPointsFloor.forEach((p) => p.y += 0.01*(node.id + 1) / this.objects.getNbNodes());
-                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*(node.id + 1) / this.objects.getNbNodes());
-                coveredPointsWallX.forEach((p) => p.x += 0.01*(node.id + 1) / this.objects.getNbNodes());
-                coveredPointsWallY.forEach((p) => p.z += 0.01*(node.id + 1) / this.objects.getNbNodes());
+                if(this.objects.getNbNodes() === 0) return;
+
+                coveredPointsFloor.forEach((p) => p.y += 0.01*(node.id / this.objects.getNbNodes() + 1));
+                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*(node.id / this.objects.getNbNodes() + 1));
+                coveredPointsWallX.forEach((p) => p.x += 0.01*(node.id / this.objects.getNbNodes() + 1));
+                coveredPointsWallY.forEach((p) => p.z += 0.01*(node.id / this.objects.getNbNodes() + 1));
 
 
                 //display area value 
