@@ -422,6 +422,10 @@ class SceneObjects{
 
         this.getNbNodes = () => nodes.length;
 
+        this.getNbLidars = () => lidars.length;
+
+        this.getNbSensors = () => this.getNbNodes() + this.getNbLidars();
+
         // DEBUG
         this.debug = function()
         {

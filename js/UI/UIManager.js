@@ -134,7 +134,7 @@ class UIManager{
         
         function changeNumberOfNodes(sceneManager)
         {
-            document.getElementById('number-nodes-value').innerHTML = sceneManager.objects.getNbNodes();
+            document.getElementById('number-nodes-value').innerHTML = sceneManager.objects.getNbSensors();
         }
 
         this.update = function(sceneManager)
