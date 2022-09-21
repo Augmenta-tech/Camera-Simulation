@@ -21,7 +21,7 @@ import { SceneManager } from './scene/SceneManager.js';
 
 class ViewportManager{
     static DEFAULT_CAM_POSITION = new Vector3(12,8,12);
-    constructor(viewportElement)
+    constructor(viewportElement, isBuilder)
     {
         const scope = this;
 
@@ -41,7 +41,7 @@ class ViewportManager{
 
         let orbitControls = buildOrbitControls();
         let controlsGizmo = buildGuizmo(orbitControls);
-        this.sceneManager = new SceneManager(buildTransformControl());
+        this.sceneManager = new SceneManager(isBuilder, isBuilder ? undefined : buildTransformControl());
 
     /* HANDLE VIEWPORT EVENTS */
 
@@ -51,7 +51,8 @@ class ViewportManager{
             this.element.addEventListener( 'pointerup', onPointerUp);
             this.element.addEventListener( 'pointermove', onPointerMove);
         
-            this.sceneManager.objects.transformControl.addEventListener( 'objectChange', function () {
+            const transfControl = this.sceneManager.objects.transformControl;
+            if(transfControl) transfControl.addEventListener( 'objectChange', function () {
                 scope.element.removeEventListener( 'pointermove', onDrag);
                 scope.sceneManager.objects.updateObjectsPosition();
             });
@@ -82,7 +83,8 @@ class ViewportManager{
             onUpPosition.x = event.clientX;
             onUpPosition.y = event.clientY;
 
-            if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) scope.sceneManager.objects.transformControl.detach();
+            const transfControl = scope.sceneManager.objects.transformControl;
+            if(transfControl) if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) transfControl.detach();
 
             scope.element.removeEventListener( 'pointermove', onDrag);
             scope.element.addEventListener( 'pointermove', onPointerMove);
@@ -90,36 +92,40 @@ class ViewportManager{
 
         function onPointerMove(event)
         {
-            const pointer = new Vector2(
-                (event.clientX / viewportElement.offsetWidth) * 2 - 1,
-                - ((event.clientY - document.getElementById('header').offsetHeight) / viewportElement.offsetHeight) * 2 + 1
-            );
-            
-            const raycaster = new Raycaster()
-            raycaster.setFromCamera( pointer, scope.activeCamera );
-            
-            const meshes = scope.sceneManager.objects.nodeMeshes.concat(scope.sceneManager.objects.dummiesMeshes).concat(scope.sceneManager.objects.lidarsMeshes);
+            const transfControl = scope.sceneManager.objects.transformControl;
+            if(transfControl)
+            {
+                const pointer = new Vector2(
+                    (event.clientX / viewportElement.offsetWidth) * 2 - 1,
+                    - ((event.clientY - document.getElementById('header').offsetHeight) / viewportElement.offsetHeight) * 2 + 1
+                );
+                
+                const raycaster = new Raycaster()
+                raycaster.setFromCamera( pointer, scope.activeCamera );
+                
+                const meshes = scope.sceneManager.objects.nodeMeshes.concat(scope.sceneManager.objects.dummiesMeshes).concat(scope.sceneManager.objects.lidarsMeshes);
 
-            const intersect = raycaster.intersectObjects( meshes, false );
+                const intersect = raycaster.intersectObjects( meshes, false );
 
-            if(intersect.length > 0) {
-                const object = intersect[0].object;
-                if (object !== scope.sceneManager.objects.transformControl.object)
-                {
-                    scope.sceneManager.objects.transformControl.attach(object);
-                    if(scope.activeCamera.isOrthographicCamera)
+                if(intersect.length > 0) {
+                    const object = intersect[0].object;
+                    if (object !== transfControl.object)
                     {
-                        let dir = new Vector3();
-                        scope.activeCamera.getWorldDirection(dir);
-                        scope.sceneManager.objects.transformControl.showX = 1 - Math.abs(dir.dot(new Vector3(1, 0, 0))) < 0.001 ? false : true;
-                        scope.sceneManager.objects.transformControl.showZ = (1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001) || object.name === 'Lidar' ? false : true;
-                        scope.sceneManager.objects.transformControl.showY = (1 - Math.abs(dir.dot(new Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true;
-                    }
-                    else
-                    {
-                        scope.sceneManager.objects.transformControl.showX = true;
-                        scope.sceneManager.objects.transformControl.showZ = object.name === 'Lidar' ? false : true;
-                        scope.sceneManager.objects.transformControl.showY = object.name === 'Dummy' ? false : true;
+                        transfControl.attach(object);
+                        if(scope.activeCamera.isOrthographicCamera)
+                        {
+                            let dir = new Vector3();
+                            scope.activeCamera.getWorldDirection(dir);
+                            transfControl.showX = 1 - Math.abs(dir.dot(new Vector3(1, 0, 0))) < 0.001 ? false : true;
+                            transfControl.showZ = (1 - Math.abs(dir.dot(new Vector3(0, 0, 1))) < 0.001) || object.name === 'Lidar' ? false : true;
+                            transfControl.showY = (1 - Math.abs(dir.dot(new Vector3(0, 1, 0))) < 0.001) || object.name === 'Dummy' ? false : true;
+                        }
+                        else
+                        {
+                            transfControl.showX = true;
+                            transfControl.showZ = object.name === 'Lidar' ? false : true;
+                            transfControl.showY = object.name === 'Dummy' ? false : true;
+                        }
                     }
                 }
             }
@@ -216,13 +222,14 @@ class ViewportManager{
          */
         this.setupCameraChangement = function (changeCameraType = true, newPos = ViewportManager.DEFAULT_CAM_POSITION)
         {
+            const transfControl = this.sceneManager.objects.transformControl;
             if(changeCameraType)
             {
                 /* Change vue between perspective and orthographic */
                 this.activeCamera = this.activeCamera.isOrthographicCamera ? perspCam : orthoCam;
-                this.sceneManager.objects.transformControl.camera = this.activeCamera;
+                if(transfControl) transfControl.camera = this.activeCamera;
             }
-            this.sceneManager.objects.transformControl.detach();
+            if(transfControl) transfControl.detach();
 
             //this.activeCamera.position.set(newPos.x, newPos.y, newPos.z);
             this.placeCamera(newPos);

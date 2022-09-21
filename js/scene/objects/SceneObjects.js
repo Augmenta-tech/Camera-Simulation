@@ -5,15 +5,16 @@ import * as POLYBOOL from 'polybool';
 import { NodeUI } from '../../UI/NodeUI.js';
 import { LidarUI } from '../../UI/LidarUI.js';
 import { SceneManager } from '../SceneManager.js';
-import { Dummy } from './props/Dummy.js';
+import { Dummy, loadModel } from './props/Dummy.js';
 import { Node } from './sensors/Node.js';
 import { Lidar } from './sensors/Lidar.js';
 
 
 class SceneObjects{
-    static loadFont(callback)
+    static loadFont(isBuilder, callback)
     {
-        new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+        const path = isBuilder ? './designer/' : './';
+        new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneObjects.font = response;
             callback();
             return;
@@ -21,7 +22,7 @@ class SceneObjects{
     }
     static font;
 
-    constructor(_transformControl, sceneManager)
+    constructor(sceneManager, isBuilder, _transformControl)
     {
         const nodes = [];
         const lidars = [];
@@ -39,7 +40,7 @@ class SceneObjects{
 
         this.initObjects = function()
         {
-            sceneManager.scene.add(this.transformControl);
+            if(this.transformControl) sceneManager.scene.add(this.transformControl);
             createSceneFromURL(this);
         }
 
@@ -72,16 +73,22 @@ class SceneObjects{
                     switch(key)
                     {
                         case "L":
-                            document.getElementById("input-scene-width-inspector").value = parseFloat(val);
+                            const inputSceneWidth = document.getElementById("input-scene-width-inspector");
+                            if(inputSceneWidth) inputSceneWidth.value = parseFloat(val);
                             sceneWidth = val;
                             break;
                         case "l":
-                            document.getElementById("input-scene-height-inspector").value = parseFloat(val);
+                            const inputSceneHeight = document.getElementById("input-scene-height-inspector");
+                            if(inputSceneHeight) inputSceneHeight.value = parseFloat(val);
                             sceneHeight = val;
                             break;
                         case "m":
-                            document.getElementById("tracking-mode-selection-inspector").value = val;
-                            document.getElementById("tracking-mode-selection-inspector").dispatchEvent(new Event('change'));
+                            const trackingModeSelect = document.getElementById("tracking-mode-selection-inspector");
+                            if(trackingModeSelect)
+                            {
+                                trackingModeSelect.value = val;
+                                trackingModeSelect.dispatchEvent(new Event('change'));
+                            }
                             break;
                         case "h":
                             sceneManager.heightDetected = parseFloat(val);
@@ -151,7 +158,7 @@ class SceneObjects{
          */
         this.deleteObject = function(obj)
         {
-            if (this.transformControl.object === obj.mesh) this.transformControl.detach();
+            if (this.transformControl) if (this.transformControl.object === obj.mesh) this.transformControl.detach();
             obj.removeFromScene(sceneManager.scene);
             obj.dispose();
         }
@@ -212,7 +219,7 @@ class SceneObjects{
                 return;
             }
             const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new NodeUI(newCamera, sceneManager);
+            if(!isBuilder) newCamera.uiElement = new NodeUI(newCamera, sceneManager);
             
             //Offset
             if(!autoConstruct)
@@ -239,14 +246,14 @@ class SceneObjects{
             const visibles = nodes.filter(n => n.areaAppear);
             nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
             const iconElem = document.getElementById('display-frustums-button-icon');
-            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            if(iconElem) iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.updateFrustumIcon = function()
         {
             const visibles = nodes.filter(n => n.areaAppear);
             const iconElem = document.getElementById('display-frustums-button-icon');
-            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            if(iconElem) iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.removeNodes = function()
@@ -264,7 +271,7 @@ class SceneObjects{
                 return;
             }
             const newLidar = new Lidar(lidars.length, typeID, x, z, r);
-            newLidar.uiElement = new LidarUI(newLidar, sceneManager);
+            if(!isBuilder) newLidar.uiElement = new LidarUI(newLidar, sceneManager);
             
             //Offset
             if(!autoConstruct)
@@ -291,14 +298,14 @@ class SceneObjects{
             const visibles = lidars.filter(l => l.raysAppear);
             lidars.forEach(l => l.changeVisibility(visibles.length != lidars.length));
             const iconElem = document.getElementById('display-lidars-rays-button-icon');
-            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            if(iconElem) iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.updateRaysIcon = function()
         {
             const visibles = lidars.filter(l => l.raysAppear);
             const iconElem = document.getElementById('display-lidars-rays-button-icon');
-            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            if(iconElem) iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.removeLidars = function()
@@ -439,7 +446,10 @@ class SceneObjects{
                 sceneManager.drawProjection(n);
             });
         }
-        SceneObjects.loadFont(() => SceneManager.loadFont(() => sceneManager.initAugmentaScene()));
+        SceneObjects.loadFont(isBuilder, () => SceneManager.loadFont(isBuilder, () => sceneManager.initAugmentaScene()));
+        
+        loadModel(isBuilder, 'male');
+        loadModel(isBuilder, 'female');
     }
 }
 

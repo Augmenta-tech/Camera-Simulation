@@ -19,7 +19,7 @@ class Node{
     static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
     static SIZE_TEXT_NODE = 0.4;
 
-    constructor(id, mode = document.getElementById("tracking-mode-inspector").value, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = 0, p_z = Node.DEFAULT_NODE_HEIGHT, r_x = 0, r_y = 0, r_z = 0)
+    constructor(id, mode = document.getElementById("tracking-mode-inspector") ? document.getElementById("tracking-mode-inspector").value : 'human-tracking', cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = 0, p_z = Node.DEFAULT_NODE_HEIGHT, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
         this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
@@ -129,7 +129,7 @@ class Node{
             this.nameText.visible = value;
             this.areaValueText.visible = value;
 
-            this.uiElement.changeVisibility(value);
+            if(this.uiElement) this.uiElement.changeVisibility(value);
         }
 
         this.updatePosition = function(currentUnitValue)
@@ -139,7 +139,7 @@ class Node{
             this.zPos = this.mesh.position.y;
             this.cameraPerspective.position.set(this.xPos, this.zPos, this.yPos);
 
-            this.uiElement.updatePosition(this.xPos, this.yPos, this.zPos, currentUnitValue)
+            if(this.uiElement) this.uiElement.updatePosition(this.xPos, this.yPos, this.zPos, currentUnitValue)
         }
 
         this.updateAreaText = function(currentUnit)
@@ -173,7 +173,7 @@ class Node{
                     break;
             }
 
-            this.uiElement.changeFar();
+            if(this.uiElement) this.uiElement.changeFar();
         }
 
         this.update = function()
@@ -225,7 +225,7 @@ class Node{
             this.areaValueText.geometry.dispose();
             this.areaValueText.material.dispose();
 
-            this.uiElement.dispose();
+            if(this.uiElement) this.uiElement.dispose();
         }
     }
 }

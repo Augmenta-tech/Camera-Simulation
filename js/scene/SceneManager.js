@@ -28,9 +28,10 @@ import { Node } from './objects/sensors/Node.js';
 import { SphereGeometry } from 'three';
 
 class SceneManager{
-    static loadFont(callback)
+    static loadFont(isBuilder, callback)
     {
-        new FontLoader().load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+        const path = isBuilder ? './designer/' : './';
+        new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneManager.font = response;
             callback();
             return;
@@ -39,14 +40,14 @@ class SceneManager{
     static font;
     static DEFAULT_UNIT = units.meters;
     static DEFAULT_TRACKING_MODE = 'human-tracking';
-    static DEFAULT_DETECTION_HEIGHT = parseFloat(document.getElementById('default-height-detected').value);
+    static DEFAULT_DETECTION_HEIGHT = document.getElementById('default-height-detected') ? parseFloat(document.getElementById('default-height-detected').value) : 1.2;
     static DEFAULT_WIDTH = 5;
     static DEFAULT_HEIGHT = 5;
 
     static TABLE_ELEVATION = 0.75;
     static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
 
-    constructor(_transformControl)
+    constructor(isBuilder, _transformControl)
     {
         this.scene = buildScene();
 
@@ -72,7 +73,7 @@ class SceneManager{
         this.checkerboardFloor;
         this.checkerboardWallY;
         this.checkerboardWallX;
-        this.objects = new SceneObjects(_transformControl, this);
+        this.objects = new SceneObjects(this, isBuilder, _transformControl);
 
         this.augmentaSceneLoaded = false;
 
@@ -175,12 +176,10 @@ class SceneManager{
 
         function buildAxesHelper()
         {
-            const axesHelper = new AxesHelper( 0.5 );
-            axesHelper.position.set(-0.01,0,-0.01);
+            const axesHelper = new AxesHelper( 1 );
+            axesHelper.position.set(0.01,0.01,0.01);
 
-            axesHelper.material = new LineBasicMaterial( {
-                color: 0xffffff,
-                linewidth: 3});
+            axesHelper.setColors(new Color(0xbf4747), new Color(0x708eb0), new Color(0x37a48a));
 
             return axesHelper;
         }
@@ -216,10 +215,12 @@ class SceneManager{
                 e.innerHTML = unit.label;
             });
 
-            document.getElementById('toggle-unit-button-' + this.currentUnit.label).classList.remove("bold-font");
-            document.getElementById('toggle-unit-button-' + this.currentUnit.label).classList.add("normal-font");
-            document.getElementById('toggle-unit-button-' + unit.label).classList.remove("normal-font");
-            document.getElementById('toggle-unit-button-' + unit.label).classList.add("bold-font");
+            const toggleUnitButtonCurrent = document.getElementById('toggle-unit-button-' + this.currentUnit.label)
+            if(toggleUnitButtonCurrent) toggleUnitButtonCurrent.classList.remove("bold-font");
+            if(toggleUnitButtonCurrent) toggleUnitButtonCurrent.classList.add("normal-font");
+            const toggleUnitButtonUnit = document.getElementById('toggle-unit-button-' + unit.label)
+            if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.remove("normal-font");
+            if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.add("bold-font");
             
             this.currentUnit = unit;
         }
@@ -500,7 +501,7 @@ class SceneManager{
                 node.areaCoveredWallY.geometry.dispose();
                 node.areaCoveredWallY.material.dispose();
 
-                node.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
+                node.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0x7777777); //, 0xff0f00); //orange
                 node.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
                 node.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
                 node.areaCoveredWallY = drawAreaWithPoints(coveredPointsWallY);
@@ -656,7 +657,7 @@ class SceneManager{
             return barycentre;
         }
 
-        function drawAreaWithPoints(coveredPoints, color = 0x008888)
+        function drawAreaWithPoints(coveredPoints, color = 0x382961) //0x008888) //blue
         {
             const geometryArea = new BufferGeometry();
             const verticesArray = [];

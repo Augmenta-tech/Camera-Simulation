@@ -10,7 +10,7 @@ import { OBJLoader } from 'three-loaders/OBJLoader.js';
 
 
 class Dummy {
-    static DEFAULT_DUMMIES_HEIGHT = document.getElementById('dummy-height-reference').value;
+    static DEFAULT_DUMMIES_HEIGHT = document.getElementById('dummy-height-reference') ? document.getElementById('dummy-height-reference').value : 2;
     static maleModel;
     static femaleModel;
     
@@ -91,10 +91,7 @@ class Dummy {
     }
 }
 
-loadModel('male');
-loadModel('female');
-
-function loadModel(genre)
+function loadModel(isBuilder, genre)
 {
     const onProgress = function ( xhr ) {
 
@@ -107,8 +104,10 @@ function loadModel(genre)
 
     };
 
+    const path = isBuilder ? './designer/' : './';
+
     new MTLLoader()
-    .setPath( 'models/'+ genre +'02/' )
+    .setPath( path + 'models/'+ genre +'02/' )
     .setRequestHeader({ "Content-Type" : "model/mtl"})
     .load( genre +'02.mtl', function ( materials ) {
 
@@ -116,7 +115,7 @@ function loadModel(genre)
 
         new OBJLoader()
             .setMaterials( materials )
-            .setPath( 'models/'+ genre +'02/' )
+            .setPath( path + 'models/'+ genre +'02/' )
             .setRequestHeader({ "Content-Type" : "model/obj"})
             .load( genre +'02.obj', function ( object ) {
 
@@ -128,3 +127,4 @@ function loadModel(genre)
 }
 
 export { Dummy }
+export { loadModel }
