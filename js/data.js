@@ -103,6 +103,20 @@ const camerasTypes =
         recommended: true
     },
     {
+        name:"Helios2 - Wide", 
+        HFov:108, 
+        VFov:78, 
+        rangeNear: 0.3,
+        rangeFar: 4,
+        handFar: 2,
+        suitable: [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        checkedDefault : false,
+        recommended: true
+    },
+    {
         name:"Kinect 1", 
         HFov:57, 
         VFov:43, 
