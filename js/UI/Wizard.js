@@ -548,7 +548,7 @@ function checkLidarCoherence(givenSceneWidth, givenSceneHeight, unitValue, maxFa
      */
 
     const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
-    return (givenSceneHeight / unitValue <= Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar &&
+    return (givenSceneHeight / unitValue <= Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar ||
             givenSceneWidth / unitValue <= 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
             
 }
