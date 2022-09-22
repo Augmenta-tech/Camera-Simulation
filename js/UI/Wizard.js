@@ -59,7 +59,7 @@ class Wizard{
                 {
                     case 'wall-tracking':
                     {
-                        if(checkLidarCoherence(document.getElementById('input-wall-y-scene-width-wizard').value, document.getElementById('input-wall-y-scene-height-wizard').value, maxFar, sceneManager.currentUnit.value))
+                        if(!checkLidarCoherence(document.getElementById('input-wall-y-scene-width-wizard').value, document.getElementById('input-wall-y-scene-height-wizard').value, maxFar, sceneManager.currentUnit.value))
                         {
                             document.getElementById('input-wall-y-scene-width-wizard').style.color = "red";
                             document.getElementById('input-wall-y-scene-height-wizard').style.color = "red";
@@ -86,7 +86,7 @@ class Wizard{
                     case 'hand-tracking':
                     default:
                     {
-                        if(checkCameraCoherence(document.getElementById('input-hook-height-wizard').value, sceneManager.currentUnit.value, maxFar))
+                        if(!checkCameraCoherence(document.getElementById('input-hook-height-wizard').value, sceneManager.currentUnit.value, maxFar))
                         {
                             document.getElementById('input-hook-height-wizard').style.color = "red";
                             const warningElem = document.getElementById('warning-hook-height');
@@ -534,7 +534,7 @@ class Wizard{
 
 function checkCameraCoherence(givenHookHeight, unitValue, maxFar)
 {
-    return givenHookHeight / unitValue > maxFar;
+    return givenHookHeight / unitValue <= maxFar;
             
 }
 
@@ -548,8 +548,8 @@ function checkLidarCoherence(givenSceneWidth, givenSceneHeight, unitValue, maxFa
      */
 
     const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
-    return (givenSceneHeight / unitValue > Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar &&
-            givenSceneWidth / unitValue > 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
+    return (givenSceneHeight / unitValue <= Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar &&
+            givenSceneWidth / unitValue <= 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
             
 }
 
