@@ -59,16 +59,7 @@ class Wizard{
                 {
                     case 'wall-tracking':
                     {
-                        /** 
-                         * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
-                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
-                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
-                         * lidarMaxHeight = sqrt(1 - 1/(4*RATIO*RATIO)) * rangeFar
-                         */
-
-                        const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
-                        if (document.getElementById('input-wall-y-scene-height-wizard').value / sceneManager.currentUnit.value > Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar &&
-                            document.getElementById('input-wall-y-scene-width-wizard').value / sceneManager.currentUnit.value > 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
+                        if(checkLidarCoherence(document.getElementById('input-wall-y-scene-width-wizard').value, document.getElementById('input-wall-y-scene-height-wizard').value, maxFar, sceneManager.currentUnit.value))
                         {
                             document.getElementById('input-wall-y-scene-width-wizard').style.color = "red";
                             document.getElementById('input-wall-y-scene-height-wizard').style.color = "red";
@@ -77,7 +68,7 @@ class Wizard{
                             {
                                 const newWarningElem = document.createElement("p");
                                 newWarningElem.id = 'warning-scene-dimensions-lidar';
-                                newWarningElem.innerHTML = `None of the lidars you chose can cover this surface (max = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round((maxFar * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>)`;
+                                newWarningElem.innerHTML = `None of the lidars you chose can cover this surface.`;
                                 newWarningElem.style.color = "red";
                                 document.getElementById('wall-y-scene-size-wizard').appendChild(newWarningElem);
                             }
@@ -95,7 +86,7 @@ class Wizard{
                     case 'hand-tracking':
                     default:
                     {
-                        if(document.getElementById('input-hook-height-wizard').value / sceneManager.currentUnit.value > maxFar)
+                        if(checkCameraCoherence(document.getElementById('input-hook-height-wizard').value, sceneManager.currentUnit.value, maxFar))
                         {
                             document.getElementById('input-hook-height-wizard').style.color = "red";
                             const warningElem = document.getElementById('warning-hook-height');
@@ -284,8 +275,7 @@ class Wizard{
                             lidarTypesChecked.push(parseFloat(last));
                         });
                         const lidarsChecked = lidarsTypes.filter(c => lidarTypesChecked.includes(c.id));
-                        lidarsChecked.sort((A,B) => B.rangeFar - A.rangeFar)
-                        return lidarsChecked[0].rangeFar;
+                        return getMaxFarFromSensors(lidarsChecked, mode);
                     }
                     else return 0;
                 }
@@ -309,17 +299,7 @@ class Wizard{
                             camTypesChecked.push(parseFloat(last));
                         });
                         const camerasChecked = camerasTypes.filter(c => camTypesChecked.includes(c.id));
-            
-                        switch(mode)
-                        {
-                            case 'hand-tracking':
-                                camerasChecked.sort((A,B) => B.handFar - A.handFar)
-                                return camerasChecked[0].handFar;
-                            case 'human-tracking':
-                            default:
-                                camerasChecked.sort((A,B) => B.rangeFar - A.rangeFar)
-                                return camerasChecked[0].rangeFar;
-                        }
+                        return getMaxFarFromSensors(camerasChecked, mode);
                     }
                     else return 0;
                 }
@@ -552,4 +532,42 @@ class Wizard{
     }
 }
 
+function checkCameraCoherence(givenHookHeight, unitValue, maxFar)
+{
+    return givenHookHeight / unitValue > maxFar;
+            
+}
+
+function checkLidarCoherence(givenSceneWidth, givenSceneHeight, unitValue, maxFar)
+{
+    /** 
+     * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
+     * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
+     * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
+     * lidarMaxHeight = sqrt(1 - 1/(4*RATIO*RATIO)) * rangeFar
+     */
+
+    const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
+    return (givenSceneHeight / unitValue > Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar &&
+            givenSceneWidth / unitValue > 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
+            
+}
+
+function getMaxFarFromSensors(sensors, trackingMode)
+{
+    const sensorsCopy = [...sensors];
+    if(trackingMode === "hand-tracking")
+    {
+        sensorsCopy.sort((A,B) => B.handFar - A.handFar)
+        return sensorsCopy[0].handFar;
+    }
+    else
+    {
+        sensorsCopy.sort((A,B) => B.rangeFar - A.rangeFar)
+        return sensorsCopy[0].rangeFar;
+    }
+}
+
 export { Wizard }
+
+export { checkCameraCoherence, checkLidarCoherence, getMaxFarFromSensors }
