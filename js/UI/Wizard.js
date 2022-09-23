@@ -329,56 +329,8 @@ class Wizard{
                     let configs = []; 
 
                     lidarsTypes.filter(l => l.recommended).filter(l => document.getElementById('check-lidar-' + l.id).checked).forEach(l => {
-                        /** 
-                         * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
-                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
-                         * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
-                         * lidarMaxHeight = sqrt(1 - 1/(4*RATIO*RATIO)) * rangeFar
-                         */
-
-                        const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
-                        //if possible, put above
-                        if(givenHeight <= Math.sqrt(1 - 1 / (4 * sqRatio)) * l.rangeFar)
-                        {
-                            const widthCoveredByOneLidar = 2 * Math.sqrt(l.rangeFar * l.rangeFar - givenHeight*givenHeight);
-                            const nbLidars = Math.ceil(givenWidth / widthCoveredByOneLidar);
-                            const pos = [];
-                            const distBetweenLidars = Math.max(givenWidth / nbLidars, l.rangeFar / Lidar.DEFAULT_RATIO_FAR_MINDIST);
-                            const offsetX = (givenWidth - distBetweenLidars * (nbLidars - 1)) / 2.0;
-                            for(let i = 0; i < nbLidars; i++)
-                            {
-                                pos.push(new Vector2(offsetX + i* distBetweenLidars, givenHeight));
-                            }
-                            configs.push({ typeID: l.id, positions: pos });
-                        }
-                        // else, if possible put on sides
-                        else if (givenWidth <= 2 * l.rangeFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
-                        {
-                            const maxRayAngle = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION;
-                            if(Math.abs(maxRayAngle % Math.PI) < 0.001)
-                            {
-                                configs.push({ typeID: l.id, positions: [new Vector2(0, 1), new Vector2(givenWidth, 1)]});
-                            }
-                            else if(Math.abs(maxRayAngle % (Math.PI / 2.0)) > 0.001)
-                            {
-                                // Highest possible
-                                // const height = Math.sqrt(l.rangeFar * l.rangeFar - (givenWidth/2) * (givenWidth/2));
-                                
-                                // Bottommost possible
-                                // const height = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
-                                //                 givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
-                                //                 0;
-
-                                //Average between two 
-                                const heighest = Math.sqrt(l.rangeFar * l.rangeFar - (givenWidth/2) * (givenWidth/2));
-                                const bottommost = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
-                                                givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
-                                                0;
-                                const height = (heighest + bottommost) / 2.0;
-
-                                configs.push({ typeID: l.id, positions: [new Vector2(0, height), new Vector2(givenWidth, height)] });
-                            }
-                        }
+                        const config = calculateLidarConfig(l, givenWidth, givenHeight);
+                        if(config) configs.push(config);
                     });
 
                     if(configs.length === 0)
@@ -396,10 +348,12 @@ class Wizard{
                         let chosenConfig = configs[0];
                         sceneManager.objects.removeSensors();
 
+                        createSceneFromLidarConfig(chosenConfig, sceneManager);
+/*
                         for(let i = 0; i < chosenConfig.positions.length; i++)
                         {
                             sceneManager.objects.addLidar(true, chosenConfig.typeID, chosenConfig.positions[i].x, chosenConfig.positions[i].y);
-                        }
+                        }*/
 
                         // update inspector infos
                         document.getElementById('input-wall-y-scene-width-inspector').value = inputWidth;
@@ -424,7 +378,7 @@ class Wizard{
                             break;
                         case 'human-tracking':
                         default:
-                            sceneElevation = sceneManager.sceneElevation;
+                            sceneElevation = 0;
                             overlapHeightDetection = parseFloat(document.getElementById('overlap-height-selection-wizard').value);
                             break;
                     }
@@ -446,31 +400,8 @@ class Wizard{
                     let configs = [];
 
                     camerasTypes.filter(c => c.recommended).filter(c => document.getElementById('check-cam-' + c.id).checked).forEach(type => {
-                        let augmentaFar = 0;
-                        switch(trackingMode)
-                        {
-                            case 'hand-tracking':
-                                augmentaFar = type.handFar;
-                                break;
-                            case 'human-tracking':
-                            default:
-                                augmentaFar = type.rangeFar;
-                                break;
-                        }
-                        if(camsHeight <= augmentaFar && camsHeight >= type.rangeNear + overlapHeightDetection)
-                        {
-                            const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
-                            const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
-
-                            const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
-                            const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
-
-                            nbCamsRot < nbCamsNoRot
-                                ?
-                                configs.push({ typeID: type.id, w: heightAreaCovered, h:widthAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true })
-                                :
-                                configs.push({ typeID: type.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenHeight / heightAreaCovered), rot: false });
-                        }
+                        const config = calculateCameraConfig(trackingMode, type, givenWidth, givenHeight, camsHeight, overlapHeightDetection);
+                        if(config) configs.push(config);
                     });
 
                     if(configs.length === 0)
@@ -488,25 +419,7 @@ class Wizard{
                         let chosenConfig = configs[0];
                         sceneManager.objects.removeSensors();
 
-                        let offsetX = chosenConfig.w / 2.0;
-                        let offsetY = chosenConfig.h / 2.0;
-                        if(chosenConfig.nbW === 1) offsetX -= (chosenConfig.nbW*chosenConfig.w - givenWidth)/2.0;
-                        if(chosenConfig.nbH === 1) offsetY -= (chosenConfig.nbH*chosenConfig.h - givenHeight)/2.0;
-                        const oX = chosenConfig.nbW > 1 ? (chosenConfig.nbW*chosenConfig.w - givenWidth)/(chosenConfig.nbW - 1) : 0;
-                        const oY = chosenConfig.nbH > 1 ? (chosenConfig.nbH*chosenConfig.h - givenHeight)/(chosenConfig.nbH - 1) : 0;
-
-                        for(let i = 0; i < chosenConfig.nbW; i++)
-                        {
-                            for(let j = 0; j < chosenConfig.nbH; j++)
-                            {
-                                chosenConfig.rot 
-                                    ?
-                                    sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), offsetY + j*(chosenConfig.h - oY), camsHeight + sceneElevation, 0, 0, Math.PI/2.0)
-                                    :
-                                    sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), offsetY + j*(chosenConfig.h - oY), camsHeight + sceneElevation);
-
-                            }
-                        }
+                        createSceneFromCameraConfig(chosenConfig, trackingMode, givenWidth, givenHeight, camsHeight + sceneElevation, sceneManager);
 
                         // update inspector infos
                         document.getElementById('input-scene-width-inspector').value = inputWidth;
@@ -568,6 +481,124 @@ function getMaxFarFromSensors(sensors, trackingMode)
     }
 }
 
+function calculateLidarConfig(lidarType, givenWidth, givenHeight){
+    /** 
+     * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
+     * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
+     * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
+     * lidarMaxHeight = sqrt(1 - 1/(4*RATIO*RATIO)) * rangeFar
+     */
+
+    const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
+    //if possible, put above
+    if(givenHeight <= Math.sqrt(1 - 1 / (4 * sqRatio)) * lidarType.rangeFar)
+    {
+        const widthCoveredByOneLidar = 2 * Math.sqrt(lidarType.rangeFar * lidarType.rangeFar - givenHeight*givenHeight);
+        const nbLidars = Math.ceil(givenWidth / widthCoveredByOneLidar);
+        const pos = [];
+        const distBetweenLidars = Math.max(givenWidth / nbLidars, lidarType.rangeFar / Lidar.DEFAULT_RATIO_FAR_MINDIST);
+        const offsetX = (givenWidth - distBetweenLidars * (nbLidars - 1)) / 2.0;
+        for(let i = 0; i < nbLidars; i++)
+        {
+            pos.push(new Vector2(offsetX + i* distBetweenLidars, givenHeight));
+        }
+        return { typeID: lidarType.id, positions: pos };
+    }
+    // else, if possible put on sides
+    else if (givenWidth <= 2 * lidarType.rangeFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
+    {
+        const maxRayAngle = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION;
+        if(Math.abs(maxRayAngle % Math.PI) < 0.001)
+        {
+            return { typeID: lidarType.id, positions: [new Vector2(0, 1), new Vector2(givenWidth, 1)]};
+        }
+        else if(Math.abs(maxRayAngle % (Math.PI / 2.0)) > 0.001)
+        {
+            // Highest possible
+            // const height = Math.sqrt(l.rangeFar * l.rangeFar - (givenWidth/2) * (givenWidth/2));
+            
+            // Bottommost possible
+            // const height = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
+            //                 givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
+            //                 0;
+
+            //Average between two 
+            const heighest = Math.sqrt(lidarType.rangeFar * lidarType.rangeFar - (givenWidth/2) * (givenWidth/2));
+            const bottommost = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
+                            givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
+                            0;
+            const height = (heighest + bottommost) / 2.0;
+
+            return { typeID: lidarType.id, positions: [new Vector2(0, height), new Vector2(givenWidth, height)] };
+        }
+    }
+
+    return false;
+}
+
+function calculateCameraConfig(trackingMode, cameraType, givenWidth, givenHeight, camsHeight, overlapHeightDetection)
+{
+    let augmentaFar = 0;
+    switch(trackingMode)
+    {
+        case 'hand-tracking':
+            augmentaFar = cameraType.handFar;
+            break;
+        case 'human-tracking':
+        default:
+            augmentaFar = cameraType.rangeFar;
+            break;
+    }
+    if(camsHeight <= augmentaFar && camsHeight >= cameraType.rangeNear + overlapHeightDetection)
+    {
+        const widthAreaCovered = Math.abs(Math.tan((cameraType.HFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
+        const heightAreaCovered = Math.abs(Math.tan((cameraType.VFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
+
+        const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
+        const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
+
+        return nbCamsRot < nbCamsNoRot
+            ?
+            { typeID: cameraType.id, w: heightAreaCovered, h:widthAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true }
+            :
+            { typeID: cameraType.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenHeight / heightAreaCovered), rot: false };
+    }
+
+    return false;
+}
+
+function createSceneFromCameraConfig(config, trackingMode, givenWidth, givenHeight, camsZPosition, sceneManager)
+{
+    let offsetX = config.w / 2.0;
+    let offsetY = config.h / 2.0;
+    if(config.nbW === 1) offsetX -= (config.nbW*config.w - givenWidth)/2.0;
+    if(config.nbH === 1) offsetY -= (config.nbH*config.h - givenHeight)/2.0;
+    const oX = config.nbW > 1 ? (config.nbW*config.w - givenWidth)/(config.nbW - 1) : 0;
+    const oY = config.nbH > 1 ? (config.nbH*config.h - givenHeight)/(config.nbH - 1) : 0;
+
+    for(let i = 0; i < config.nbW; i++)
+    {
+        for(let j = 0; j < config.nbH; j++)
+        {
+            config.rot 
+                ?
+                sceneManager.objects.addNode(true, trackingMode, config.typeID, offsetX + i*(config.w - oX), offsetY + j*(config.h - oY), camsZPosition, 0, 0, Math.PI/2.0)
+                :
+                sceneManager.objects.addNode(true, trackingMode, config.typeID, offsetX + i*(config.w - oX), offsetY + j*(config.h - oY), camsZPosition);
+
+        }
+    }
+}
+
+function createSceneFromLidarConfig(config, sceneManager)
+{
+    for(let i = 0; i < config.positions.length; i++)
+    {
+        sceneManager.objects.addLidar(true, config.typeID, config.positions[i].x, config.positions[i].y);
+    }
+}
+
+
 export { Wizard }
 
-export { checkCameraCoherence, checkLidarCoherence, getMaxFarFromSensors }
+export { checkCameraCoherence, checkLidarCoherence, getMaxFarFromSensors, calculateLidarConfig, calculateCameraConfig, createSceneFromLidarConfig, createSceneFromCameraConfig }
