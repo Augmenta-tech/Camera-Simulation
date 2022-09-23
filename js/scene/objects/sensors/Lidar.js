@@ -105,7 +105,7 @@ class Lidar{
             this.raysAppear = value;
             this.rays.visible = value;
 
-            this.uiElement.changeVisibility(value);
+            if(this.uiElement) this.uiElement.changeVisibility(value);
         }
 
         this.updatePosition = function(currentUnitValue)
@@ -114,7 +114,7 @@ class Lidar{
             this.zPos = this.mesh.position.y;
             this.rays.position.set(this.xPos, this.zPos, this.yPos);
 
-            this.uiElement.updatePosition(this.xPos, this.zPos, currentUnitValue)
+            if(this.uiElement) this.uiElement.updatePosition(this.xPos, this.zPos, currentUnitValue)
         }
 
         this.update = function()
@@ -133,7 +133,7 @@ class Lidar{
             });
             this.rays.clear();
 
-            this.uiElement.dispose();
+            if(this.uiElement) this.uiElement.dispose();
         }
 
         this.buildRays();
