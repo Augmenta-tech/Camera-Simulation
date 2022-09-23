@@ -1,7 +1,8 @@
 const camerasTypes = 
 [
     {
-        name:"Orbbec Astra +", 
+        name:"Orbbec Astra +",
+        textId: "orbbec-astra-plus",
         HFov:56.5, 
         VFov:45, 
         rangeNear: 0.6,
@@ -11,11 +12,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : true,
         recommended: true
     },
     {
-        name:"Orbbec Astra Pro", 
+        name:"Orbbec Astra Pro",
+        textId: "orbbec-astra-pro",
         HFov:60, 
         VFov:49.5, 
         rangeNear: 0.6,
@@ -25,11 +30,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Azure Kinect (NFOV)", 
+        textId: "azure-kinect-nfov",
         // inscribed square. 75°x65° are official FOV for the hexagon
         HFov: Math.round(2 * (Math.atan((1/3) * ( - Math.tan(75/2 * Math.PI/180) + Math.sqrt(3*Math.tan(65/2 * Math.PI/180)*Math.tan(65/2 * Math.PI/180) + 4*Math.tan(75/2 * Math.PI/180)*Math.tan(75/2 * Math.PI/180))))) * 180/Math.PI * 10) / 10, 
         VFov:65, 
@@ -40,11 +49,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Azure Kinect (WFOV)", 
+        textId: "azure-kinect-wfov",
         // inscribed square. 120° are the FOV for the circle. 
         // tan(squareFOV / 2) = sqrt(2)/2 * tan(circleFOV/2)
         // => squareFOV = 2 * arctan(sqrt(2) / 2 * tan(circleFOV/2))
@@ -57,11 +70,15 @@ const camerasTypes =
         suitable: [
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"Orbbec Femto", 
+        name:"Orbbec Femto",
+        textId: "orbbec-femto",
         HFov:64.6, 
         VFov:50.8, 
         rangeNear: 0.25,
@@ -71,11 +88,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"Orbbec Femto W", 
+        name:"Orbbec Femto Wide",
+        textId: "orbbec-femto-wide",
         HFov:90, 
         VFov:74, 
         rangeNear: 0.25,
@@ -85,11 +106,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"Helios2", 
+        name:"Helios2",
+        textId: "helios-two",
         HFov:69, 
         VFov:51, 
         rangeNear: 0.3,
@@ -99,11 +124,16 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor',
+            'outdoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"Helios2 - Wide", 
+        name:"Helios2 - Wide",
+        textId: "helios-two-wide",
         HFov:108, 
         VFov:78, 
         rangeNear: 0.3,
@@ -113,11 +143,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"Kinect 1", 
+        name:"Kinect 1",
+        textId: "kinect-one",
         HFov:57, 
         VFov:43, 
         rangeNear: 1.2,
@@ -127,11 +161,15 @@ const camerasTypes =
             "human-tracking",
             "hand-tracking" 
         ],
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"Kinect 2", 
+        name:"Kinect 2",
+        textId: "kinect-two",
         HFov:70, 
         VFov:60, 
         rangeNear: 0.5,
@@ -140,6 +178,9 @@ const camerasTypes =
         suitable: [
             "human-tracking",
             "hand-tracking" 
+        ],
+        canBeUsed: [
+            'indoor'
         ],
         checkedDefault : false,
         recommended: true
@@ -152,32 +193,44 @@ camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0
 
 const lidarsTypes = [
     {
-        name:"10LX - H01", 
+        name:"10LX - H01",
+        textId: "10lx-h01", 
         angularResolution: 0.125, 
         fov: 270,
         steps: 2161, 
         rangeNear: 0.06,
         rangeFar: 10,
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : true,
         recommended: true
     },
     {
-        name:"10LX - H02", 
+        name:"10LX - H02",
+        textId: "10lx-h02",
         angularResolution: 0.125, 
         fov: 270,
         steps: 2161, 
         rangeNear: 0.06,
         rangeFar: 10,
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
-        name:"20LX", 
+        name:"20LX",
+        textId: "20lx",
         angularResolution: 0.25, 
         fov: 270,
         steps: 1081, 
         rangeNear: 0.06,
         rangeFar: 20,
+        canBeUsed: [
+            'indoor'
+        ],
         checkedDefault : true,
         recommended: true
     }
