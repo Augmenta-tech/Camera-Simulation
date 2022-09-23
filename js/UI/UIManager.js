@@ -39,6 +39,11 @@ class UIManager{
 
         function resetValues()
         {
+            //TOGGLE INPUTS  UNITS
+            const inputs = document.getElementsByTagName('input');
+            for(let i = 0; i < inputs.length; i++)
+                { inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value; }
+
             //INSPECTOR INPUTS
             document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
             document.getElementById('overlap-height-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
