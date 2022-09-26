@@ -34,27 +34,47 @@
             <h1 id="website-title">Augmenta Designer (beta)</h1>
           </div>
 
-          <!-- SHARE BUTTON -->
-          <div>
-            <div id="generate-link" class="button main-button">
-              <span class="iconify main-icon" data-icon="ci:share"></span>
-              <p> Share </p>
-            </div>
-
-            <!-- SHARE MODAL -->
-            <div id="share-modal" class="modal hidden">
-              <div id="share-modal-content" class="column center-x center-y modal-content">
-                  <p id="copy-feedback-text" class="main-text">URL of your scene has been copied to clipboard !</p>
+          <!-- SHARE SECTION -->
+          <div class="row center-x center-y">
+            <label id="load-file-button" class="button main-button">
+              <input type="file" id="load-file-input" class="hidden">
+              <span class="iconify main-icon" data-icon="eva:cloud-upload-outline"></span>
+              <p> Load file </p>
+            </label>
+            <!-- SHARE BUTTON -->
+            <div>
+              <div id="generate-link" class="button main-button">
+                <span class="iconify main-icon" data-icon="ci:share"></span>
+                <p> Share </p>
               </div>
-            </div>
-            <!-- END SHARE MODAL -->
-            
+
+              <!-- SHARE MODAL -->
+              <div id="share-modal" class="modal hidden">
+                <div id="share-modal-content" class="column center-x center-y modal-content">
+                  <span id="close-share-modal" class="close">&times;</span>
+                  <p id="copy-feedback-text" class="main-text">An URL of your scene has been copied to clipboard.</p>
+                  <p class="main-text">You can also download a file for your scene below:</p>
+                  <div class="row center-x space-y">
+                    <input type="text" id="scene-file-name-input" placeholder="Your file name">
+                    <div id="download-scene-file" class="button main-button">
+                      <span class="iconify main-icon" data-icon="eva:cloud-download-outline"></span>
+                      <p> Download </p>
+                    </div>
+                  </div>
+                  <div id="warning-text-input-illegal-symbol" class="hidden">
+                    <p class="warning-message">You cannot use '<span id="illegal-symbol-used"></span>' in your file name.</p>
+                  </div>
+                </div>
+              </div>
+              <!-- END SHARE MODAL -->
             <!-- TO ADD HELP BUTTON <p>Help ?</p> -->
+            </div>
           </div>
         </div>
 
         <!-- VIEWPORT -->
         <div id="viewport">
+          <pre id="file-content"></pre>
           <!-- ADD TOOLS 
           <div id="toolbar" class="row">
             <div data-tool="1" class="active">
@@ -361,7 +381,7 @@
   <!-- Remove this when import maps will be widely supported -->
   <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>
   <script async src="https://ga.jspm.io/npm:es-module-shims@1.5.9/dist/es-module-shims.js"></script>
-  
+  <script xmlns="http://www.w3.org/1999/xhtml" async="" src="https://cdn.rawgit.com/eligrey/FileSaver.js/5ed507ef8aa53d8ecfea96d96bc7214cd2476fd2/FileSaver.min.js"></script>
   <script type="importmap">
     {
       "imports": {

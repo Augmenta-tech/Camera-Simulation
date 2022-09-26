@@ -386,6 +386,141 @@ class SceneObjects{
             return url;
         }
 
+        this.parseJson = function(jsonDatas)
+        {
+            const datas = JSON.parse(jsonDatas);
+
+            //scene size
+            let surfaceName;
+            if(datas.hasOwnProperty('trackingMode'))
+            {
+                switch(datas.trackingMode)
+                {
+                    case "wall-tracking":
+                        surfaceName = "wall-y-";
+                        break;
+                    default:
+                        surfaceName = '';
+                }
+            }
+            else surfaceName = '';
+            
+            if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
+            {
+                const sceneWidthElement = document.getElementById("input-" + surfaceName + "scene-width-inspector");
+                const sceneHeightElement = document.getElementById("input-" + surfaceName + "scene-height-inspector");
+                sceneWidthElement.value = datas.sceneSize[0];
+                sceneHeightElement.value = datas.sceneSize[1];
+                sceneWidthElement.dispatchEvent(new Event('change'));
+                sceneHeightElement.dispatchEvent(new Event('change'));
+            }
+
+            //unit
+            if(datas.hasOwnProperty('unit'))
+            {
+                sceneManager.toggleUnit(datas.unit);
+            }
+
+            //tracking mode
+            if(datas.hasOwnProperty('trackingMode'))
+            {
+                const trackingModeElement = document.getElementById("tracking-mode-selection-inspector");
+                trackingModeElement.value = datas.trackingMode;
+                trackingModeElement.dispatchEvent(new Event('change'));
+            }
+
+            //height detected
+            if(datas.hasOwnProperty('heightDetected'))
+            {
+                const overlapElement = document.getElementById("overlap-height-selection-inspector")
+                overlapElement.value = datas.heightDetected;
+                overlapElement.dispatchEvent(new Event('change'));
+            }
+
+            //objects
+            if(datas.hasOwnProperty('objects'))
+            {
+                if(datas.objects.hasOwnProperty('nodes'))
+                {
+                    datas.objects.nodes.forEach(n => this.addNode(true, datas.trackingMode, n.cameraTypeId, n.p_x, n.p_y, n.p_z, n.r_x, n.r_y, n.r_z));
+                }
+                if(datas.objects.hasOwnProperty('lidars'))
+                {
+                    datas.objects.lidars.forEach(l => this.addLidar(true, l.cameraTypeId, l.p_x, l.p_z, l.r_y));
+                }
+                if(datas.objects.hasOwnProperty('dummies'))
+                {
+                    datas.objects.dummies.forEach(d => {
+                        this.addDummy();
+                        const dummy = dummies[dummies.length - 1];
+                        dummy.mesh.translateX(d.p_x);
+                        dummy.mesh.translateZ(d.p_y);
+                        dummy.updatePosition();
+                    });
+                }
+            }
+        }
+        
+        /**
+         * Create a json format containing all the informations of the scene
+         * 
+         * @returns scene infos in json format
+         */
+        this.generateJson = function()
+        {
+            const datas = {
+                sceneSize: [sceneManager.sceneWidth, sceneManager.sceneHeight],
+                unit: sceneManager.currentUnit,
+                trackingMode: sceneManager.trackingMode,
+                heightDetected: sceneManager.heightDetected,
+                objects: {
+                    nodes: [],
+                    lidars: [],
+                    dummies: []
+                }
+            };
+
+            nodes.forEach(n => {
+                const nodeData = {
+                    id: n.id,
+                    cameraTypeId: n.cameraType.id,
+                    p_x: n.xPos,
+                    p_y: n.yPos,
+                    p_z: n.zPos,
+                    r_x: n.xRot,
+                    r_y: n.yRot,
+                    r_z: n.zRot
+                };
+
+                datas.objects.nodes.push(nodeData);
+            });
+
+            lidars.forEach(l => {
+                const lidarData = {
+                    id: l.id,
+                    lidarTypeId: l.lidarType.id,
+                    p_x: l.xPos,
+                    p_z: l.zPos,
+                    r_y: l.yRot
+                };
+
+                datas.objects.lidars.push(lidarData);
+            });
+
+            dummies.forEach(d => {
+                const dummiesData = {
+                    id: d.id,
+                    p_x: d.xPos,
+                    p_y: d.yPos,
+                    p_z: d.zPos
+                };
+                
+                datas.objects.dummies.push(dummiesData);
+            });
+
+            return JSON.stringify(datas);
+        }
+
         this.changeSensorsTrackingMode = function(mode)
         {
             nodes.forEach(n => n.changeMode(mode))
@@ -436,7 +571,7 @@ class SceneObjects{
         // DEBUG
         this.debug = function()
         {
-
+            
         }
 
         this.update = function ()

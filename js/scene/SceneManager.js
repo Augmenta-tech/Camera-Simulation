@@ -194,10 +194,8 @@ class SceneManager{
 
     /* USER'S ACTIONS */
 
-        this.toggleUnit = function()
+        this.toggleUnit = function(unit = this.currentUnit === units.meters ? units.feets : units.meters)
         {
-            const unit = this.currentUnit === units.meters ? units.feets : units.meters;
-
             if(this.augmentaSceneLoaded) 
             {
                 this.checkerboardFloor.toggleUnit(unit);
@@ -255,6 +253,9 @@ class SceneManager{
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
                 const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
 
+                this.sceneWidth = givenWidth;
+                this.sceneHeight = givenHeight;
+
                 //update checkerboard
                 if(this.augmentaSceneLoaded) this.checkerboardWallY.setSize(givenWidth, givenHeight);
             }
@@ -269,12 +270,16 @@ class SceneManager{
                 case 'hand-tracking':
                     this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     this.sceneElevation = SceneManager.TABLE_ELEVATION;
+                    this.sceneWidth = this.checkerboardFloor.width;
+                    this.sceneHeight = this.checkerboardFloor.height;
                     if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
                     this.wallY.position.z = -10;
                     break;
                 case 'wall-tracking':
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
+                    this.sceneWidth = this.checkerboardWallY.width;
+                    this.sceneHeight = this.checkerboardWallY.height;
                     if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
                     this.wallY.position.z = 0;
                     break;
@@ -282,6 +287,8 @@ class SceneManager{
                 default:
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
+                    this.sceneWidth = this.checkerboardFloor.width;
+                    this.sceneHeight = this.checkerboardFloor.height;
                     if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
                     this.wallY.position.z = -10;
                     break;
@@ -698,8 +705,6 @@ class SceneManager{
         // DEBUG
         this.debug = function()
         {
-            console.log(document.getElementById("overlap-height-selection-inspector").value)
-            console.log(this.heightDetected);
             this.objects.debug();
         }
     }

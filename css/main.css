@@ -113,6 +113,10 @@ canvas {
   padding: 10px 0;
 }
 
+.warning-message {
+  color: red;
+}
+
 .number-nodes {
   line-height: 25px;
   font-weight: bold;
@@ -412,9 +416,20 @@ canvas {
   background-color: var(--color-darkmode-secondary) !important;
 }
 
+/** LOAD FILE BUTTON **/
+#load-file-input{
+  background-color: rgba(0, 0, 0, 0);
+  outline: 0;
+}
+
 /** SHARE MODAL **/
 #share-modal-content {
   width: 20%;
+  padding: 10px 30px 30px 30px;
+}
+
+#close-share-modal{
+  align-self: flex-end;
 }
 
 /** WIZARD MODAL **/

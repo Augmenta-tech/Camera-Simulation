@@ -69,7 +69,7 @@ class Wizard{
                                 const newWarningElem = document.createElement("p");
                                 newWarningElem.id = 'warning-scene-dimensions-lidar';
                                 newWarningElem.innerHTML = `None of the lidars you chose can cover this surface.`;
-                                newWarningElem.style.color = "red";
+                                newWarningElem.classList.add('warning-message');
                                 document.getElementById('wall-y-scene-size-wizard').appendChild(newWarningElem);
                             }
                         }

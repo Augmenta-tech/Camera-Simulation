@@ -15,9 +15,15 @@ class UIManager{
             document.getElementById('generate-link').addEventListener('click', () => {
                 copyLink(sceneManager.objects.generateLink());
             });
+            //CLOSE MODAL CHEN CLICKING THE CROSS
+            document.getElementById('close-share-modal').addEventListener('click', () => copyUrlModal.classList.add('hidden'));
+            //CLOSE MODAL WHEN CLICKING OUTSIDE
             window.addEventListener('click', () => {
                 if(event.target == copyUrlModal) copyUrlModal.classList.add('hidden');
             });
+
+            document.getElementById('load-file-input').addEventListener('change', (e) => loadJsonFile(e, sceneManager), false);
+            document.getElementById('download-scene-file').addEventListener('click', () => downloadSceneFile(viewportManager.sceneManager));
 
             document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateFloorAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
             document.getElementById("input-scene-height-inspector").addEventListener('change', () => sceneManager.updateFloorAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
@@ -42,11 +48,14 @@ class UIManager{
             //TOGGLE INPUTS  UNITS
             const inputs = document.getElementsByTagName('input');
             for(let i = 0; i < inputs.length; i++)
+                if(inputs[i].type !== 'file' || inputs[i].id === 'scene-file-name-input')
                 { inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value; }
 
+            document.getElementById('scene-file-name-input').value = '';
+            
             //INSPECTOR INPUTS
             document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
-            document.getElementById('overlap-height-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
+            document.getElementById('overlap-height-selection-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
             document.getElementById("input-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
             document.getElementById("input-scene-height-inspector").value = SceneManager.DEFAULT_HEIGHT;
             document.getElementById("input-wall-y-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
@@ -65,7 +74,54 @@ class UIManager{
             navigator.clipboard.writeText(link);
 
             document.getElementById("share-modal").classList.remove('hidden');
-            window.setTimeout(() => document.getElementById("share-modal").classList.add('hidden'), 1500);
+            //window.setTimeout(() => document.getElementById("share-modal").classList.add('hidden'), 1500);
+        }
+
+        function downloadSceneFile(sceneManager)
+        {
+            const fileNameInput = document.getElementById('scene-file-name-input');
+            if(fileNameInput && fileNameInput.value)
+            {
+                const illegalSymbols = ['*', '.', '"', '/', '\\', '[', ']', ':', ';', '|', ',', '?', '<', '>'];
+                const fileName = fileNameInput.value.toString();
+                
+                for(let i = 0; i < illegalSymbols.length; i++)
+                {
+                    const s = illegalSymbols[i];
+                    if(fileName.includes(s))
+                    {
+                        document.getElementById('warning-text-input-illegal-symbol').classList.remove('hidden');
+                        document.getElementById('illegal-symbol-used').innerHTML = s;
+                        return;
+                    }
+                }
+
+                const data = sceneManager.objects.generateJson();
+                const blob = new Blob([data], { type: 'application/json' });
+                saveAs(blob, fileName + '.json');
+                document.getElementById('warning-text-input-illegal-symbol').classList.add('hidden');
+            }
+        }
+
+        function loadJsonFile(e, sceneManager)
+        {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+            if(file.type !== 'application/json')
+            {
+                alert(`Invalid file. Your file must end with ".json"`);
+                return;
+            }
+            console.log(file);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const contents = e.target.result;
+                sceneManager.objects.removeSensors();
+                sceneManager.objects.parseJson(contents);
+            };
+            reader.readAsText(file);
         }
 
         this.changeTrackingMode = function(trackingMode)
