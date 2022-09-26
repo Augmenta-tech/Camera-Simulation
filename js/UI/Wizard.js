@@ -183,8 +183,8 @@ class Wizard{
             document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-scene-height-wizard').value = Math.round(sceneManager.sceneHeight * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-wall-y-scene-width-wizard').value = Math.round(document.getElementById('input-wall-y-scene-width-inspector').value * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-wall-y-scene-height-wizard').value = Math.round(document.getElementById('input-wall-y-scene-height-inspector').value * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-wall-y-scene-width-wizard').value = document.getElementById('input-wall-y-scene-width-inspector').value;
+            document.getElementById('input-wall-y-scene-height-wizard').value = document.getElementById('input-wall-y-scene-height-inspector').value;
 
             document.getElementById('tracking-mode-selection-wizard').value = sceneManager.trackingMode;
 
@@ -349,11 +349,6 @@ class Wizard{
                         sceneManager.objects.removeSensors();
 
                         createSceneFromLidarConfig(chosenConfig, sceneManager);
-/*
-                        for(let i = 0; i < chosenConfig.positions.length; i++)
-                        {
-                            sceneManager.objects.addLidar(true, chosenConfig.typeID, chosenConfig.positions[i].x, chosenConfig.positions[i].y);
-                        }*/
 
                         // update inspector infos
                         document.getElementById('input-wall-y-scene-width-inspector').value = inputWidth;
