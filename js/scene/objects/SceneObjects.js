@@ -70,7 +70,7 @@ class SceneObjects{
             let url = document.location.href;
             const index = url.indexOf('&');
             
-            if(index === -1) return false;
+            if(index === -1 || isBuilder) return false;
             else
             {
                 url = url.substring(url.indexOf('?') + 1);
@@ -469,28 +469,43 @@ class SceneObjects{
             const datas = JSON.parse(jsonDatas);
 
             //scene size
-            let surfaceName;
+            let mode = 'human-tracking';
             if(datas.hasOwnProperty('trackingMode'))
             {
-                switch(datas.trackingMode)
-                {
-                    case "wall-tracking":
-                        surfaceName = "wall-y-";
-                        break;
-                    default:
-                        surfaceName = '';
-                }
+                mode = datas.trackingMode
             }
-            else surfaceName = '';
             
             if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
             {
-                const sceneWidthElement = document.getElementById("input-" + surfaceName + "scene-width-inspector");
-                const sceneHeightElement = document.getElementById("input-" + surfaceName + "scene-height-inspector");
-                sceneWidthElement.value = datas.sceneSize[0];
-                sceneHeightElement.value = datas.sceneSize[1];
-                sceneWidthElement.dispatchEvent(new Event('change'));
-                sceneHeightElement.dispatchEvent(new Event('change'));
+                const sceneWidth = datas.sceneSize[0];
+                const sceneHeight = datas.sceneSize[1];
+
+                switch(mode)
+                {
+                    case 'wall-tracking':
+                    {
+                        const sceneWidthElement = document.getElementById("input-wall-y-scene-width-inspector");
+                        if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
+                        
+                        const sceneHeightElement = document.getElementById("input-wall-y-scene-height-inspector");
+                        if(sceneHeightElement) sceneHeightElement.value = sceneHeight;
+                        sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneHeight);
+                        break;
+                    }
+                    case 'hand-tracking':
+                    case 'human-tracking':
+                    {
+                        const sceneWidthElement = document.getElementById("input-scene-width-inspector");
+                        if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
+                        
+                        const sceneHeightElement = document.getElementById("input-scene-height-inspector");
+                        if(sceneHeightElement) sceneHeightElement.value = sceneHeight;
+                        sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneHeight);
+                        break;
+                    }
+                    default:
+                        break;
+                }
             }
 
             //unit
@@ -500,19 +515,24 @@ class SceneObjects{
             }
 
             //tracking mode
-            if(datas.hasOwnProperty('trackingMode'))
+            const trackingModeElement = document.getElementById("tracking-mode-selection-inspector");
+            if(trackingModeElement)
             {
-                const trackingModeElement = document.getElementById("tracking-mode-selection-inspector");
-                trackingModeElement.value = datas.trackingMode;
+                trackingModeElement.value = mode;
                 trackingModeElement.dispatchEvent(new Event('change'));
             }
+            sceneManager.changeTrackingMode(mode);
 
             //height detected
             if(datas.hasOwnProperty('heightDetected'))
             {
                 const overlapElement = document.getElementById("overlap-height-selection-inspector")
-                overlapElement.value = datas.heightDetected;
-                overlapElement.dispatchEvent(new Event('change'));
+                if(overlapElement)
+                {
+                    overlapElement.value = datas.heightDetected;
+                    overlapElement.dispatchEvent(new Event('change'));
+                }
+                sceneManager.heightDetected = datas.heightDetected;
             }
 
             //objects
@@ -651,6 +671,7 @@ class SceneObjects{
         // DEBUG
         this.debug = function()
         {
+            console.log(sceneManager.heightDetected);
             console.log(JSON.parse(localStorage.getItem('sceneInfos')));
         }
 
