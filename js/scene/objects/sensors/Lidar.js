@@ -34,7 +34,7 @@ class Lidar{
     
         this.color = new Color(0.5*Math.random(), 0.5*Math.random(), 0.5*Math.random());
 
-        this.mesh = buildMesh(this.color, this.xPos, this.yPos - 0.01*this.id, this.zPos);
+        this.mesh = buildMesh(this.color, this.xPos, Lidar.DEFAULT_LIDAR_SIZE, this.zPos);
         this.rays = new Group();
 
         this.raysAppear = true;

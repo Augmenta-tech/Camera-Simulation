@@ -22,7 +22,7 @@ class SceneObjects{
     }
     static font;
 
-    constructor(sceneManager, isBuilder, _transformControl)
+    constructor(sceneManager, isBuilder)
     {
         const nodes = [];
         const lidars = [];
@@ -30,8 +30,6 @@ class SceneObjects{
         this.nodeMeshes = [];
         this.lidarsMeshes = [];
         this.dummiesMeshes = [];
-
-        this.transformControl = _transformControl;
         
         const givenAreaPolygonRegions = [[]];
 
@@ -205,7 +203,7 @@ class SceneObjects{
          */
         this.deleteObject = function(obj)
         {
-            if (this.transformControl) if (this.transformControl.object === obj.mesh) this.transformControl.detach();
+            if (sceneManager.transformControl) if (sceneManager.transformControl.object === obj.mesh) sceneManager.transformControl.detach();
             obj.removeFromScene(sceneManager.scene);
             obj.dispose();
         }

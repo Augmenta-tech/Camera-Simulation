@@ -51,7 +51,7 @@ class ViewportManager{
             this.element.addEventListener( 'pointerup', onPointerUp);
             this.element.addEventListener( 'pointermove', onPointerMove);
         
-            const transfControl = this.sceneManager.objects.transformControl;
+            const transfControl = this.sceneManager.transformControl;
             if(transfControl) transfControl.addEventListener( 'objectChange', function () {
                 scope.element.removeEventListener( 'pointermove', onDrag);
                 scope.sceneManager.objects.updateObjectsPosition();
@@ -84,7 +84,7 @@ class ViewportManager{
             onUpPosition.x = event.clientX;
             onUpPosition.y = event.clientY;
 
-            const transfControl = scope.sceneManager.objects.transformControl;
+            const transfControl = scope.sceneManager.transformControl;
             if(transfControl) if ( onDownPosition.distanceTo( onUpPosition ) === 0 ) transfControl.detach();
 
             scope.element.removeEventListener( 'pointermove', onDrag);
@@ -93,7 +93,7 @@ class ViewportManager{
 
         function onPointerMove(event)
         {
-            const transfControl = scope.sceneManager.objects.transformControl;
+            const transfControl = scope.sceneManager.transformControl;
             if(transfControl)
             {
                 const pointer = new Vector2(
@@ -223,7 +223,7 @@ class ViewportManager{
          */
         this.setupCameraChangement = function (changeCameraType = true, newPos = ViewportManager.DEFAULT_CAM_POSITION)
         {
-            const transfControl = this.sceneManager.objects.transformControl;
+            const transfControl = this.sceneManager.transformControl;
             if(changeCameraType)
             {
                 /* Change vue between perspective and orthographic */

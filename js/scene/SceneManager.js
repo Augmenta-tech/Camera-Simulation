@@ -73,7 +73,9 @@ class SceneManager{
         this.checkerboardFloor;
         this.checkerboardWallY;
         this.checkerboardWallX;
-        this.objects = new SceneObjects(this, isBuilder, _transformControl);
+
+        this.transformControl = _transformControl;
+        this.objects = new SceneObjects(this, isBuilder);
 
         this.augmentaSceneLoaded = false;
 
@@ -120,6 +122,8 @@ class SceneManager{
             this.checkerboardWallY = new Checkerboard(this.wallY, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
 
             //this.checkerboardWallX = new Checkerboard(this.wallX, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
+
+            if(this.transformControl) this.scene.add(this.transformControl);
 
             this.augmentaSceneLoaded = true;
 
