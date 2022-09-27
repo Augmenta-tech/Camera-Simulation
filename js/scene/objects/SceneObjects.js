@@ -38,7 +38,7 @@ class SceneObjects{
 
         this.initObjects = function()
         {
-            const sceneInfosStorage = localStorage.getItem('sceneInfos')
+            const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
 
             if(!createSceneFromURL(this))
             {
@@ -56,7 +56,7 @@ class SceneObjects{
             }
             else
             {
-                localStorage.setItem('sceneInfos', sceneInfosStorage);
+                sessionStorage.setItem('sceneInfos', sceneInfosStorage);
             }
         }
 
@@ -619,7 +619,7 @@ class SceneObjects{
             return JSON.stringify(datas);
         }
 
-        this.populateStorage = () => localStorage.setItem('sceneInfos', this.generateJson())
+        this.populateStorage = () => sessionStorage.setItem('sceneInfos', this.generateJson())
 
         this.changeSensorsTrackingMode = function(mode)
         {
@@ -672,7 +672,7 @@ class SceneObjects{
         this.debug = function()
         {
             console.log(sceneManager.heightDetected);
-            console.log(JSON.parse(localStorage.getItem('sceneInfos')));
+            console.log(JSON.parse(sessionStorage.getItem('sceneInfos')));
         }
 
         this.update = function ()
