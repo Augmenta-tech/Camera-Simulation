@@ -48,7 +48,7 @@ class UIManager{
             //TOGGLE INPUTS  UNITS
             const inputs = document.getElementsByTagName('input');
             for(let i = 0; i < inputs.length; i++)
-                if(inputs[i].type !== 'file' || inputs[i].id === 'scene-file-name-input')
+                if(inputs[i].type !== 'file' && inputs[i].id !== 'scene-file-name-input')
                 { inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value; }
 
             document.getElementById('scene-file-name-input').value = '';

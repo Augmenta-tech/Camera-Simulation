@@ -446,7 +446,7 @@ class SceneObjects{
                 }
                 if(datas.objects.hasOwnProperty('lidars'))
                 {
-                    datas.objects.lidars.forEach(l => this.addLidar(true, l.cameraTypeId, l.p_x, l.p_z, l.r_y));
+                    datas.objects.lidars.forEach(l => this.addLidar(true, l.lidarTypeId, l.p_x, l.p_z, l.r_y));
                 }
                 if(datas.objects.hasOwnProperty('dummies'))
                 {

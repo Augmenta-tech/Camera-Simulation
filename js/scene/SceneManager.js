@@ -194,7 +194,7 @@ class SceneManager{
 
     /* USER'S ACTIONS */
 
-        this.toggleUnit = function(unit = this.currentUnit === units.meters ? units.feets : units.meters)
+        this.toggleUnit = function(unit = this.currentUnit.value === units.meters.value ? units.feets : units.meters)
         {
             if(this.augmentaSceneLoaded) 
             {
