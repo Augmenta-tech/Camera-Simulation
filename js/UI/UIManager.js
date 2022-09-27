@@ -37,7 +37,10 @@ class UIManager{
                 sceneManager.changeTrackingMode(mode);
                 this.displayWarning(sceneManager);
             });
-            document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-inspector").value));
+            document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
+                sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-inspector").value);
+                sceneManager.objects.populateStorage();
+            });
             
 
             this.wizard.bindEventListeners(viewportManager, this);
