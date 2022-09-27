@@ -38,13 +38,13 @@ class SceneObjects{
 
         this.initObjects = function()
         {
-            if(this.transformControl) sceneManager.scene.add(this.transformControl);
+            const sceneInfosStorage = localStorage.getItem('sceneInfos')
 
             if(!createSceneFromURL(this))
             {
-                if(localStorage.getItem('sceneInfos'))
+                if(sceneInfosStorage)
                 {
-                    this.parseJson(localStorage.getItem('sceneInfos'));
+                    this.parseJson(sceneInfosStorage);
                 }
                 else
                 {
@@ -53,6 +53,10 @@ class SceneObjects{
 
                     this.populateStorage();
                 }
+            }
+            else
+            {
+                localStorage.setItem('sceneInfos', sceneInfosStorage);
             }
         }
 
