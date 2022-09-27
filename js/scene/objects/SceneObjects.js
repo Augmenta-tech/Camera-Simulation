@@ -41,7 +41,21 @@ class SceneObjects{
         this.initObjects = function()
         {
             if(this.transformControl) sceneManager.scene.add(this.transformControl);
-            createSceneFromURL(this);
+
+            if(!createSceneFromURL(this))
+            {
+                if(localStorage.getItem('sceneInfos'))
+                {
+                    this.parseJson(localStorage.getItem('sceneInfos'));
+                }
+                else
+                {
+                    if(!isBuilder) this.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
+                    sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
+
+                    this.populateStorage();
+                }
+            }
         }
 
         /**
@@ -54,11 +68,7 @@ class SceneObjects{
             let url = document.location.href;
             const index = url.indexOf('&');
             
-            if(index === -1)
-            {
-                if(!isBuilder) sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
-                sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
-            }
+            if(index === -1) return false;
             else
             {
                 url = url.substring(url.indexOf('?') + 1);
@@ -144,6 +154,7 @@ class SceneObjects{
                     });
                     sceneObjects.addNode(true, sceneManager.trackingMode, typeID, x, y, z, p, a, r)
                 })
+                return true;
             }
         }
 
@@ -189,6 +200,8 @@ class SceneObjects{
             //Management
             dummies.push(newDummy);
             this.dummiesMeshes.push(newDummy.mesh);
+
+            this.populateStorage();
         }
 
         this.removeDummies = function()
@@ -196,6 +209,8 @@ class SceneObjects{
             dummies.forEach(d => this.deleteObject(d));
             dummies.length = 0;
             this.dummiesMeshes.length = 0;
+
+            this.populateStorage();
         }
 
         /**
@@ -239,6 +254,8 @@ class SceneObjects{
 
             nodes.push(newCamera);
             this.nodeMeshes.push(newCamera.mesh);
+
+            this.populateStorage();
         }
 
         this.displayFrustums = function()
@@ -261,6 +278,8 @@ class SceneObjects{
             nodes.forEach(n => this.deleteObject(n));
             nodes.length = 0;
             this.nodeMeshes.length = 0;
+
+            this.populateStorage();
         }
 
         this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, z = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
@@ -291,6 +310,8 @@ class SceneObjects{
 
             lidars.push(newLidar);
             this.lidarsMeshes.push(newLidar.mesh);
+
+            this.populateStorage();
         }
 
         this.displayRays = function()
@@ -313,6 +334,8 @@ class SceneObjects{
             lidars.forEach(l => this.deleteObject(l));
             lidars.length = 0;
             this.lidarsMeshes.length = 0;
+
+            this.populateStorage();
         }
         
 
@@ -521,6 +544,8 @@ class SceneObjects{
             return JSON.stringify(datas);
         }
 
+        this.populateStorage = () => localStorage.setItem('sceneInfos', this.generateJson())
+
         this.changeSensorsTrackingMode = function(mode)
         {
             nodes.forEach(n => n.changeMode(mode))
@@ -571,7 +596,7 @@ class SceneObjects{
         // DEBUG
         this.debug = function()
         {
-            
+            console.log(JSON.parse(localStorage.getItem('sceneInfos')));
         }
 
         this.update = function ()

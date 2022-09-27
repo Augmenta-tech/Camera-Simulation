@@ -55,6 +55,7 @@ class ViewportManager{
             if(transfControl) transfControl.addEventListener( 'objectChange', function () {
                 scope.element.removeEventListener( 'pointermove', onDrag);
                 scope.sceneManager.objects.updateObjectsPosition();
+                scope.sceneManager.objects.populateStorage();
             });
 
             //DEBUG

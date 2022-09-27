@@ -177,6 +177,8 @@ class LidarUI{
                 /* stop changing when mouse button is released:*/
                 document.onmouseup = null;
                 document.onmousemove = null;
+
+                sceneManager.objects.populateStorage();
         
                 /*on clic, change the value with an input*/
                 /* WIP
@@ -226,6 +228,8 @@ class LidarUI{
             document.getElementById('lidar-res' + lidar.id).innerHTML = lidar.lidarType.angularResolution + '°';
             document.getElementById('lidar-near' + lidar.id).innerHTML = (Math.round(lidar.lidarType.rangeNear*document.getElementById('lidar-near' + lidar.id).dataset.unit * 100) / 100.0);
             document.getElementById('lidar-far' + lidar.id).innerHTML = (Math.round(lidar.lidarType.rangeFar*document.getElementById('lidar-far' + lidar.id).dataset.unit * 100) / 100.0);
+
+            sceneManager.objects.populateStorage();
         }
 
         this.changeVisibility = function(visible)

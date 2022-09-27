@@ -221,6 +221,8 @@ class SceneManager{
             if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.add("bold-font");
             
             this.currentUnit = unit;
+
+            this.objects.populateStorage();
         }
 
         /**
@@ -243,6 +245,8 @@ class SceneManager{
                 if(this.augmentaSceneLoaded) this.checkerboardFloor.setSize(givenWidth, givenHeight);
 
                 this.objects.calculateScenePolygon(givenWidth, givenHeight);
+
+                this.objects.populateStorage();
             }
         }
 
@@ -258,6 +262,8 @@ class SceneManager{
 
                 //update checkerboard
                 if(this.augmentaSceneLoaded) this.checkerboardWallY.setSize(givenWidth, givenHeight);
+
+                this.objects.populateStorage();
             }
         }
 
@@ -294,6 +300,10 @@ class SceneManager{
                     break;
             }
 
+            this.objects.changeSensorsTrackingMode(mode);
+
+            this.objects.populateStorage();
+
             /**
              * Change checkerboards
              * @param {Scene} scene threejs scene
@@ -314,8 +324,6 @@ class SceneManager{
                     toAdd[i].setSceneElevation(sceneElevations[i]);
                 }
             }
-
-            this.objects.changeSensorsTrackingMode(mode);
         }
 
 

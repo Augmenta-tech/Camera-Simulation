@@ -207,6 +207,8 @@ class NodeUI{
                 /* stop changing when mouse button is released:*/
                 document.onmouseup = null;
                 document.onmousemove = null;
+
+                sceneManager.objects.populateStorage();
         
                 /*on clic, change the value with an input*/
                 /* WIP
@@ -257,6 +259,8 @@ class NodeUI{
             document.getElementById('vfov' + node.id).innerHTML = node.cameraType.VFov + '°';
             document.getElementById('node-near' + node.id).innerHTML = (Math.round(node.cameraPerspective.near*document.getElementById('node-near' + node.id).dataset.unit * 100) / 100.0);
             document.getElementById('node-far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('node-far' + node.id).dataset.unit * 100) / 100.0);
+
+            sceneManager.objects.populateStorage();
         }
 
         this.changeFar = function()
