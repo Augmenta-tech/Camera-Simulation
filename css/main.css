@@ -42,7 +42,7 @@ p {
   color: var(--color-grey-p);
 }
 
-h3.dark-mode, p.dark-mode, label.dark-mode {
+h3.dark-mode, .dark-mode p, label.dark-mode {
   color: var(--color-white);
 }
 

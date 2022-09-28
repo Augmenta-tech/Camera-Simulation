@@ -207,7 +207,7 @@ class SceneManager{
             }
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
-                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
+                if(e.tagName === 'INPUT' && e.value) e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
                 else e.innerHTML = Math.round(e.innerHTML / this.currentUnit.value * unit.value * 100) / 100.0;
                 e.dataset.unit = unit.value;
             });
