@@ -426,7 +426,7 @@ class SceneObjects{
             nodes.forEach(n => {
                 url += "sensor=";
                 url += "node";
-                url += "id=";
+                url += ",id=";
                 url += n.id;
                 url += ",typeID=";
                 url += n.cameraType.id;
