@@ -448,8 +448,6 @@ class Wizard{
 
 function checkCameraCoherence(givenHookHeight, overlapHeightDetection, maxFar, minNear)
 {
-    console.log(minNear)
-    console.log(overlapHeightDetection);
     return givenHookHeight <= maxFar && givenHookHeight >= overlapHeightDetection + minNear;            
 }
 
