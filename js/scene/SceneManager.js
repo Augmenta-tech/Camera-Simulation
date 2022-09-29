@@ -43,6 +43,7 @@ class SceneManager{
     static DEFAULT_DETECTION_HEIGHT = document.getElementById('default-height-detected') ? parseFloat(document.getElementById('default-height-detected').value) : 1.2;
     static DEFAULT_WIDTH = 5;
     static DEFAULT_HEIGHT = 5;
+    static DEFAULT_ENV = 'indoor';
 
     static TABLE_ELEVATION = 0.75;
     static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
@@ -59,6 +60,8 @@ class SceneManager{
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
         this.sceneHeight = SceneManager.DEFAULT_HEIGHT;
         this.sceneElevation = 0;
+
+        this.sceneEnvironment = SceneManager.DEFAULT_ENV;
 
         this.size = 160;
 
@@ -328,6 +331,12 @@ class SceneManager{
                     toAdd[i].setSceneElevation(sceneElevations[i]);
                 }
             }
+        }
+
+        this.changeEnvironment = function(env = ((this.sceneEnvironment) === 'indoor' ? 'outdoor' : 'indoor'))
+        {
+            this.sceneEnvironment = env;
+            this.objects.populateStorage();
         }
 
 

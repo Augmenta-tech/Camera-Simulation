@@ -468,11 +468,17 @@ class SceneObjects{
         {
             const datas = JSON.parse(jsonDatas);
 
+            //scene environment
+            if(datas.hasOwnProperty('sceneEnvironment'))
+            {
+                sceneManager.sceneEnvironment = datas.sceneEnvironment;
+            }
+
             //scene size
             let mode = 'human-tracking';
             if(datas.hasOwnProperty('trackingMode'))
             {
-                mode = datas.trackingMode
+                mode = datas.trackingMode;
             }
             
             if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
@@ -567,6 +573,7 @@ class SceneObjects{
         this.generateJson = function()
         {
             const datas = {
+                sceneEnvironment: sceneManager.sceneEnvironment,
                 sceneSize: [sceneManager.sceneWidth, sceneManager.sceneHeight],
                 unit: sceneManager.currentUnit,
                 trackingMode: sceneManager.trackingMode,
@@ -671,7 +678,6 @@ class SceneObjects{
         // DEBUG
         this.debug = function()
         {
-            console.log(sceneManager.heightDetected);
             console.log(JSON.parse(sessionStorage.getItem('sceneInfos')));
         }
 
