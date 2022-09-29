@@ -54,7 +54,9 @@ class Wizard{
             function checkFormCoherence(sceneManager)
             {
                 const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
-                const maxFar = getMaxFarFromCheckedSensor(trackingMode)
+                const checkedSensors = getCheckedSensor(trackingMode)
+                const maxFar = getMaxFarFromSensors(checkedSensors, trackingMode);
+                const minNear = getMinNearFromSensors(checkedSensors);
                 switch(trackingMode)
                 {
                     case 'wall-tracking':
@@ -89,7 +91,8 @@ class Wizard{
                     default:
                     {
                         const givenHookHeight = document.getElementById('input-hook-height-wizard').value / sceneManager.currentUnit.value;
-                        if(!checkCameraCoherence(givenHookHeight, maxFar))
+                        const overlapHeightDetection = parseFloat(document.getElementById('overlap-height-selection-wizard').value);
+                        if(!checkCameraCoherence(givenHookHeight, overlapHeightDetection, maxFar, minNear))
                         {
                             document.getElementById('input-hook-height-wizard').style.color = "red";
                             const warningElem = document.getElementById('warning-hook-height');
@@ -97,7 +100,7 @@ class Wizard{
                             {
                                 const newWarningElem = document.createElement("p");
                                 newWarningElem.id = 'warning-hook-height';
-                                newWarningElem.innerHTML = `The camera(s) you chose cannot see your tracking surface that far (max = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round((maxFar * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>)`;
+                                newWarningElem.innerHTML = `The camera(s) you chose cannot see your tracking surface at this distance (min = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(((minNear + overlapHeightDetection) * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>, max = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round((maxFar * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>)`;
                                 newWarningElem.style.color = "red";
                                 document.getElementById('hook-height-input').appendChild(newWarningElem);
                             }
@@ -256,7 +259,7 @@ class Wizard{
             sensorTypesForm.appendChild(lidarTypesForm);
         }
 
-        function getMaxFarFromCheckedSensor(mode)
+        function getCheckedSensor(mode)
         {
             switch(mode)
             {
@@ -278,9 +281,9 @@ class Wizard{
                             lidarTypesChecked.push(parseFloat(last));
                         });
                         const lidarsChecked = lidarsTypes.filter(c => lidarTypesChecked.includes(c.id));
-                        return getMaxFarFromSensors(lidarsChecked, mode);
+                        return lidarsChecked;
                     }
-                    else return 0;
+                    else return [];
                 }
                 case 'human-tracking':
                 case 'hand-tracking':
@@ -302,9 +305,9 @@ class Wizard{
                             camTypesChecked.push(parseFloat(last));
                         });
                         const camerasChecked = camerasTypes.filter(c => camTypesChecked.includes(c.id));
-                        return getMaxFarFromSensors(camerasChecked, mode);
+                        return camerasChecked;
                     }
-                    else return 0;
+                    else return [];
                 }
             }
         }
@@ -443,10 +446,11 @@ class Wizard{
     }
 }
 
-function checkCameraCoherence(givenHookHeight, maxFar)
+function checkCameraCoherence(givenHookHeight, overlapHeightDetection, maxFar, minNear)
 {
-    return givenHookHeight <= maxFar;
-            
+    console.log(minNear)
+    console.log(overlapHeightDetection);
+    return givenHookHeight <= maxFar && givenHookHeight >= overlapHeightDetection + minNear;            
 }
 
 function checkLidarCoherence(givenSceneWidth, givenSceneHeight, maxFar)
@@ -466,17 +470,32 @@ function checkLidarCoherence(givenSceneWidth, givenSceneHeight, maxFar)
 
 function getMaxFarFromSensors(sensors, trackingMode)
 {
-    const sensorsCopy = [...sensors];
-    if(trackingMode === "hand-tracking")
+    if(sensors.length > 0)
     {
-        sensorsCopy.sort((A,B) => B.handFar - A.handFar)
-        return sensorsCopy[0].handFar;
+        const sensorsCopy = [...sensors];
+        if(trackingMode === "hand-tracking")
+        {
+            sensorsCopy.sort((A,B) => B.handFar - A.handFar)
+            return sensorsCopy[0].handFar;
+        }
+        else
+        {
+            sensorsCopy.sort((A,B) => B.rangeFar - A.rangeFar)
+            return sensorsCopy[0].rangeFar;
+        }
     }
-    else
+    return 0;
+}
+
+function getMinNearFromSensors(sensors)
+{
+    if(sensors.length > 0)
     {
-        sensorsCopy.sort((A,B) => B.rangeFar - A.rangeFar)
-        return sensorsCopy[0].rangeFar;
+        const sensorsCopy = [...sensors];
+        sensorsCopy.sort((A,B) => A.rangeNear - B.rangeNear)
+        return sensorsCopy[0].rangeNear;
     }
+    return 0;
 }
 
 function calculateLidarConfig(lidarType, givenWidth, givenHeight){
