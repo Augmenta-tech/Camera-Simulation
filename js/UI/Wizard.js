@@ -39,7 +39,7 @@ class Wizard{
             }
             document.getElementById('input-hook-height-wizard').addEventListener('change', () => checkFormCoherence(sceneManager));
             
-            //CHECKS COHERENCE BETWEEN CAMERAS SPECS AND USER INPUTS
+            //CHECKS COHERENCE BETWEEN LIDARS SPECS AND USER INPUTS
             const lidarCheckboxes = document.getElementsByClassName('checkbox-lidar-type');
             for(let i = 0; i < lidarCheckboxes.length; i++)
             {
@@ -91,6 +91,7 @@ class Wizard{
                     default:
                     {
                         const givenHookHeight = document.getElementById('input-hook-height-wizard').value / sceneManager.currentUnit.value;
+                        //TO DO DIFFERENCE BETWEN HAND AND HUMAN TRACKING
                         const overlapHeightDetection = parseFloat(document.getElementById('overlap-height-selection-wizard').value);
                         if(!checkCameraCoherence(givenHookHeight, overlapHeightDetection, maxFar, minNear))
                         {
@@ -350,7 +351,7 @@ class Wizard{
 
                         configs.sort((A,B) => A.positions.length - B.positions.length);
                         configs = configs.filter(c => c.positions.length === configs[0].positions.length);
-                        configs.sort((A,B) => A.typeID - B.typeID);
+                        configs.sort((A,B) => A.typeID - B.typeID); // lowest sensor id is priorised
                         let chosenConfig = configs[0];
                         sceneManager.objects.removeSensors();
 
@@ -416,7 +417,7 @@ class Wizard{
 
                         configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                         configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
-                        configs.sort((A,B) => A.typeID - B.typeID);
+                        configs.sort((A,B) => A.typeID - B.typeID); // lowest sensor id is priorised
                         let chosenConfig = configs[0];
                         sceneManager.objects.removeSensors();
 
@@ -461,8 +462,8 @@ function checkLidarCoherence(givenSceneWidth, givenSceneHeight, maxFar)
      */
 
     const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
-    return (givenSceneHeight <= Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar ||
-            givenSceneWidth <= 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)))
+    return (givenSceneHeight <= Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar /* above */ ||
+            givenSceneWidth <= 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION) /* on sides */ ))
             
 }
 

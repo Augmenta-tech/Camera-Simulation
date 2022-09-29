@@ -1,3 +1,5 @@
+// TODO: switch all .id to .textId (to retrieve sensor type for example)
+
 const camerasTypes = 
 [
     {
@@ -238,7 +240,7 @@ const camerasTypes =
 ];
 
 let i = 0;
-camerasTypes.forEach(type => type.id = i++);
+camerasTypes.forEach(type => type.id = i++); //lowest id is priorised 
 camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
 
 const lidarsTypes = [

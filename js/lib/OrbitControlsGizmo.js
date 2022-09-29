@@ -14,8 +14,9 @@
 
 /** Modifications: 
  * 
+ * pass viexportManager as argument
  * In createAxis() : inversion y and z
- * OnMouseclick() : different behaviour 
+ * onMouseClick() : different behaviour 
  */
 
 import {

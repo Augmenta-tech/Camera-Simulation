@@ -48,6 +48,7 @@ class UIManager{
 
         function resetValues()
         {
+            /* TODO: This should disappear : add data-unit="1" in every numeral inputs that we want to convert (this adds it in all inputs)*/
             //TOGGLE INPUTS  UNITS
             const inputs = document.getElementsByTagName('input');
             for(let i = 0; i < inputs.length; i++)
@@ -101,7 +102,7 @@ class UIManager{
 
                 const data = sceneManager.objects.generateJson();
                 const blob = new Blob([data], { type: 'application/json' });
-                saveAs(blob, fileName + '.json');
+                saveAs(blob, fileName + '.json'); // module FileSaver
                 document.getElementById('warning-text-input-illegal-symbol').classList.add('hidden');
             }
         }

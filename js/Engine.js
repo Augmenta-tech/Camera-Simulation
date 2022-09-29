@@ -14,10 +14,10 @@ class Engine{
         /* initialize ui */ 
         const uiManager = isBuilder ? undefined : new UIManager();
 
-        bindEventListeners(this.viewportManager);
+        bindEventListeners();
         animate();
 
-        function bindEventListeners(viewportManager)
+        function bindEventListeners()
         {
             window.addEventListener('resize', () => onWindowResize(viewportManager));
 

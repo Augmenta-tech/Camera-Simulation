@@ -38,10 +38,14 @@ class SceneObjects{
 
         this.initObjects = function()
         {
-            const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
+            //if local storage, uncomment this
+            //const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
 
             if(!createSceneFromURL(this))
             {
+                // and comment this
+                const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
+
                 if(sceneInfosStorage)
                 {
                     this.parseJson(sceneInfosStorage);
@@ -56,7 +60,10 @@ class SceneObjects{
             }
             else
             {
-                sessionStorage.setItem('sceneInfos', sceneInfosStorage);
+                //if local storage, uncomment this
+                //sessionStorage.setItem('sceneInfos', sceneInfosStorage);
+                //and comment this
+                this.populateStorage();
             }
         }
 
@@ -217,6 +224,7 @@ class SceneObjects{
             if(!Dummy.maleModel || !Dummy.femaleModel)
             {
                 //TODO: Add UI to inform that button will work in few seconds
+                console.log("Add Dummy button will work in an instant");
                 return;
             }
             const newDummy = new Dummy(dummies.length);
@@ -269,6 +277,7 @@ class SceneObjects{
             if(!SceneObjects.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
+                console.log("Add Node button will work in an instant");
                 return;
             }
             const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
@@ -325,6 +334,7 @@ class SceneObjects{
             if(!SceneObjects.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
+                console.log("Add Lidar button will work in an instant");
                 return;
             }
             const newLidar = new Lidar(lidars.length, typeID, x, z, r);
@@ -467,6 +477,8 @@ class SceneObjects{
         this.parseJson = function(jsonDatas)
         {
             const datas = JSON.parse(jsonDatas);
+
+            // /!\ parsing order matters
 
             //scene environment
             if(datas.hasOwnProperty('sceneEnvironment'))
@@ -643,6 +655,8 @@ class SceneObjects{
          */
         this.doesCoverArea = function()
         {
+            // see https://github.com/velipso/polybooljs for more information
+
             const unionRegions = [...givenAreaPolygonRegions];
             let union = {
                 regions: unionRegions,
@@ -675,7 +689,7 @@ class SceneObjects{
 
         this.getNbSensors = () => this.getNbNodes() + this.getNbLidars();
 
-        // DEBUG
+        // press P for DEBUG
         this.debug = function()
         {
             console.log(JSON.parse(sessionStorage.getItem('sceneInfos')));

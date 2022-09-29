@@ -98,7 +98,6 @@ class Lidar{
         }
 
     /* USER'S ACTION */
-        //TODO: Mettre le code de la UI dans camera UI (stocke sa propre camera UI et appelle les méthodes)
         this.changeVisibility = function(display = !this.raysAppear)
         {
             const value = display;

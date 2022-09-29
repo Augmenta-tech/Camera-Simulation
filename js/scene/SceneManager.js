@@ -65,7 +65,7 @@ class SceneManager{
 
         this.size = 160;
 
-        this.wallX = buildWallXMesh(this.size, -10, -10);
+        this.wallX = buildWallXMesh(this.size, -10, -10); // if you want to get the wall on checkerboard border, change this AND values in changeTrackingMode()
         this.wallY = buildWallYMesh(this.size, -10, -10);
         this.floor = buildFloorMesh(this.size, this.wallX.position.x, this.wallY.position.z);
 
@@ -201,6 +201,7 @@ class SceneManager{
 
     /* USER'S ACTIONS */
 
+    /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
         this.toggleUnit = function(unit = this.currentUnit.value === units.meters.value ? units.feets : units.meters)
         {
             if(this.augmentaSceneLoaded) 
@@ -264,6 +265,7 @@ class SceneManager{
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
                 const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
 
+                /* TODO: add wallYSceneWidth and wallYSceneHeight */
                 this.sceneWidth = givenWidth;
                 this.sceneHeight = givenHeight;
 
@@ -286,7 +288,7 @@ class SceneManager{
                     this.sceneWidth = this.checkerboardFloor.width;
                     this.sceneHeight = this.checkerboardFloor.height;
                     if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
-                    this.wallY.position.z = -10;
+                    this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
                     break;
                 case 'wall-tracking':
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
@@ -342,7 +344,7 @@ class SceneManager{
 
         /* SCENE UPDATE */
 
-        /* NOES PROJECTION */ 
+        /* NODES PROJECTION */ 
 
         /**
          * Calculate area covered by the node to draw it and display it
@@ -356,10 +358,10 @@ class SceneManager{
             /** GLOBAL OPERATING PHILOSPHY
              * 
              * 1/ remove all drawn projections
-             * 2/ for each plane of the scene (floor, walls ...), calculates the intersection rays
+             * 2/ for each plane of the scene (floor, walls ...), calculates the intersection rays with frustum
              * 3/ for each plane of the scene, calculates the intersection points of those rays
              * 4/ keeps only points into the frustum of the camera cam
-             * 5/ calculate area covered by the camera and display it
+             * 5/ calculate area value covered by the camera and display it
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
             
@@ -369,7 +371,7 @@ class SceneManager{
             this.scene.remove(node.areaCoveredWallY);
 
             const floorPlane = new Plane(floorNormal, -this.sceneElevation);
-            const abovePlane = new Plane(floorNormal, -(this.sceneElevation + this.heightDetected));
+            const abovePlane = new Plane(floorNormal, -(this.sceneElevation + this.heightDetected)); // hips height, shoulders height, ... (heightDetected)
             const wallXPlane = new Plane(wallXNormal, -this.wallX.position.x);
             const wallYPlane = new Plane(wallYNormal, -this.wallY.position.z);
 
@@ -448,7 +450,7 @@ class SceneManager{
                 const coveredPointsWallY = intersectionPointsWallY.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallX.position.x - 0.01 && p.z > this.wallY.position.z - 0.01 && p.y > this.sceneElevation - 0.01);
 
 
-                //filter points above, they must be in the frustum at heightDetected but also on the floor
+                //filter points above (calculated heightDetected meters above floor), they must be in the frustum at heightDetected but also on the floor mostly for angled cameras
                 let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
                 coveredPointsAbove.forEach((p) => p.y -= this.heightDetected);
                 if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
@@ -482,15 +484,16 @@ class SceneManager{
                     coveredPointsAbove = [];
                 }
 
+                //only valid if all surfaces are convex
                 sortByAngle(coveredPointsFloor, floorNormal);
                 sortByAngle(coveredPointsAbove, floorNormal);
                 sortByAngle(coveredPointsWallX, wallXNormal);
                 sortByAngle(coveredPointsWallY, wallYNormal);
 
+                // stocked to calculate if augmenta scene is fully covered by cameras
                 node.coveredPointsAbove = coveredPointsAbove;
 
-                if(this.objects.getNbNodes() === 0) return;
-
+                // to avoid z-fighting
                 coveredPointsFloor.forEach((p) => p.y += 0.01*(node.id / this.objects.getNbNodes() + 1));
                 coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*(node.id / this.objects.getNbNodes() + 1));
                 coveredPointsWallX.forEach((p) => p.x += 0.01*(node.id / this.objects.getNbNodes() + 1));
@@ -723,7 +726,7 @@ class SceneManager{
         // initialize three js scene
         this.initScene(this.floor, this.wallX, this.wallY);
 
-        // DEBUG
+        // press P for DEBUG
         this.debug = function()
         {
             this.objects.debug();

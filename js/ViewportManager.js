@@ -137,7 +137,7 @@ class ViewportManager{
 
             switch ( event.keyCode ) {
 
-                case 80: /*P*/
+                case 80: /*P for DEBUG*/
                     scope.sceneManager.debug();
                     break;
 
