@@ -2,6 +2,7 @@ const camerasTypes =
 [
     {
         name:"Orbbec Astra +",
+        niceName: "3D Camera",
         textId: "orbbec-astra-plus",
         HFov:56.5, 
         VFov:45, 
@@ -15,11 +16,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : true,
         recommended: true
     },
     {
         name:"Orbbec Astra Pro",
+        niceName: "3D Camera",
         textId: "orbbec-astra-pro",
         HFov:60, 
         VFov:49.5, 
@@ -33,11 +39,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Azure Kinect (NFOV)", 
+        niceName: "3D Camera",
         textId: "azure-kinect-nfov",
         // inscribed square. 75°x65° are official FOV for the hexagon
         HFov: Math.round(2 * (Math.atan((1/3) * ( - Math.tan(75/2 * Math.PI/180) + Math.sqrt(3*Math.tan(65/2 * Math.PI/180)*Math.tan(65/2 * Math.PI/180) + 4*Math.tan(75/2 * Math.PI/180)*Math.tan(75/2 * Math.PI/180))))) * 180/Math.PI * 10) / 10, 
@@ -52,11 +63,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Azure Kinect (WFOV)", 
+        niceName: "3D Camera",
         textId: "azure-kinect-wfov",
         // inscribed square. 120° are the FOV for the circle. 
         // tan(squareFOV / 2) = sqrt(2)/2 * tan(circleFOV/2)
@@ -73,11 +89,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Orbbec Femto",
+        niceName: "3D Camera",
         textId: "orbbec-femto",
         HFov:64.6, 
         VFov:50.8, 
@@ -91,11 +112,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Orbbec Femto Wide",
+        niceName: "3D Camera",
         textId: "orbbec-femto-wide",
         HFov:90, 
         VFov:74, 
@@ -109,11 +135,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Helios2",
+        niceName: "3D Camera",
         textId: "helios-two",
         HFov:69, 
         VFov:51, 
@@ -128,11 +159,16 @@ const camerasTypes =
             'indoor',
             'outdoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Helios2 - Wide",
+        niceName: "3D Camera",
         textId: "helios-two-wide",
         HFov:108, 
         VFov:78, 
@@ -146,11 +182,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Kinect 1",
+        niceName: "3D Camera",
         textId: "kinect-one",
         HFov:57, 
         VFov:43, 
@@ -164,11 +205,16 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"Kinect 2",
+        niceName: "3D Camera",
         textId: "kinect-two",
         HFov:70, 
         VFov:60, 
@@ -182,6 +228,10 @@ const camerasTypes =
         canBeUsed: [
             'indoor'
         ],
+        accessories: [
+            "Augmenta Node",
+            "Hook"
+        ],
         checkedDefault : false,
         recommended: true
     }
@@ -194,6 +244,7 @@ camerasTypes.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0
 const lidarsTypes = [
     {
         name:"10LX - H01",
+        niceName: "2D Lidar",
         textId: "10lx-h01", 
         angularResolution: 0.125, 
         fov: 270,
@@ -203,11 +254,13 @@ const lidarsTypes = [
         canBeUsed: [
             'indoor'
         ],
+        accessories: [],
         checkedDefault : true,
         recommended: true
     },
     {
         name:"10LX - H02",
+        niceName: "2D Lidar",
         textId: "10lx-h02",
         angularResolution: 0.125, 
         fov: 270,
@@ -217,11 +270,13 @@ const lidarsTypes = [
         canBeUsed: [
             'indoor'
         ],
+        accessories: [],
         checkedDefault : false,
         recommended: true
     },
     {
         name:"20LX",
+        niceName: "2D Lidar",
         textId: "20lx",
         angularResolution: 0.25, 
         fov: 270,
@@ -231,6 +286,7 @@ const lidarsTypes = [
         canBeUsed: [
             'indoor'
         ],
+        accessories: [],
         checkedDefault : true,
         recommended: true
     }
