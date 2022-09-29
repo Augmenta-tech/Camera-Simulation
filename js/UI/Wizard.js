@@ -618,4 +618,4 @@ function createSceneFromLidarConfig(config, sceneManager)
 
 export { Wizard }
 
-export { checkCameraCoherence, checkLidarCoherence, getMaxFarFromSensors, calculateLidarConfig, calculateCameraConfig, createSceneFromLidarConfig, createSceneFromCameraConfig }
+export { checkCameraCoherence, checkLidarCoherence, getMinNearFromSensors, getMaxFarFromSensors, calculateLidarConfig, calculateCameraConfig, createSceneFromLidarConfig, createSceneFromCameraConfig }
