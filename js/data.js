@@ -46,7 +46,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Azure Kinect (NFOV)", 
@@ -70,7 +70,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Azure Kinect (WFOV)", 
@@ -96,7 +96,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Orbbec Femto",
@@ -119,7 +119,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Orbbec Femto Wide",
@@ -142,7 +142,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Helios2",
@@ -189,7 +189,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Kinect 1",
@@ -212,7 +212,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Kinect 2",
@@ -235,7 +235,7 @@ const camerasTypes =
             "Hook"
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     }
 ];
 
