@@ -26,7 +26,7 @@ const camerasTypes =
             "hand-tracking" 
         ],
         checkedDefault : false,
-        recommended: true
+        recommended: false
     },
     {
         name:"Azure Kinect (NFOV)", 
