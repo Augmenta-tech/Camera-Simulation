@@ -236,6 +236,29 @@ const camerasTypes =
         ],
         checkedDefault : false,
         recommended: false
+    },
+    {
+        name:"Visionary-T Mini",
+        niceName: "3D Camera",
+        textId: "visionary-t-mini",
+        HFov:70, 
+        VFov:60, 
+        rangeNear: 0.5,
+        rangeFar: 8,
+        handFar: 3,
+        suitable: [
+            "human-tracking",
+            "hand-tracking" 
+        ],
+        canBeUsed: [
+            'indoor',
+            'outdoor'
+        ],
+        accessories: [
+            "Hook"
+        ],
+        checkedDefault : false,
+        recommended: true
     }
 ];
 
