@@ -270,6 +270,10 @@ canvas {
   color: var(--color-white);
 }
 
+a.main-button {
+  text-decoration: none;
+}
+
 
 /** GIZMO **/ 
 .orbit-controls-gizmo {
@@ -412,6 +416,11 @@ canvas {
   background-color: var(--color-darkmode-secondary) !important;
 }
 
+/** HEADER BUTTONS SECTION **/
+#header-buttons {
+  display: inline-flex;
+}
+
 /** SHARE MODAL **/
 #share-modal-content {
   width: 20%;
@@ -420,6 +429,11 @@ canvas {
 /** WIZARD MODAL **/
 #wizard-content {
   width: 35%;
+}
+
+/** CONTACT BUTTON **/
+#contact-button {
+  margin-left: 1em;
 }
 
 
