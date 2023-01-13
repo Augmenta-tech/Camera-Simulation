@@ -41,7 +41,7 @@ class SceneManager{
     static DEFAULT_TRACKING_MODE = 'human-tracking';
     static DEFAULT_DETECTION_HEIGHT = parseFloat(document.getElementById('default-height-detected').value);
     static DEFAULT_WIDTH = 5;
-    static DEFAULT_HEIGHT = 5;
+    static DEFAULT_LENGTH = 5;
 
     static TABLE_ELEVATION = 0.75;
     static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
@@ -56,7 +56,7 @@ class SceneManager{
 
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
-        this.sceneHeight = SceneManager.DEFAULT_HEIGHT;
+        this.sceneLength = SceneManager.DEFAULT_LENGTH;
         this.sceneElevation = 0;
 
         this.size = 160;
@@ -110,7 +110,7 @@ class SceneManager{
         this.initAugmentaScene = function()
         {
             // Scene Checkerboard
-            this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
+            this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
             this.checkerboard.addPlanesToScene(this.scene);
 
             this.augmentaSceneLoaded = true;
@@ -217,22 +217,22 @@ class SceneManager{
          * Define the border of the scene to track
          * 
          * @param {*} givenWidthValue horizontal length value entered input in the current unit.
-         * @param {*} givenHeightValue vertical length value entered input in the current unit.
+         * @param {*} givenLengthValue vertical length value entered input in the current unit.
          */
-        this.updateAugmentaSceneBorder = function(givenWidthValue, givenHeightValue)
+        this.updateAugmentaSceneBorder = function(givenWidthValue, givenLengthValue)
         {
-            if(givenWidthValue && givenHeightValue)
+            if(givenWidthValue && givenLengthValue)
             {
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
-                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
+                const givenLength = parseFloat(givenLengthValue) / this.currentUnit.value;
 
                 this.sceneWidth = givenWidth;
-                this.sceneHeight = givenHeight;
+                this.sceneLength = givenLength;
 
                 //update checkerboard
-                if(this.augmentaSceneLoaded) this.checkerboard.setSize(givenWidth, givenHeight);
+                if(this.augmentaSceneLoaded) this.checkerboard.setSize(givenWidth, givenLength);
 
-                this.objects.calculateScenePolygon(givenWidth, givenHeight);
+                this.objects.calculateScenePolygon(givenWidth, givenLength);
             }
         }
 

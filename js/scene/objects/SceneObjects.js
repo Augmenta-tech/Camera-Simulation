@@ -52,7 +52,7 @@ class SceneObjects{
             if(index === -1)
             {
                 sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
-                sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
+                sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_LENGTH);
             }
             else
             {
@@ -60,7 +60,7 @@ class SceneObjects{
                 const cams = url.split('&');
                 const sceneInfo = cams.shift();
                 const infos = sceneInfo.split(',');
-                let mode, sceneWidth, sceneHeight;;
+                let mode, sceneWidth, sceneLength;
                 infos.forEach(info => {
                     const keyVal = info.split('=');
                     const key = keyVal[0];
@@ -72,8 +72,8 @@ class SceneObjects{
                             sceneWidth = val;
                             break;
                         case "l":
-                            document.getElementById("input-scene-height-inspector").value = parseFloat(val);
-                            sceneHeight = val;
+                            document.getElementById("input-scene-length-inspector").value = parseFloat(val);
+                            sceneLength = val;
                             break;
                         case "m":
                             document.getElementById("tracking-mode-selection-inspector").value = val;
@@ -86,7 +86,7 @@ class SceneObjects{
                             break;
                     }
                 });
-                sceneManager.updateAugmentaSceneBorder(sceneWidth, sceneHeight);
+                sceneManager.updateAugmentaSceneBorder(sceneWidth, sceneLength);
                 
                 cams.forEach(c => {
                     const props = c.split(',');
@@ -255,13 +255,13 @@ class SceneObjects{
 
     /* USER'S ACTIONS */
 
-        this.calculateScenePolygon = function(givenWidth, givenHeight)
+        this.calculateScenePolygon = function(givenWidth, givenLength)
         {
             givenAreaPolygonRegions[0].length = 0;
             givenAreaPolygonRegions[0].push([0, 0]);
             givenAreaPolygonRegions[0].push([givenWidth, 0]);
-            givenAreaPolygonRegions[0].push([givenWidth, givenHeight]);
-            givenAreaPolygonRegions[0].push([0, givenHeight]);
+            givenAreaPolygonRegions[0].push([givenWidth, givenLength]);
+            givenAreaPolygonRegions[0].push([0, givenLength]);
         }
 
         this.updateObjectsPosition = function()
@@ -285,7 +285,7 @@ class SceneObjects{
             url += "L=";
             url += Math.floor(sceneManager.sceneWidth * 100)/100;
             url += ",l=";
-            url += Math.floor(sceneManager.sceneHeight * 100)/100;
+            url += Math.floor(sceneManager.sceneLength * 100)/100;
             url += ",m=";
             url += sceneManager.trackingMode;
             url += ",h=";

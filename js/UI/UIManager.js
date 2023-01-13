@@ -19,8 +19,8 @@ class UIManager{
                 if(event.target == copyUrlModal) copyUrlModal.classList.add('hidden');
             });
 
-            document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
-            document.getElementById("input-scene-height-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
+            document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-length-inspector").value)));
+            document.getElementById("input-scene-length-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-length-inspector").value)));
 
 
             document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {

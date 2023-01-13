@@ -101,7 +101,7 @@ class Wizard{
         function initWizardValues(sceneManager)
         {
             document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-scene-height-wizard').value = Math.round(sceneManager.sceneHeight * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-scene-length-wizard').value = Math.round(sceneManager.sceneLength * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
 
             document.getElementById('tracking-mode-selection-wizard').value = sceneManager.trackingMode;
@@ -177,7 +177,7 @@ class Wizard{
         function createSceneFromWizard(sceneManager)
         {
             const inputWidth = parseFloat(document.getElementById('input-scene-width-wizard').value);
-            const inputHeight = parseFloat(document.getElementById('input-scene-height-wizard').value);
+            const inputLength = parseFloat(document.getElementById('input-scene-length-wizard').value);
             const camsHeight = Math.round(parseFloat(document.getElementById('input-hook-height-wizard').value) / sceneManager.currentUnit.value * 100) / 100;
             
             const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
@@ -195,7 +195,7 @@ class Wizard{
                     break;
             }
 
-            if(!inputWidth || !inputHeight)
+            if(!inputWidth || !inputLength)
             {
                 alert("Please fill your scene horizontal and vertical length");
                 return;
@@ -207,7 +207,7 @@ class Wizard{
             }
 
             const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit.value * 100) / 100;
-            const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit.value * 100) / 100;
+            const givenLength = Math.ceil(inputLength / sceneManager.currentUnit.value * 100) / 100;
 
             let configs = [];
 
@@ -226,16 +226,16 @@ class Wizard{
                 if(document.getElementById('check-' + type.id).checked && camsHeight <= augmentaFar && camsHeight >= type.rangeNear + overlapHeightDetection)
                 {
                     const widthAreaCovered = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
-                    const heightAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
+                    const lengthAreaCovered = Math.abs(Math.tan((type.VFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
 
-                    const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
-                    const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
+                    const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenLength / lengthAreaCovered);
+                    const nbCamsRot = Math.ceil(givenWidth / lengthAreaCovered) * Math.ceil(givenLength / widthAreaCovered);
 
                     nbCamsRot < nbCamsNoRot
                         ?
-                        configs.push({ typeID: type.id, w: heightAreaCovered, h:widthAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true })
+                        configs.push({ typeID: type.id, w: lengthAreaCovered, l:widthAreaCovered, nbW: Math.ceil(givenWidth / lengthAreaCovered), nbL: Math.ceil(givenLength / widthAreaCovered), rot: true })
                         :
-                        configs.push({ typeID: type.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenHeight / heightAreaCovered), rot: false });
+                        configs.push({ typeID: type.id, w: widthAreaCovered, l:lengthAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbL: Math.ceil(givenLength / lengthAreaCovered), rot: false });
                 }
             });
 
@@ -246,37 +246,37 @@ class Wizard{
             }
             else
             {
-                sceneManager.updateAugmentaSceneBorder(inputWidth, inputHeight);
+                sceneManager.updateAugmentaSceneBorder(inputWidth, inputLength);
 
-                configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
-                configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
+                configs.sort((A,B) => A.nbW * A.nbL - B.nbW * B.nbL);
+                configs = configs.filter(c => c.nbW * c.nbL === configs[0].nbW * configs[0].nbL);
                 configs.sort((A,B) => A.typeID - B.typeID);
                 let chosenConfig = configs[0];
                 sceneManager.objects.removeNodes();
 
                 let offsetX = chosenConfig.w / 2.0;
-                let offsetY = chosenConfig.h / 2.0;
+                let offsetY = chosenConfig.l / 2.0;
                 if(chosenConfig.nbW === 1) offsetX -= (chosenConfig.nbW*chosenConfig.w - givenWidth)/2.0;
-                if(chosenConfig.nbH === 1) offsetY -= (chosenConfig.nbH*chosenConfig.h - givenHeight)/2.0;
+                if(chosenConfig.nbL === 1) offsetY -= (chosenConfig.nbL*chosenConfig.l - givenLength)/2.0;
                 const oX = chosenConfig.nbW > 1 ? (chosenConfig.nbW*chosenConfig.w - givenWidth)/(chosenConfig.nbW - 1) : 0;
-                const oY = chosenConfig.nbH > 1 ? (chosenConfig.nbH*chosenConfig.h - givenHeight)/(chosenConfig.nbH - 1) : 0;
+                const oY = chosenConfig.nbL > 1 ? (chosenConfig.nbL*chosenConfig.l - givenLength)/(chosenConfig.nbL - 1) : 0;
 
                 for(let i = 0; i < chosenConfig.nbW; i++)
                 {
-                    for(let j = 0; j < chosenConfig.nbH; j++)
+                    for(let j = 0; j < chosenConfig.nbL; j++)
                     {
                         chosenConfig.rot 
                             ?
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.h - oY), 0, 0, Math.PI/2.0)
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.l - oY), 0, 0, Math.PI/2.0)
                             :
-                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.h - oY));
+                            sceneManager.objects.addNode(true, trackingMode, chosenConfig.typeID, offsetX + i*(chosenConfig.w - oX), camsHeight + sceneElevation, offsetY + j*(chosenConfig.l - oY));
 
                     }
                 }
 
                 // update inspector infos
                 document.getElementById('input-scene-width-inspector').value = inputWidth;
-                document.getElementById('input-scene-height-inspector').value = inputHeight;
+                document.getElementById('input-scene-length-inspector').value = inputLength;
                 document.getElementById('input-scene-sensor-height-inspector').value = camsHeight;
     
                 document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
@@ -296,7 +296,7 @@ class Wizard{
                 sceneManager.changeTrackingMode(trackingMode);
                 if(trackingMode === 'human-tracking') sceneManager.heightDetected = overlapHeightDetection;
     
-                //placeCamera(new THREE.Vector3(givenWidth, 6, givenHeight));
+                //placeCamera(new THREE.Vector3(givenWidth, 6, givenLength));
                 document.getElementById('wizard-modal').classList.add('hidden');
             }
         }
