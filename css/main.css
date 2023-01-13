@@ -42,6 +42,13 @@ p {
   color: var(--color-grey-p);
 }
 
+p a {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 15px;
+}
+
 h3.dark-mode, p.dark-mode, label.dark-mode {
   color: var(--color-white);
 }
