@@ -277,6 +277,7 @@ class Wizard{
                 // update inspector infos
                 document.getElementById('input-scene-width-inspector').value = inputWidth;
                 document.getElementById('input-scene-height-inspector').value = inputHeight;
+                document.getElementById('input-scene-sensor-height-inspector').value = camsHeight;
     
                 document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
                 switch(trackingMode)
