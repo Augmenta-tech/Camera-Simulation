@@ -8,8 +8,7 @@ import {
     Vector3
 } from 'three';
 import { TextGeometry } from 'three-text-geometry';
-
-import { camerasTypes, units } from '/js/data.js'
+import { getCamerasTypes } from '../../../data.js';
 
 import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 
@@ -22,7 +21,7 @@ class Node{
     constructor(id, mode = document.getElementById("tracking-mode-inspector").value, cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = Node.DEFAULT_NODE_HEIGHT, p_z = 0, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
-        this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
+        this.cameraType = getCamerasTypes().find(t => t.id === cameraTypeID);
 
         this.xPos = p_x;
         this.yPos = p_y;

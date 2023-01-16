@@ -1,4 +1,4 @@
-import { camerasTypes, units } from '/js/data.js'
+import { getCamerasTypes, units } from '/js/data.js'
 
 import { SceneManager } from '/js/scene/SceneManager.js'
 
@@ -119,7 +119,7 @@ class Wizard{
             let title = document.createElement("h3");
             title.innerHTML = "Choose the type.s of camera.s you want to use";
             camTypesForm.appendChild(title);*/
-            camerasTypes.filter(c => c.recommended).forEach(c => {
+            getCamerasTypes().filter(c => c.recommended).forEach(c => {
                 //const hookHeight = parseFloat(document.getElementById('input-hook-height-wizard').value);
                 //if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById('tracking-mode-selection-wizard').value))
                 //{
@@ -159,7 +159,7 @@ class Wizard{
                     const last = id.charAt(id.length - 1);
                     camTypesChecked.push(parseFloat(last));
                 });
-                const camerasChecked = camerasTypes.filter(c => camTypesChecked.includes(c.id));
+                const camerasChecked = getCamerasTypes().filter(c => camTypesChecked.includes(c.id));
     
                 switch(mode)
                 {
@@ -211,7 +211,7 @@ class Wizard{
 
             let configs = [];
 
-            camerasTypes.filter(c => c.recommended).forEach(type => {
+            getCamerasTypes().filter(c => c.recommended).forEach(type => {
                 let augmentaFar = 0;
                 switch(trackingMode)
                 {

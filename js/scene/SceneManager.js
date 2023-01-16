@@ -19,7 +19,7 @@ import {
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
 
-import { camerasTypes, units } from '/js/data.js';
+import { units } from '/js/data.js';
 import { Checkerboard } from '/js/scene/Checkerboard.js';
 import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 import { Node } from '/js/scene/objects/sensors/Node.js';
