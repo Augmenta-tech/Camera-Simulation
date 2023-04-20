@@ -178,7 +178,7 @@ class Wizard{
         {
             const inputWidth = parseFloat(document.getElementById('input-scene-width-wizard').value);
             const inputLength = parseFloat(document.getElementById('input-scene-length-wizard').value);
-            const camsHeight = Math.round(parseFloat(document.getElementById('input-hook-height-wizard').value) / sceneManager.currentUnit.value * 100) / 100;
+            const inputCamsHeight = parseFloat(document.getElementById('input-hook-height-wizard').value);
             
             const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
             let sceneElevation, overlapHeightDetection;
@@ -200,7 +200,7 @@ class Wizard{
                 alert("Please fill your scene horizontal and vertical length");
                 return;
             }
-            if(!camsHeight)
+            if(!inputCamsHeight)
             {
                 alert("Please fill the hook height from your scene");
                 return;
@@ -208,6 +208,7 @@ class Wizard{
 
             const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit.value * 100) / 100;
             const givenLength = Math.ceil(inputLength / sceneManager.currentUnit.value * 100) / 100;
+            const camsHeight = Math.round(inputCamsHeight / sceneManager.currentUnit.value * 100) / 100;
 
             let configs = [];
 
@@ -277,7 +278,7 @@ class Wizard{
                 // update inspector infos
                 document.getElementById('input-scene-width-inspector').value = inputWidth;
                 document.getElementById('input-scene-length-inspector').value = inputLength;
-                document.getElementById('input-scene-sensor-height-inspector').value = camsHeight;
+                document.getElementById('input-scene-sensor-height-inspector').value = inputCamsHeight;
     
                 document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
                 switch(trackingMode)
