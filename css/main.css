@@ -460,3 +460,14 @@ a.main-button {
 #scene-fully-covered-icon{
   color: #2b2
 }
+
+#open-wizard-button {
+  background-color: #7c4596;
+  height: 3em;
+  width: 70%;
+}
+
+#open-wizard-button p {
+  font-weight: bold;
+  font-size: large;
+}
