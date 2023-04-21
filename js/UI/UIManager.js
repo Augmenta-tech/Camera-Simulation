@@ -112,6 +112,8 @@ class UIManager{
             isAreaCoveredUI(sceneManager);
             changeNumberOfNodes(sceneManager);
         }
+
+        isAreaCoveredUI(); // update area fully covered icon
     }
 }
 
