@@ -57,6 +57,7 @@ class SceneManager{
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
         this.sceneLength = SceneManager.DEFAULT_LENGTH;
+        this.sceneSensorHeight = Node.DEFAULT_NODE_HEIGHT;
         this.sceneElevation = 0;
 
         this.size = 160;

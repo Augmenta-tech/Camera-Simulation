@@ -297,6 +297,7 @@ class Wizard{
                 //set scene attributes
                 sceneManager.changeTrackingMode(trackingMode);
                 if(trackingMode === 'human-tracking') sceneManager.heightDetected = overlapHeightDetection;
+                sceneManager.sceneSensorHeight = camsHeight;
     
                 //placeCamera(new THREE.Vector3(givenWidth, 6, givenLength));
                 document.getElementById('wizard-modal').classList.add('hidden');

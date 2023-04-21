@@ -82,6 +82,9 @@ class SceneObjects{
                         case "h":
                             sceneManager.heightDetected = parseFloat(val);
                             break;
+                        case "sh":
+                            document.getElementById("input-scene-sensor-height-inspector").value = parseFloat(val);
+                            sceneManager.sceneSensorHeight = parseFloat(val);
                         default:
                             break;
                     }
@@ -290,6 +293,8 @@ class SceneObjects{
             url += sceneManager.trackingMode;
             url += ",h=";
             url += sceneManager.heightDetected;
+            url += ",sh=";
+            url += sceneManager.sceneSensorHeight;
             url += '&';
             nodes.forEach(n => {
                 url += "id=";
