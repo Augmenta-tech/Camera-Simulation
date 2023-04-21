@@ -61,6 +61,7 @@ class SceneObjects{
                 const sceneInfo = cams.shift();
                 const infos = sceneInfo.split(',');
                 let mode, sceneWidth, sceneLength;
+                let unitLabelFromURL = "";
                 infos.forEach(info => {
                     const keyVal = info.split('=');
                     const key = keyVal[0];
@@ -85,6 +86,10 @@ class SceneObjects{
                         case "sh":
                             document.getElementById("input-scene-sensor-height-inspector").value = parseFloat(val);
                             sceneManager.sceneSensorHeight = parseFloat(val);
+                            break;
+                        case "u":
+                            unitLabelFromURL = val;
+                            break;
                         default:
                             break;
                     }
@@ -136,6 +141,10 @@ class SceneObjects{
                     });
                     sceneObjects.addNode(true, sceneManager.trackingMode, typeID, x, y, z, p, a, r)
                 })
+
+                // change the unit according to the value in the URL 
+                if(unitLabelFromURL != "" && sceneManager.currentUnit.label != unitLabelFromURL) sceneManager.toggleUnit();
+                console.assert(sceneManager.currentUnit.label == unitLabelFromURL);
             }
         }
 
@@ -295,6 +304,8 @@ class SceneObjects{
             url += sceneManager.heightDetected;
             url += ",sh=";
             url += sceneManager.sceneSensorHeight;
+            url += ",u=";
+            url += sceneManager.currentUnit.label;
             url += '&';
             nodes.forEach(n => {
                 url += "id=";
