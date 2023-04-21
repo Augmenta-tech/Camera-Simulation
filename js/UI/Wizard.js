@@ -1,6 +1,7 @@
-import { getCamerasTypes, units } from '/js/data.js'
+import { getCamerasTypes, units } from '/js/data.js';
 
-import { SceneManager } from '/js/scene/SceneManager.js'
+import { SceneManager } from '/js/scene/SceneManager.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 
 class Wizard{
     constructor()
@@ -102,7 +103,7 @@ class Wizard{
         {
             document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-scene-length-wizard').value = Math.round(sceneManager.sceneLength * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(Node.DEFAULT_NODE_HEIGHT * sceneManager.currentUnit.value * 100) / 100.0;
 
             document.getElementById('tracking-mode-selection-wizard').value = sceneManager.trackingMode;
 

@@ -1,4 +1,5 @@
 import { SceneManager } from '/js/scene/SceneManager.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 
 import { Wizard } from '/js/UI/Wizard.js';
 
@@ -22,7 +23,6 @@ class UIManager{
             document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-length-inspector").value)));
             document.getElementById("input-scene-length-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-length-inspector").value)));
 
-
             document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {
                 const mode = document.getElementById("tracking-mode-selection-inspector").value;
                 sceneManager.changeTrackingMode(mode);
@@ -45,6 +45,7 @@ class UIManager{
                 else inputs[i].value = '';
             }
 
+            document.getElementById("input-scene-sensor-height-inspector").value = Node.DEFAULT_NODE_HEIGHT;
             document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
         }
 
