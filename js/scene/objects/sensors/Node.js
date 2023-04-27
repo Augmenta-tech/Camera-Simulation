@@ -14,7 +14,7 @@ import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;
-    static DEFAULT_NODE_HEIGHT = 4.5;
+    static DEFAULT_NODE_HEIGHT = 5.5;
     static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
     static SIZE_TEXT_NODE = 0.4;
 
