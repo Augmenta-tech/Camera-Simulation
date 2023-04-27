@@ -132,7 +132,7 @@ class Wizard{
                     camTypeCheckbox.classList.add('checkbox-camera-type');
                     const label = document.createElement("label");
                     label.setAttribute("for", "check-" + c.id)
-                    label.innerHTML = c.name;
+                    label.innerHTML = c.niceName;
 
                     const url = document.location.href;
                     if(url.includes('beta')) label.classList.add('dark-mode');

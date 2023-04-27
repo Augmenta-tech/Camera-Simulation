@@ -13,7 +13,7 @@ class NodeUI{
         {
             let cameraTypesOptions = ``;
             getCamerasTypes().filter(c => c.recommended).forEach(type => {
-                const optionElement = `<option value="` + type.name + `" ` + (node.cameraType.name === type.name ? `selected` : ``) + `>` + type.name;
+                const optionElement = `<option value="` + type.niceName + `" ` + (node.cameraType.niceName === type.niceName ? `selected` : ``) + `>` + type.niceName;
                 cameraTypesOptions += optionElement;
                 cameraTypesOptions += "</option>"
             });
@@ -258,7 +258,7 @@ class NodeUI{
 
         function changeCameraType()
         {
-            node.cameraType = getCamerasTypes().find(type => type.name === document.getElementById('cam-type-' + node.id).value);
+            node.cameraType = getCamerasTypes().find(type => type.niceName === document.getElementById('cam-type-' + node.id).value);
 
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;
