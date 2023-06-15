@@ -539,7 +539,6 @@ class SceneObjects{
                 trackingModeElement.value = mode;
                 trackingModeElement.dispatchEvent(new Event('change'));
             }
-            sceneManager.changeTrackingMode(mode);
 
             //height detected
             if(datas.hasOwnProperty('heightDetected'))

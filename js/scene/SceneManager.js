@@ -30,7 +30,7 @@ import { SphereGeometry } from 'three';
 class SceneManager{
     static loadFont(isBuilder, callback)
     {
-        const path = isBuilder ? './designer/' : './';
+        const path = './';
         new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneManager.font = response;
             callback();
@@ -279,6 +279,7 @@ class SceneManager{
         this.changeTrackingMode = function(mode)
         {
             this.trackingMode = mode;
+            console.log(mode)
 
             switch(mode)
             {
@@ -291,15 +292,19 @@ class SceneManager{
                     this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
                     break;
                 case 'wall-tracking':
+                    console.log("wall")
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     this.sceneWidth = this.checkerboardWallY.width;
                     this.sceneHeight = this.checkerboardWallY.height;
-                    if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
+                    if(this.augmentaSceneLoaded) {
+                        console.log(this.augmentaSceneLoaded)
+                        changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
                     this.wallY.position.z = 0;
                     break;
                 case 'human-tracking':
-                default:
+                    default:
+                    console.log("human")
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     this.sceneWidth = this.checkerboardFloor.width;

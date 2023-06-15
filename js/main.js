@@ -1,3 +1,5 @@
 import { Engine } from './Engine.js';
 
-new Engine();
+const main = new Engine();
+
+export{main}

@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="#">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <title>Augmenta designer (beta)</title>
     <link rel="icon" href="img/augmenta-logo.png" type="image/png">
@@ -18,11 +19,218 @@
     <!-- POPUP -->
     <div id="popup" class="cd-popup is-visible" role="alert">
       <div class="cd-popup-container">
-       <p>something</p>
+        <div id="bottom-section" class="column center-x">
+
+          <!-- TABS -->
+          <div id="builder-tabs" class="row center-x">
+            <div id="setup-tab" class="column center-x tab passed-tab">
+              <h3>Setup</h3>
+              <div class="tab-line"></div>
+            </div>
+            <div id="dimensions-tab" class="column center-x tab">
+              <h3>Dimensions</h3>
+              <div class="tab-line"></div>
+            </div>
+            <div id="hardware-tab" class="column center-x tab">
+              <h3>Hardware</h3>
+              <div class="tab-line"></div>
+            </div>
+            <div id="my-system-tab" class="column center-x tab">
+              <h3>My system</h3>
+              <div class="tab-line"></div>
+            </div>
+          </div>
+  
+          <!-- SETUP CONTENT -->
+          <div id="setup-content" class="column builder-section">
+            <!-- TRACKING MODE SELECTION -->
+            <div id="tracking-mode-selection-builder" class="row wrap center-x center-y builder-section-content">
+              <label id="tracking-mode-human-tracking-input" class="tracking-mode-choice">
+                <input type="radio" name="tracking-mode-selection-builder" value="human-tracking" checked>
+                <img id="human-tracking-img" src="img/floor-tracking.png" alt="Human tracking">
+              </label>
+              <label id="tracking-mode-hand-tracking-input" class="tracking-mode-choice">
+                <input type="radio" name="tracking-mode-selection-builder" value="hand-tracking">
+                <img id="hand-tracking-img" src="img/table-tracking.png" alt="Hand tracking">
+              </label>
+              <label id="tracking-mode-wall-tracking-input" class="tracking-mode-choice">
+                <input type="radio" name="tracking-mode-selection-builder" value="wall-tracking">
+                <img id="wall-tracking-img" src="img/wall-tracking.png" alt="Wall tracking">
+              </label>
+              <label id="tracking-mode-advanced" class="tracking-mode-choice">
+                <img id="advanced-img" src="img/advanced.png" alt="Advanced">
+              </label>
+              <label id="tracking-mode-curved-wall-input" class="tracking-mode-choice hidden">
+                <input type="radio" name="tracking-mode-selection-builder" value="curved-wall">
+                <img id="curved-wall-img" src="img/curved-wall.png" alt="Curved Wall">
+              </label>
+              <label id="tracking-mode-feet-tracking-input" class="tracking-mode-choice hidden">
+                <input type="radio" name="tracking-mode-selection-builder" value="feet-tracking">
+                <img id="feet-tracking-img" src="img/feet-tracking.png" alt="Feet tracking">
+              </label>
+              <label id="tracking-mode-fast-objects-tracking-input" class="tracking-mode-choice hidden">
+                <input type="radio" name="tracking-mode-selection-builder" value="fast-objects-tracking">
+                <img id="fast-objects-tracking-img" src="img/fast-objects-tracking.png" alt="Fast objects">
+              </label>
+            </div>
+            <div id="setup-warning-message" class="row center-x hidden">
+              <p id="setup-warning-text" class="warning-text">Please choose a surface to track</p>
+            </div>
+  
+            <!-- SETUP BUTTONS-->
+            <div class="column center-x center-y builder-section-buttons">
+              <div class="row center-x center-y nav-buttons">
+              <!-- NEXT BUTTON -->
+                <div id="next-button-setup" class="builder-button builder-main-button">
+                  <p id="next-button-setup-text" class="bold-font"> NEXT </p>
+                  <span class="iconify" data-icon="dashicons:arrow-right-alt2"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- DIMENSIONS CONTENT -->
+          <div id="dimensions-content" class="column builder-section hidden">
+            <!-- DIMENSIONS INPUTS -->
+            <div id="dimensions-section-builder" class="column center-y builder-section-content">
+              <div id="gizmo-helper-image" class="row center-x center-y">
+                <img src="img/gizmo-helper.png" alt="Gizmo helper">
+              </div>
+              <div id="dimensions-inputs" class="row wrap center-x center-y dimensions-inputs">
+                <div id="dimensions-width" class="column">
+                  <div class="column">
+                    <p id="dimensions-width-text">Width (<span data-unittext="1">m</span>)</p>
+                  </div>
+                  <div class="column">
+                    <input id="dimensions-width-input" type="text" placeholder="Width" min="0" max="100" step="0.1" data-unit="1">
+                  </div>
+                </div>
+                <div id="dimensions-length" class="column">
+                  <div class="column">
+                    <p id="dimensions-length-text">Length (<span data-unittext="1">m</span>)</p>
+                  </div>
+                  <div class="column">
+                    <input id="dimensions-length-input" type="text" placeholder="Length" min="0" max="100" step="0.1" data-unit="1">
+                  </div>
+                </div>
+                <div id="dimensions-distance" class="column">
+                  <div class="column">
+                    <p id="dimensions-distance-text-default">Sensor height (<span data-unittext="1">m</span>)</p>
+                    <p id="dimensions-distance-text-hand-tracking" class="hidden">Sensor height (<span data-unittext="1">m</span>) <span id="sensor-height-infos" class="iconify" data-icon="el:info-circle"></span></p>
+                    <div id="sensor-height-infos-text" class="hidden">
+                      <p>Sensor height from your tracking area. Please indicate here the distance between your hook and your table.</p>
+                    </div>
+                    <p id="dimensions-distance-text-wall-tracking" class="hidden">Height (<span data-unittext="1">m</span>)</p>
+                  </div>
+                  <div class="column">
+                    <input id="dimensions-distance-input" type="text" placeholder="Sensor height" min="0" max="20" step="0.1" data-unit="1">
+                  </div>
+                </div>
+              </div>
+              <div id="dimensions-warning-message" class="row center-x wrap hidden">
+                <p id="dimensions-warning-text" class="warning-text">No hardware setup found,</p><p id="dimensions-warning-button" class="text-button">click here to get in touch with our experts.</p>
+              </div>
+              <div id="dimensions-negative-values-warning" class="row center-x wrap hidden">
+                <p id="dimensions-negative-values-warning-text" class="warning-text">Please enter positive values.</p>
+              </div>
+            </div>
+            <!-- DIMENSIONS BUTTONS-->
+            <div class="column center-x center-y builder-section-buttons">
+              <div class="row center-x center-y nav-buttons">
+                <!-- PREVIOUS BUTTON -->
+                <div id="previous-button-dimensions" class="builder-button builder-secondary-button">
+                  <p id="previous-button-dimensions-text" class="bold-font"> PREVIOUS </p>
+                </div>
+                <!-- NEXT BUTTON -->
+                <div id="next-button-dimensions" class="builder-button builder-main-button">
+                  <p id="next-button-dimensions-text" class="bold-font"> NEXT </p>
+                  <span class="iconify" data-icon="dashicons:arrow-right-alt2"></span>
+                </div>
+              </div>
+              <!-- NEED SOMETHING DIFFERENT BUTTON -->
+              <div id="dimensions-need-something-different-button" class="row center-x">
+                <p id="dimensions-need-something-different-button" class="text-button">Need something different ?</p>
+              </div>
+            </div>
+          </div>
+  
+          <!-- HARDWARES CONTENT -->
+          <div id="hardware-content" class="column builder-section hidden">
+            <!-- HARDWARES SELECTION -->
+            <div id="hardware-section-builder" class="column center-x center-y builder-section-content">
+              <div id="hardware-switch-indoor-outdoor" class="row center-x center-y">
+                <label class="hardware-radio-label">
+                  <input id="hardware-input-radio-indoor" type="radio" name="switch-indoor-outdoor-builder" value="indoor" checked>
+                  <div class="row center-x center-y hardware-switch">
+                    <p>Indoor</p>
+                  </div>
+                </label>
+                <label class="hardware-radio-label">
+                  <input id="hardware-input-radio-outdoor" type="radio" name="switch-indoor-outdoor-builder" value="outdoor">
+                  <div class="row center-x center-y hardware-switch">
+                    <p>Outdoor</p>
+                  </div>
+                </label>
+              </div>
+              <div id="hardware-sensors-selection" class="row wrap center-x center-y">
+                <!-- FILLED IN JS WITH CORRECT SENSORS -->
+              </div>
+              <div id="hardware-warning-message" class="row center-x wrap hidden">
+                <p id="hardware-warning-text" class="warning-text">No hardware setup found,</p><p id="hardware-warning-button" class="text-button">click here to get in touch with our experts.</p>
+              </div>
+            </div>
+            <!-- HARDWARES BUTTONS-->
+            <div class="column center-x center-y builder-section-buttons">
+              <div class="row center-x center-y nav-buttons">
+                <!-- PREVIOUS BUTTON -->
+                <div id="previous-button-hardware" class="builder-button builder-secondary-button">
+                  <p id="previous-button-hardware-text" class="bold-font"> PREVIOUS </p>
+                </div>
+                <!-- NEXT BUTTON -->
+                <div id="next-button-hardware" class="builder-button builder-main-button">
+                  <p id="next-button-hardware-text" class="bold-font"> NEXT </p>
+                  <span class="iconify" data-icon="dashicons:arrow-right-alt2"></span>
+                </div>
+              </div>
+              <!-- NEED SOMETHING DIFFERENT BUTTON -->
+              <div id="hardware-need-something-different-button" class="row center-x">
+                <p id="hardware-need-something-different-button" class="text-button">Need something different ?</p>
+              </div>
+            </div>
+          </div>
+  
+          <!-- MY SYSTEM CONTENT -->
+          <div id="my-system-content" class="column builder-section hidden">
+            <!-- RECAP -->
+            <div id="my-system-section-builder" class="row center-x center-y builder-section-content">
+              <div id="my-system-scene-infos" class="row center-x center-y my-system-section my-system-line">
+                <div id="my-system-tracking-mode" class="column center-x center-y ">
+                  <!-- FILLED IN JS WITH CHOSEN CONFIG -->
+                </div>
+                <div id="my-system-dimensions" class="column center-x center-y">
+                  <!-- FILLED IN JS WITH CHOSEN CONFIG -->
+                </div>
+              </div>
+              <div id="my-system-recap" class="column center-y my-system-section">
+                <!-- FILLED IN JS WITH CHOSEN CONFIG -->
+              </div>
+            </div>
+            <!-- MY SYSTEM BUTTONS-->
+            <div class="column center-x center-y builder-section-buttons">
+              <div class="row center-x center-y nav-buttons">
+                <!-- PREVIOUS BUTTON -->
+                <div id="previous-button-my-system" class="builder-button builder-secondary-button">
+                  <p id="previous-button-my-system-text" class="bold-font"> PREVIOUS </p>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div id="bottom-line" class="bottom-line"></div>
+        </div> 
         <a id="close-popup" href="#0" class="cd-popup-close img-replace">Close</a>
       </div>
     </div>
-    <script type="module" src="./js/UI/Popup.js"></script>
 
     <div class="row full-height">
 
@@ -403,4 +611,5 @@
   </script> 
 
   <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/UI/Popup.js"></script>
 </html>

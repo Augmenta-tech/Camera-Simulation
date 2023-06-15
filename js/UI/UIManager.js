@@ -37,12 +37,12 @@ class UIManager{
                 sceneManager.changeTrackingMode(mode);
                 this.displayWarning(sceneManager);
             });
+            
             document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
                 sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-inspector").value);
                 sceneManager.objects.populateStorage();
             });
             
-
             this.wizard.bindEventListeners(viewportManager, this);
         }
 
@@ -50,10 +50,10 @@ class UIManager{
         {
             /* TODO: This should disappear : add data-unit="1" in every numeral inputs that we want to convert (this adds it in all inputs)*/
             //TOGGLE INPUTS  UNITS
-            const inputs = document.getElementsByTagName('input');
-            for(let i = 0; i < inputs.length; i++)
-                if(inputs[i].type !== 'file' && inputs[i].id !== 'scene-file-name-input')
-                { inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value; }
+            // const inputs = document.getElementsByTagName('input');
+            // for(let i = 0; i < inputs.length; i++)
+            //     if(inputs[i].type !== 'file' && inputs[i].id !== 'scene-file-name-input')
+            //     { inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value; }
 
             document.getElementById('scene-file-name-input').value = '';
             
