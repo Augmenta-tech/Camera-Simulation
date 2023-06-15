@@ -8,7 +8,7 @@ class Wizard{
     constructor()
     {
         addSensorsTypesToForm();
-
+        
         this.bindEventListeners = function(viewportManager, uiManager)
         {
             const sceneManager = viewportManager.sceneManager;
@@ -17,6 +17,7 @@ class Wizard{
             document.getElementById('open-wizard-button').addEventListener('click', () => {
                 if(sceneManager.augmentaSceneLoaded)
                 {
+                    //document.getElementById('popup').classList.add('is-visible');
                     initWizardValues(sceneManager);
                     formModal.classList.remove('hidden');
                 }
@@ -197,9 +198,8 @@ class Wizard{
 
             changeTrackingMode(sceneManager, sceneManager.trackingMode);
             if(sceneManager.trackingMode === 'human-tracking') document.getElementById('overlap-height-selection-wizard').value = sceneManager.heightDetected;
-
         }
-
+    
         function addSensorsTypesToForm(){
             const sensorTypesForm = document.getElementById('cam-types-checkboxes-wizard');
             /*while (sensorTypesForm.firstChild) {

@@ -12,7 +12,9 @@ class Engine{
         const viewportManager = this.viewportManager;
 
         /* initialize ui */ 
-        const uiManager = isBuilder ? undefined : new UIManager();
+        this.uiManager = isBuilder ? undefined : new UIManager();
+        const uiManager = this.uiManager;
+        
 
         bindEventListeners();
         animate();

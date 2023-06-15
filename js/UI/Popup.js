@@ -1,5 +1,6 @@
 import { camerasTypes, lidarsTypes } from '../data.js';
 import { main } from '../main.js';
+
 import { SceneManager } from '../scene/SceneManager.js';
 import { calculateCameraConfig, calculateLidarConfig, checkCameraCoherence, checkLidarCoherence, createSceneFromCameraConfig, createSceneFromLidarConfig, getMinNearFromSensors, getMaxFarFromSensors } from '../UI/Wizard.js';
 import { ViewportManager } from '../ViewportManager.js';
@@ -19,7 +20,6 @@ function onWindowResize() {
     document.getElementById('tracking-mode-selection-builder').classList.add('row');
     document.getElementById('hardware-sensors-selection').classList.add('row');
     document.getElementById('my-system-section-builder').classList.add('row');
-
     //main.viewportManager.onWindowResize();
 }
 
@@ -102,14 +102,17 @@ function deleteAllChildren(element)
 /** SETUP SECTION */
 function initSetupSection()
 {
+    //Get previous stored information
     const sceneInfos = sessionStorage.getItem('sceneInfos');
     if(sceneInfos) trackingMode = JSON.parse(sceneInfos).trackingMode;
 
+    //Highlight the previous stored option or "human-tracking" by default
     const trackingModeRadios = document.getElementsByName("tracking-mode-selection-builder");
     for(let i = 0; i < trackingModeRadios.length; i++)
     {
         trackingModeRadios[i].checked = (trackingModeRadios[i].value === (trackingMode ? trackingMode : "human-tracking"));
     }
+    //Set 3D scene to previous information
     if(trackingMode && sceneManager.augmentaSceneLoaded) sceneManager.changeTrackingMode(trackingMode)
 }
 
@@ -118,9 +121,13 @@ for(let i = 0; i < trackingModeRadios.length; i++)
 {
     trackingModeRadios[i].addEventListener('click', () => 
     {
-        const trackingModeRadios = document.getElementsByName("tracking-mode-selection-builder");
-        sceneManager.changeTrackingMode(trackingModeRadios[i].value)
-        document.getElementById('setup-warning-message').classList.add('hidden');
+        //Current selected value
+        let trackingMode = trackingModeRadios[i].value;
+        //change 3D scene
+        sceneManager.changeTrackingMode(trackingMode)
+        //change selector inspector
+        main.uiManager.changeTrackingMode(trackingMode);
+        document.getElementById("tracking-mode-selection-inspector").value = trackingMode;
     });
 }
 
