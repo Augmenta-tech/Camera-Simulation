@@ -18,11 +18,10 @@ import {
 } from 'three';
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
-
-import { camerasTypes, units } from '../data.js';
-import { Checkerboard } from './Checkerboard.js';
-import { SceneObjects } from './objects/SceneObjects.js';
-import { Node } from './objects/sensors/Node.js';
+import { units } from '/js/data.js';
+import { Checkerboard } from '/js/scene/Checkerboard.js';
+import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
@@ -42,7 +41,7 @@ class SceneManager{
     static DEFAULT_TRACKING_MODE = 'human-tracking';
     static DEFAULT_DETECTION_HEIGHT = document.getElementById('default-height-detected') ? parseFloat(document.getElementById('default-height-detected').value) : 1.2;
     static DEFAULT_WIDTH = 5;
-    static DEFAULT_HEIGHT = 5;
+    static DEFAULT_LENGTH = 5;
     static DEFAULT_ENV = 'indoor';
 
     static TABLE_ELEVATION = 0.75;
@@ -58,7 +57,8 @@ class SceneManager{
 
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
-        this.sceneHeight = SceneManager.DEFAULT_HEIGHT;
+        this.sceneLength = SceneManager.DEFAULT_LENGTH;
+        this.sceneSensorHeight = Node.DEFAULT_NODE_HEIGHT;
         this.sceneElevation = 0;
 
         this.sceneEnvironment = SceneManager.DEFAULT_ENV;
@@ -119,12 +119,12 @@ class SceneManager{
         this.initAugmentaScene = function()
         {
             // Scene Checkerboard
-            this.checkerboardFloor = new Checkerboard(this.floor, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
+            this.checkerboardFloor = new Checkerboard(this.floor, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
             this.checkerboardFloor.addToScene(this.scene);
 
-            this.checkerboardWallY = new Checkerboard(this.wallY, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
+            this.checkerboardWallY = new Checkerboard(this.wallY, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
 
-            //this.checkerboardWallX = new Checkerboard(this.wallX, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneHeight);
+            //this.checkerboardWallX = new Checkerboard(this.wallX, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
 
             if(this.transformControl) this.scene.add(this.transformControl);
 
@@ -237,22 +237,22 @@ class SceneManager{
          * Define the border of the scene to track
          * 
          * @param {*} givenWidthValue horizontal length value entered input in the current unit.
-         * @param {*} givenHeightValue vertical length value entered input in the current unit.
+         * @param {*} givenLengthValue vertical length value entered input in the current unit.
          */
-        this.updateFloorAugmentaSceneBorder = function(givenWidthValue, givenHeightValue)
+        this.updateFloorAugmentaSceneBorder = function(givenWidthValue, givenLengthValue)
         {
-            if(givenWidthValue && givenHeightValue)
+            if(givenWidthValue && givenLengthValue)
             {
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
-                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
+                const givenLength = parseFloat(givenLengthValue) / this.currentUnit.value;
 
                 this.sceneWidth = givenWidth;
-                this.sceneHeight = givenHeight;
+                this.sceneLength = givenLength;
 
                 //update checkerboard
-                if(this.augmentaSceneLoaded) this.checkerboardFloor.setSize(givenWidth, givenHeight);
+                if(this.augmentaSceneLoaded) this.checkerboardFloor.setSize(givenWidth, givenLength);
 
-                this.objects.calculateScenePolygon(givenWidth, givenHeight);
+                this.objects.calculateScenePolygon(givenWidth, givenLength);
 
                 this.objects.populateStorage();
             }
@@ -265,9 +265,9 @@ class SceneManager{
                 const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
                 const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
 
-                /* TODO: add wallYSceneWidth and wallYSceneHeight */
+                /* TODO: add wallYSceneWidth and wallYsceneLength */
                 this.sceneWidth = givenWidth;
-                this.sceneHeight = givenHeight;
+                this.sceneLength = givenHeight;
 
                 //update checkerboard
                 if(this.augmentaSceneLoaded) this.checkerboardWallY.setSize(givenWidth, givenHeight);
@@ -286,7 +286,7 @@ class SceneManager{
                     this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     this.sceneElevation = SceneManager.TABLE_ELEVATION;
                     this.sceneWidth = this.checkerboardFloor.width;
-                    this.sceneHeight = this.checkerboardFloor.height;
+                    this.sceneLength = this.checkerboardFloor.height;
                     if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
                     this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
                     break;
@@ -294,9 +294,8 @@ class SceneManager{
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     this.sceneWidth = this.checkerboardWallY.width;
-                    this.sceneHeight = this.checkerboardWallY.height;
-                    if(this.augmentaSceneLoaded) {
-                        changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
+                    this.sceneLength = this.checkerboardWallY.height;
+                    if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
                     this.wallY.position.z = 0;
                     break;
                 case 'human-tracking':
@@ -304,7 +303,7 @@ class SceneManager{
                     this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     this.sceneWidth = this.checkerboardFloor.width;
-                    this.sceneHeight = this.checkerboardFloor.height;
+                    this.sceneLength = this.checkerboardFloor.height;
                     if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
                     this.wallY.position.z = -10;
                     break;

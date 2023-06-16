@@ -1,8 +1,9 @@
 import { Vector2 } from 'three'
-import { camerasTypes, lidarsTypes, units } from '../data.js'
+import { getCamerasTypes, getLidarsTypes, units } from '/js/data.js';
 
-import { SceneManager } from '../scene/SceneManager.js'
-import { Lidar } from '../scene/objects/sensors/Lidar.js'
+import { SceneManager } from '/js/scene/SceneManager.js'
+import { Node } from '/js/scene/objects/sensors/Node.js';
+import { Lidar } from '/js/scene/objects/sensors/Lidar.js'
 
 class Wizard{
     constructor()
@@ -193,8 +194,8 @@ class Wizard{
         function initWizardValues(sceneManager)
         {
             document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-scene-height-wizard').value = Math.round(sceneManager.sceneHeight * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(4.5 * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-scene-length-wizard').value = Math.round(sceneManager.sceneLength * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-hook-height-wizard').value = Math.round(sceneManager.sceneSensorHeight * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-wall-y-scene-width-wizard').value = document.getElementById('input-wall-y-scene-width-inspector').value;
             document.getElementById('input-wall-y-scene-height-wizard').value = document.getElementById('input-wall-y-scene-height-inspector').value;
 
@@ -215,7 +216,7 @@ class Wizard{
             
             const camTypesForm = document.createElement("div");
             camTypesForm.id = "cam-types-selection";
-            camerasTypes.filter(c => c.recommended).forEach(c => {
+            getCamerasTypes().filter(c => c.recommended).forEach(c => {
                 //const hookHeight = parseFloat(document.getElementById('input-hook-height-wizard').value);
                 //if(hookHeight < c.rangeFar && c.suitable.includes(document.getElementById('tracking-mode-selection-wizard').value))
                 //{
@@ -226,8 +227,9 @@ class Wizard{
                     camTypeCheckbox.id = "check-cam-" + c.id;
                     camTypeCheckbox.classList.add('checkbox-camera-type');
                     const label = document.createElement("label");
+
                     label.setAttribute("for", "check-cam-" + c.id)
-                    label.innerHTML = c.name;
+                    label.innerHTML = c.niceName;
 
                     const url = document.location.href;
                     if(url.includes('beta')) label.classList.add('dark-mode');
@@ -240,7 +242,7 @@ class Wizard{
             
             const lidarTypesForm = document.createElement("div");
             lidarTypesForm.id = "lidar-types-selection";
-            lidarsTypes.filter(t => t.recommended).forEach(l => {
+            getLidarsTypes().filter(t => t.recommended).forEach(l => {
                     const lidarTypeChoice = document.createElement("div");
                     const lidarTypeCheckbox = document.createElement("input");
                     lidarTypeCheckbox.setAttribute("type", "checkbox");
@@ -285,7 +287,7 @@ class Wizard{
                             const last = idSplit[idSplit.length - 1];
                             lidarTypesChecked.push(parseFloat(last));
                         });
-                        const lidarsChecked = lidarsTypes.filter(c => lidarTypesChecked.includes(c.id));
+                        const lidarsChecked = getLidarsTypes().filter(c => lidarTypesChecked.includes(c.id));
                         return lidarsChecked;
                     }
                     else return [];
@@ -309,7 +311,7 @@ class Wizard{
                             const last = idSplit[idSplit.length - 1];
                             camTypesChecked.push(parseFloat(last));
                         });
-                        const camerasChecked = camerasTypes.filter(c => camTypesChecked.includes(c.id));
+                        const camerasChecked = getCamerasTypes().filter(c => camTypesChecked.includes(c.id));
                         return camerasChecked;
                     }
                     else return [];
@@ -372,8 +374,9 @@ class Wizard{
                 default:
                 {
                     const inputWidth = parseFloat(document.getElementById('input-scene-width-wizard').value);
-                    const inputHeight = parseFloat(document.getElementById('input-scene-height-wizard').value);
-                    const camsHeight = Math.round(parseFloat(document.getElementById('input-hook-height-wizard').value) / sceneManager.currentUnit.value * 100) / 100;
+                    const inputLength = parseFloat(document.getElementById('input-scene-length-wizard').value);
+                    //const camsHeight = Math.round(parseFloat(document.getElementById('input-hook-height-wizard').value) / sceneManager.currentUnit.value * 100) / 100;
+                    const inputCamsHeight = parseFloat(document.getElementById('input-hook-height-wizard').value);
                     
                     let sceneElevation, overlapHeightDetection;
                     switch(trackingMode)
@@ -389,24 +392,25 @@ class Wizard{
                             break;
                     }
 
-                    if(!inputWidth || !inputHeight)
+                    if(!inputWidth || !inputLength)
                     {
                         alert("Please fill your scene horizontal and vertical length");
                         return false;
                     }
-                    if(!camsHeight)
+                    if(!inputCamsHeight)
                     {
                         alert("Please fill the hook height from your scene");
                         return false;
                     }
 
                     const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit.value * 100) / 100;
-                    const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit.value * 100) / 100;
+                    const givenLength = Math.ceil(inputLength / sceneManager.currentUnit.value * 100) / 100;
+                    const camsHeight = Math.round(inputCamsHeight / sceneManager.currentUnit.value * 100) / 100;
 
                     let configs = [];
 
-                    camerasTypes.filter(c => c.recommended).filter(c => document.getElementById('check-cam-' + c.id).checked).forEach(type => {
-                        const config = calculateCameraConfig(trackingMode, type, givenWidth, givenHeight, camsHeight, overlapHeightDetection);
+                    getCamerasTypes().filter(c => c.recommended).filter(c => document.getElementById('check-cam-' + c.id).checked).forEach(type => {
+                        const config = calculateCameraConfig(trackingMode, type, givenWidth, givenLength, camsHeight, overlapHeightDetection);
                         if(config) configs.push(config);
                     });
 
@@ -417,7 +421,7 @@ class Wizard{
                     }
                     else
                     {
-                        sceneManager.updateFloorAugmentaSceneBorder(inputWidth, inputHeight);
+                        sceneManager.updateFloorAugmentaSceneBorder(inputWidth, inputLength);
 
                         configs.sort((A,B) => A.nbW * A.nbH - B.nbW * B.nbH);
                         configs = configs.filter(c => c.nbW * c.nbH === configs[0].nbW * configs[0].nbH);
@@ -425,15 +429,31 @@ class Wizard{
                         let chosenConfig = configs[0];
                         sceneManager.objects.removeSensors();
 
-                        createSceneFromCameraConfig(chosenConfig, trackingMode, givenWidth, givenHeight, camsHeight + sceneElevation, sceneManager);
+                        createSceneFromCameraConfig(chosenConfig, trackingMode, givenWidth, givenLength, camsHeight + sceneElevation, sceneManager);
 
                         // update inspector infos
                         document.getElementById('input-scene-width-inspector').value = inputWidth;
-                        document.getElementById('input-scene-height-inspector').value = inputHeight;
+                        document.getElementById('input-scene-length-inspector').value = inputLength;
+                        document.getElementById('input-scene-sensor-height-inspector').value = inputCamsHeight;
+                        sceneManager.sceneSensorHeight = camsHeight; // ?? coming from master branch ! 
+
             
+                        // // SWTICH BLOCK comming from master branch, should we keep it ? -> looks like it is already done in uiManager.changeTrackingMode()
+                        // switch(trackingMode)
+                        // {
+                        //     case 'hand-tracking':
+                        //         document.getElementById('overlap-height-inspector').classList.add('hidden');
+                        //         break;
+                        //     case 'human-tracking':
+                        //     default:
+                        //         document.getElementById('overlap-height-inspector').classList.remove('hidden');
+                        //         document.getElementById('overlap-height-selection-inspector').value = document.getElementById('overlap-height-selection-wizard').value
+                        //         break;
+                        // }
+                        // END SWITCH BLOCK
+
                         if(trackingMode === 'human-tracking') sceneManager.heightDetected = overlapHeightDetection;
                     }
-
                     break;
                 }
             }
@@ -556,7 +576,7 @@ function calculateLidarConfig(lidarType, givenWidth, givenHeight){
     return false;
 }
 
-function calculateCameraConfig(trackingMode, cameraType, givenWidth, givenHeight, camsHeight, overlapHeightDetection)
+function calculateCameraConfig(trackingMode, cameraType, givenWidth, givenLength, camsHeight, overlapHeightDetection)
 {
     let augmentaFar = 0;
     switch(trackingMode)
@@ -574,27 +594,27 @@ function calculateCameraConfig(trackingMode, cameraType, givenWidth, givenHeight
         const widthAreaCovered = Math.abs(Math.tan((cameraType.HFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
         const heightAreaCovered = Math.abs(Math.tan((cameraType.VFov/2.0) * Math.PI / 180.0))*(camsHeight - overlapHeightDetection) * 2;
 
-        const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenHeight / heightAreaCovered);
-        const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenHeight / widthAreaCovered);
+        const nbCamsNoRot = Math.ceil(givenWidth / widthAreaCovered) * Math.ceil(givenLength / heightAreaCovered);
+        const nbCamsRot = Math.ceil(givenWidth / heightAreaCovered) * Math.ceil(givenLength / widthAreaCovered);
 
         return nbCamsRot < nbCamsNoRot
             ?
-            { typeID: cameraType.id, w: heightAreaCovered, h:widthAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenHeight / widthAreaCovered), rot: true }
+            { typeID: cameraType.id, w: heightAreaCovered, h:widthAreaCovered, nbW: Math.ceil(givenWidth / heightAreaCovered), nbH: Math.ceil(givenLength / widthAreaCovered), rot: true }
             :
-            { typeID: cameraType.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenHeight / heightAreaCovered), rot: false };
+            { typeID: cameraType.id, w: widthAreaCovered, h:heightAreaCovered, nbW: Math.ceil(givenWidth / widthAreaCovered), nbH: Math.ceil(givenLength / heightAreaCovered), rot: false };
     }
 
     return false;
 }
 
-function createSceneFromCameraConfig(config, trackingMode, givenWidth, givenHeight, camsZPosition, sceneManager)
+function createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLength, camsZPosition, sceneManager)
 {
     let offsetX = config.w / 2.0;
     let offsetY = config.h / 2.0;
     if(config.nbW === 1) offsetX -= (config.nbW*config.w - givenWidth)/2.0;
-    if(config.nbH === 1) offsetY -= (config.nbH*config.h - givenHeight)/2.0;
+    if(config.nbH === 1) offsetY -= (config.nbH*config.h - givenLength)/2.0;
     const oX = config.nbW > 1 ? (config.nbW*config.w - givenWidth)/(config.nbW - 1) : 0;
-    const oY = config.nbH > 1 ? (config.nbH*config.h - givenHeight)/(config.nbH - 1) : 0;
+    const oY = config.nbH > 1 ? (config.nbH*config.h - givenLength)/(config.nbH - 1) : 0;
 
     for(let i = 0; i < config.nbW; i++)
     {

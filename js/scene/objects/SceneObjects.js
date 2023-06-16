@@ -53,7 +53,7 @@ class SceneObjects{
                 else
                 {
                     if(!isBuilder) this.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
-                    sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_HEIGHT);
+                    sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_LENGTH);
 
                     this.populateStorage();
                 }
@@ -78,129 +78,140 @@ class SceneObjects{
             const index = url.indexOf('&');
             
             if(index === -1 || isBuilder) return false;
-            else
+
+            url = url.substring(url.indexOf('?') + 1);
+            const sensors = url.split('&');
+            const sceneInfo = sensors.shift();
+            const infos = sceneInfo.split(',');
+
+            let mode, sceneWidth, sceneLength, heightDetected;
+            let unitLabelFromURL = "";
+            infos.forEach(info => {
+                const keyVal = info.split('=');
+                const key = keyVal[0];
+                const val = keyVal[1];
+                switch(key)
+                {
+                    case "L":
+                        sceneWidth = parseFloat(val);
+                        break;
+                    case "l":
+                        sceneLength = parseFloat(val);
+                        break;
+                    case "m":
+                        mode = val;
+                        break;
+                    case "h":
+                        heightDetected = parseFloat(val);
+                        break;
+                    case "sh":
+                        document.getElementById("input-scene-sensor-height-inspector").value = parseFloat(val);
+                        sceneManager.sceneSensorHeight = parseFloat(val);
+                        break;
+                    case "u":
+                        unitLabelFromURL = val;
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            const trackingModeSelect = document.getElementById("tracking-mode-selection-inspector");
+            if(trackingModeSelect)
             {
-                url = url.substring(url.indexOf('?') + 1);
-                const sensors = url.split('&');
-                const sceneInfo = sensors.shift();
-                const infos = sceneInfo.split(',');
-                let mode, sceneWidth, sceneHeight, heightDetected;
-                infos.forEach(info => {
-                    const keyVal = info.split('=');
+                trackingModeSelect.value = mode;
+                trackingModeSelect.dispatchEvent(new Event('change'));
+            }
+            switch(mode)
+            {
+                case 'wall-tracking':
+                {
+                    const inputSceneWidth = document.getElementById("input-wall-y-scene-width-inspector");
+                    if(inputSceneWidth) inputSceneWidth.value = sceneWidth;
+    
+                    const inputSceneHeight = document.getElementById("input-wall-y-scene-height-inspector");
+                    if(inputSceneHeight) inputSceneHeight.value = sceneLength;
+                    sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneLength);
+                }
+                case 'hand-tracking':
+                case 'human-tracking':
+                default:
+                {
+                    const inputSceneWidth = document.getElementById("input-scene-width-inspector");
+                    if(inputSceneWidth) inputSceneWidth.value = sceneWidth;
+    
+                    const inputSceneLength = document.getElementById("input-scene-length-inspector");
+                    if(inputSceneLength) inputSceneLength.value = sceneLength;
+                    sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneLength);
+                }
+            }
+
+            sceneManager.heightDetected = heightDetected;
+            
+            sensors.forEach(c => {
+                const props = c.split(',');
+                let sensor;
+                let id, typeID;
+                let px, py, pz, rx, ry, rz;
+
+                props.forEach(prop => {
+                    const keyVal = prop.split('=');
                     const key = keyVal[0];
-                    const val = keyVal[1];
-                    switch(key)
+                    const stringVal = keyVal[1];
+                    if(key && stringVal)
                     {
-                        case "L":
-                            sceneWidth = parseFloat(val);
-                            break;
-                        case "l":
-                            sceneHeight = parseFloat(val);
-                            break;
-                        case "m":
-                            mode = val;
-                            break;
-                        case "h":
-                            heightDetected = parseFloat(val);
-                            break;
-                        default:
-                            break;
+                        const val = parseFloat(stringVal);
+                        switch(key)
+                        {
+                            case "sensor":
+                                sensor = stringVal;
+                            case "id":
+                                id = val
+                                break;
+                            case "typeID":
+                                typeID = val;
+                                break;
+                            case "px":
+                                px = val;
+                                break;
+                            case "py":
+                                py = val;
+                                break;
+                            case "pz":
+                                pz = val;
+                                break;
+                            case "rx":
+                                rx = val;
+                                break;
+                            case "ry":
+                                ry = val;
+                                break;
+                            case "rz":
+                                rz = val;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 });
-
-                const trackingModeSelect = document.getElementById("tracking-mode-selection-inspector");
-                if(trackingModeSelect)
+                switch(sensor)
                 {
-                    trackingModeSelect.value = mode;
-                    trackingModeSelect.dispatchEvent(new Event('change'));
-                }
-                switch(mode)
-                {
-                    case 'wall-tracking':
-                    {
-                        const inputSceneWidth = document.getElementById("input-wall-y-scene-width-inspector");
-                        if(inputSceneWidth) inputSceneWidth.value = sceneWidth;
-        
-                        const inputSceneHeight = document.getElementById("input-wall-y-scene-height-inspector");
-                        if(inputSceneHeight) inputSceneHeight.value = sceneHeight;
-                        sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneHeight);
-                    }
-                    case 'hand-tracking':
-                    case 'human-tracking':
+                    case "node":
+                        sceneObjects.addNode(true, sceneManager.trackingMode, typeID, px, py, pz, rx, ry, rz)
+                        break;
+                    case "lidar":
+                        sceneObjects.addLidar(true, typeID, px, pz, ry)
+                        break;
                     default:
-                    {
-                        const inputSceneWidth = document.getElementById("input-scene-width-inspector");
-                        if(inputSceneWidth) inputSceneWidth.value = sceneWidth;
-        
-                        const inputSceneHeight = document.getElementById("input-scene-height-inspector");
-                        if(inputSceneHeight) inputSceneHeight.value = sceneHeight;
-                        sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneHeight);
-                    }
+                        break;
                 }
+            });
 
-                sceneManager.heightDetected = heightDetected;
+            // change the unit according to the value in the URL 
+            if(unitLabelFromURL != "" && sceneManager.currentUnit.label != unitLabelFromURL) sceneManager.toggleUnit();
+            console.assert(sceneManager.currentUnit.label == unitLabelFromURL);
 
-                
-                sensors.forEach(c => {
-                    const props = c.split(',');
-                    let sensor;
-                    let id, typeID;
-                    let px, py, pz, rx, ry, rz;
-
-                    props.forEach(prop => {
-                        const keyVal = prop.split('=');
-                        const key = keyVal[0];
-                        const stringVal = keyVal[1];
-                        if(key && stringVal)
-                        {
-                            const val = parseFloat(stringVal);
-                            switch(key)
-                            {
-                                case "sensor":
-                                    sensor = stringVal;
-                                case "id":
-                                    id = val
-                                    break;
-                                case "typeID":
-                                    typeID = val;
-                                    break;
-                                case "px":
-                                    px = val;
-                                    break;
-                                case "py":
-                                    py = val;
-                                    break;
-                                case "pz":
-                                    pz = val;
-                                    break;
-                                case "rx":
-                                    rx = val;
-                                    break;
-                                case "ry":
-                                    ry = val;
-                                    break;
-                                case "rz":
-                                    rz = val;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    });
-                    switch(sensor)
-                    {
-                        case "node":
-                            sceneObjects.addNode(true, sceneManager.trackingMode, typeID, px, py, pz, rx, ry, rz)
-                            break;
-                        case "lidar":
-                            sceneObjects.addLidar(true, typeID, px, pz, ry)
-                            break;
-                        default:
-                            break;
-                    }
-                })
-                return true;
-            }
+            return true;
         }
 
 
@@ -396,13 +407,13 @@ class SceneObjects{
 
     /* USER'S ACTIONS */
 
-        this.calculateScenePolygon = function(givenWidth, givenHeight)
+        this.calculateScenePolygon = function(givenWidth, givenLength)
         {
             givenAreaPolygonRegions[0].length = 0;
             givenAreaPolygonRegions[0].push([0, 0]);
             givenAreaPolygonRegions[0].push([givenWidth, 0]);
-            givenAreaPolygonRegions[0].push([givenWidth, givenHeight]);
-            givenAreaPolygonRegions[0].push([0, givenHeight]);
+            givenAreaPolygonRegions[0].push([givenWidth, givenLength]);
+            givenAreaPolygonRegions[0].push([0, givenLength]);
         }
 
         this.updateObjectsPosition = function()
@@ -427,11 +438,15 @@ class SceneObjects{
             url += "L=";
             url += Math.floor(sceneManager.sceneWidth * 100)/100;
             url += ",l=";
-            url += Math.floor(sceneManager.sceneHeight * 100)/100;
+            url += Math.floor(sceneManager.sceneLength * 100)/100;
             url += ",m=";
             url += sceneManager.trackingMode;
             url += ",h=";
             url += sceneManager.heightDetected;
+            url += ",sh=";
+            url += sceneManager.sceneSensorHeight;
+            url += ",u=";
+            url += sceneManager.currentUnit.label;
             url += '&';
             nodes.forEach(n => {
                 url += "sensor=";
@@ -496,7 +511,7 @@ class SceneObjects{
             if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
             {
                 const sceneWidth = datas.sceneSize[0];
-                const sceneHeight = datas.sceneSize[1];
+                const sceneLength = datas.sceneSize[1];
 
                 switch(mode)
                 {
@@ -506,8 +521,8 @@ class SceneObjects{
                         if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
                         
                         const sceneHeightElement = document.getElementById("input-wall-y-scene-height-inspector");
-                        if(sceneHeightElement) sceneHeightElement.value = sceneHeight;
-                        sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneHeight);
+                        if(sceneHeightElement) sceneHeightElement.value = sceneLength;
+                        sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneLength);
                         break;
                     }
                     case 'hand-tracking':
@@ -516,9 +531,9 @@ class SceneObjects{
                         const sceneWidthElement = document.getElementById("input-scene-width-inspector");
                         if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
                         
-                        const sceneHeightElement = document.getElementById("input-scene-height-inspector");
-                        if(sceneHeightElement) sceneHeightElement.value = sceneHeight;
-                        sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneHeight);
+                        const sceneLengthElement = document.getElementById("input-scene-length-inspector");
+                        if(sceneLengthElement) sceneLengthElement.value = sceneLength;
+                        sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneLength);
                         break;
                     }
                     default:
@@ -550,6 +565,18 @@ class SceneObjects{
                     overlapElement.dispatchEvent(new Event('change'));
                 }
                 sceneManager.heightDetected = datas.heightDetected;
+            }
+
+            //scene sensor height
+            if(datas.hasOwnProperty('sceneSensorHeight'))
+            {
+                const sceneSensorHeightElement = document.getElementById("input-scene-sensor-height-inspector");
+                if(sceneSensorHeightElement)
+                {
+                    sceneSensorHeightElement.value = datas.sceneSensorHeight;
+                    sceneSensorHeightElement.dispatchEvent(new Event('change'));
+                }
+                sceneManager.sceneSensorHeight = datas.sceneSensorHeight;
             }
 
             //objects
@@ -585,10 +612,11 @@ class SceneObjects{
         {
             const datas = {
                 sceneEnvironment: sceneManager.sceneEnvironment,
-                sceneSize: [sceneManager.sceneWidth, sceneManager.sceneHeight],
+                sceneSize: [sceneManager.sceneWidth, sceneManager.sceneLength],
                 unit: sceneManager.currentUnit,
                 trackingMode: sceneManager.trackingMode,
                 heightDetected: sceneManager.heightDetected,
+                sceneSensorHeight: sceneManager.sceneSensorHeight,
                 objects: {
                     nodes: [],
                     lidars: [],

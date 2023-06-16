@@ -255,40 +255,52 @@
           </div>
 
           <!-- SHARE SECTION -->
-          <div class="row center-x center-y">
+          <!-- <div class="row center-x center-y"> -->
+          
+          <!-- SHARE, CONTACT, HELP... BUTTONS -->
+          <div id="header-buttons">
+            <!-- LOAD FILE BUTTON -->
             <label id="load-file-button" class="button default-button">
               <input type="file" id="load-file-input" class="hidden">
               <span class="iconify secondary-icon" data-icon="eva:cloud-upload-outline"></span>
               <p> Load file </p>
             </label>
-            <!-- SHARE BUTTON -->
-            <div>
-              <div id="generate-link" class="button main-button">
-                <span class="iconify main-icon" data-icon="ci:share"></span>
-                <p> Share </p>
-              </div>
 
-              <!-- SHARE MODAL -->
-              <div id="share-modal" class="modal hidden">
-                <div id="share-modal-content" class="column center-x center-y modal-content">
-                  <span id="close-share-modal" class="close">&times;</span>
-                  <p id="copy-feedback-text" class="main-text">An URL of your scene has been copied to clipboard.</p>
-                  <p class="main-text">You can also download a file for your scene below:</p>
-                  <div class="row center-x space-y">
-                    <input type="text" id="scene-file-name-input" placeholder="Your file name">
-                    <div id="download-scene-file" class="button main-button">
-                      <span class="iconify main-icon" data-icon="eva:cloud-download-outline"></span>
-                      <p> Download </p>
-                    </div>
-                  </div>
-                  <div id="warning-text-input-illegal-symbol" class="hidden">
-                    <p class="warning-message">You cannot use '<span id="illegal-symbol-used"></span>' in your file name.</p>
+            <!-- SHARE BUTTON -->
+            <div id="generate-link" class="button main-button">
+              <span class="iconify main-icon" data-icon="ci:share"></span>
+              <p> Share </p>
+            </div>
+
+            <!-- SHARE MODAL -->
+            <div id="share-modal" class="modal hidden">
+              <div id="share-modal-content" class="column center-x center-y modal-content">
+                <span id="close-share-modal" class="close">&times;</span>
+                <p id="copy-feedback-text" class="main-text">An URL of your scene has been copied to clipboard.</p>
+                <p class="main-text">You can also download a file for your scene below:</p>
+                <div class="row center-x space-y">
+                  <input type="text" id="scene-file-name-input" placeholder="Your file name">
+                  <div id="download-scene-file" class="button main-button">
+                    <span class="iconify main-icon" data-icon="eva:cloud-download-outline"></span>
+                    <p> Download </p>
                   </div>
                 </div>
+                <div id="warning-text-input-illegal-symbol" class="hidden">
+                  <p class="warning-message">You cannot use '<span id="illegal-symbol-used"></span>' in your file name.</p>
+                </div>
               </div>
-              <!-- END SHARE MODAL -->
-            <!-- TO ADD HELP BUTTON <p>Help ?</p> -->
             </div>
+            <!-- END SHARE MODAL -->
+          
+            <!-- CONTACT BUTTON -->
+            <a id="contact-button" class="button main-button" href="https://augmenta.tech/contact/" target="_blank">
+              <span class="iconify main-icon" data-icon="ci:mail"></span>
+              <p>Contact us</p>
+            </a>
+            <!-- END CONTACT BUTTON -->
+
+            <!-- TO ADD HELP BUTTON <p>Help ?</p> -->
+
           </div>
         </div>
 
@@ -394,9 +406,9 @@
                     <div id="overlap-height-wizard">
                       <p>Target overlap height detection</p>
                       <select title="overlap-height-wizard" name="overlap-height-wizard" id="overlap-height-selection-wizard">
-                        <option value="0.3">Feets</option>
-                        <option value="0.7">Knees</option>
-                        <option value="1.2" selected>Hips (recommended)</option>
+                        <!-- <option value="0.3">Feet</option>
+                        <option value="0.7">Knees</option> -->
+                        <option value="1.2" selected>Hips</option>
                         <option value="1.6">Shoulders</option>
                         <option value="2">Entire body</option>
                       </select>
@@ -415,10 +427,10 @@
                       <input id="input-scene-width-wizard" type="number" placeholder="w" min="0" max="100" step = "0.1">
                     </div>
 
-                    <!-- HEIGHT INPUT -->
+                    <!-- LENGTH INPUT -->
                     <div>
-                      <p>Height (<span data-unittext="1">m</span>)</p>
-                      <input id="input-scene-height-wizard" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                      <p>Length (<span data-unittext="1">m</span>)</p>
+                      <input id="input-scene-length-wizard" type="number" placeholder="h" min="0" max="100" step = "0.1">
                     </div>
 
                     <!-- HOOK HEIGHT INPUT -->
@@ -451,6 +463,9 @@
                       <h3>Choose the type.s of sensor.s you want to use</h3>
                       <!-- filled in javascript -->
                     </div>
+                    <div>
+                      <p>No suitable sensor ? <a href="https://augmenta.tech/contact/" target="_blank">Contact us</a> !</p>
+                    </div>
                   </div>
 
                   <!-- GENERATE SCENE BUTTON IN WIZARD -->
@@ -480,9 +495,9 @@
               <div id="overlap-height-inspector" class="">
                 <p>Target overlap height detection</p>
                 <select title="overlap-height-inspector" name="overlap-height-inspector" id="overlap-height-selection-inspector">
-                  <option value="0.3">Feets</option>
-                  <option value="0.7">Knees</option>
-                  <option id="default-height-detected" value="1.2" selected>Hips (recommended)</option>
+                  <!-- <option value="0.3">Feet</option>
+                  <option value="0.7">Knees</option> -->
+                  <option id="default-height-detected" value="1.2" selected>Hips</option>
                   <option value="1.6">Shoulders</option>
                   <option id="dummy-height-reference" value="2">Entire body</option>
                 </select>
@@ -501,10 +516,16 @@
                 <input id="input-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1">
               </div>
 
-              <!-- HEIGHT INPUT -->
+              <!-- LENGTH INPUT -->
               <div>
-                <p>Height (<span data-unittext="1">m</span>)</p>
-                <input id="input-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                <p>Length (<span data-unittext="1">m</span>)</p>
+                <input id="input-scene-length-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
+              </div>
+
+              <!-- SENSOR HEIGHT -->
+              <div>
+                <p>Sensor height (<span data-unittext="1">m</span>)</p>
+                <input id="input-scene-sensor-height-inspector" type="number" placeholder="sh" min="0" max="30" step="0.1" disabled>
               </div>
               <!-- SCENE COVERED FEEDBACK -->
               <div class="row">

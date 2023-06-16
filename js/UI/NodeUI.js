@@ -1,5 +1,7 @@
-import { camerasTypes, units } from '../data.js'
-import { Node } from '../scene/objects/sensors/Node.js'
+import { Vector3 } from 'three'
+
+import { getCamerasTypes, units } from '/js/data.js'
+import { Node } from '/js/scene/objects/sensors/Node.js'
 
 class NodeUI{
     constructor(node, sceneManager)
@@ -10,8 +12,8 @@ class NodeUI{
         function buildUIDiv()
         {
             let cameraTypesOptions = ``;
-            camerasTypes.filter(c => c.recommended).forEach(type => {
-                const optionElement = `<option value="` + type.name + `" ` + (node.cameraType.name === type.name ? `selected` : ``) + `>` + type.name;
+            getCamerasTypes().filter(c => c.recommended).forEach(type => {
+                const optionElement = `<option value="` + type.niceName + `" ` + (node.cameraType.niceName === type.niceName ? `selected` : ``) + `>` + type.niceName;
                 cameraTypesOptions += optionElement;
                 cameraTypesOptions += "</option>"
             });
@@ -240,7 +242,7 @@ class NodeUI{
 
         function changeCameraType()
         {
-            node.cameraType = camerasTypes.find(type => type.name === document.getElementById('cam-type-' + node.id).value);
+            node.cameraType = getCamerasTypes().find(type => type.niceName === document.getElementById('cam-type-' + node.id).value);
 
             node.cameraPerspective.fov = node.cameraType.VFov;
             node.cameraPerspective.aspect = node.cameraType.aspectRatio;

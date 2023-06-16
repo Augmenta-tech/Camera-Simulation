@@ -10,7 +10,7 @@ import {
     Group
 } from 'three';
 
-import { lidarsTypes, units } from '../../../data.js'
+import { getLidarsTypes, units } from '/js/data.js'
 
 
 class Lidar{
@@ -23,7 +23,7 @@ class Lidar{
     constructor(id, lidarTypeID = Lidar.DEFAULT_LIDAR_TYPE_ID, p_x = 0, p_z = Lidar.DEFAULT_LIDAR_HOOK_HEIGHT, r_y = 0)
     {
         this.id = id;
-        this.lidarType = lidarsTypes.find(t => t.id === lidarTypeID);
+        this.lidarType = getLidarsTypes().find(t => t.id === lidarTypeID);
 
         this.xPos = p_x;
         this.yPos = Lidar.DEFAULT_LIDAR_SIZE + 0.01*this.id;

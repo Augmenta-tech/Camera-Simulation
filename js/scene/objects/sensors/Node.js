@@ -9,20 +9,20 @@ import {
 } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { camerasTypes, units } from '../../../data.js'
+import { getCamerasTypes } from '/js/data.js';
 
 import { SceneObjects } from '../SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;
-    static DEFAULT_NODE_HEIGHT = 4.5;
+    static DEFAULT_NODE_HEIGHT = 5.5;
     static DEFAULT_NODE_ROTATION_X = - Math.PI / 2.0;
     static SIZE_TEXT_NODE = 0.4;
 
     constructor(id, mode = document.getElementById("tracking-mode-inspector") ? document.getElementById("tracking-mode-inspector").value : 'human-tracking', cameraTypeID = Node.DEFAULT_CAMERA_TYPE_ID, p_x = 0, p_y = 0, p_z = Node.DEFAULT_NODE_HEIGHT, r_x = 0, r_y = 0, r_z = 0)
     {
         this.id = id;
-        this.cameraType = camerasTypes.find(t => t.id === cameraTypeID);
+        this.cameraType = getCamerasTypes().find(t => t.id === cameraTypeID);
 
         this.xPos = p_x;
         this.yPos = p_y;

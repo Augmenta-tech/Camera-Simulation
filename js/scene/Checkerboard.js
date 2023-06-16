@@ -18,7 +18,7 @@ import { SceneManager } from './SceneManager.js'
 
 class Checkerboard{
     static SIZE_TEXT_SCENE = 0.3;
-    constructor(surface, unit = units.meters, sceneElevation = 0, width = SceneManager.DEFAULT_WIDTH, height = SceneManager.DEFAULT_HEIGHT)
+    constructor(surface, unit = units.meters, sceneElevation = 0, width = SceneManager.DEFAULT_WIDTH, height = SceneManager.DEFAULT_LENGTH)
     {
         //const gridSize = size
         this.width = width;
