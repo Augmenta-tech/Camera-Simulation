@@ -127,9 +127,10 @@ class Wizard{
             //GENERATE SCENE BUTTON
             document.getElementById('generate-scene-wizard-button').addEventListener('click', () => {
                 const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
+                // should be called before the creation of the wizard
+                uiManager.changeTrackingMode(trackingMode);
                 if(createSceneFromWizard(viewportManager, trackingMode))
                 {
-                    uiManager.changeTrackingMode(trackingMode);
                     uiManager.displayWarning(sceneManager);
                 }
             });
@@ -323,6 +324,9 @@ class Wizard{
         {
             const sceneManager = viewportManager.sceneManager;
 
+            // keep this at the top !
+            sceneManager.changeTrackingMode(trackingMode);
+
             switch(trackingMode)
             {
                 case 'wall-tracking':
@@ -452,14 +456,20 @@ class Wizard{
                         // }
                         // END SWITCH BLOCK
 
-                        if(trackingMode === 'human-tracking') sceneManager.heightDetected = overlapHeightDetection;
+                        if(trackingMode === 'human-tracking')
+                        {
+                            sceneManager.heightDetected = overlapHeightDetection;
+                            // update inspector value and trigger update
+                            let overlapHeightElem = document.getElementById('overlap-height-selection-inspector');
+                            overlapHeightElem.value = overlapHeightDetection;
+                            overlapHeightElem.dispatchEvent(new Event('change'));
+                        } 
                     }
                     break;
                 }
             }
 
             document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
-            sceneManager.changeTrackingMode(trackingMode);
 
             //viewportManager.placeCamera();
             viewportManager.setupCameraChangement(!!viewportManager.activeCamera.isOrthographicCamera);
