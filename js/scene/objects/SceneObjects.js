@@ -568,6 +568,18 @@ class SceneObjects{
                 sceneManager.heightDetected = datas.heightDetected;
             }
 
+            //scene sensor height
+            if(datas.hasOwnProperty('sceneSensorHeight'))
+            {
+                const sceneSensorHeightElement = document.getElementById("input-scene-sensor-height-inspector");
+                if(sceneSensorHeightElement)
+                {
+                    sceneSensorHeightElement.value = datas.sceneSensorHeight;
+                    sceneSensorHeightElement.dispatchEvent(new Event('change'));
+                }
+                sceneManager.sceneSensorHeight = datas.sceneSensorHeight;
+            }
+
             //objects
             if(datas.hasOwnProperty('objects'))
             {
@@ -605,6 +617,7 @@ class SceneObjects{
                 unit: sceneManager.currentUnit,
                 trackingMode: sceneManager.trackingMode,
                 heightDetected: sceneManager.heightDetected,
+                sceneSensorHeight: sceneManager.sceneSensorHeight,
                 objects: {
                     nodes: [],
                     lidars: [],

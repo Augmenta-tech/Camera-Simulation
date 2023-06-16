@@ -190,7 +190,7 @@ class Wizard{
         {
             document.getElementById('input-scene-width-wizard').value = Math.round(sceneManager.sceneWidth * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-scene-length-wizard').value = Math.round(sceneManager.sceneLength * sceneManager.currentUnit.value * 100) / 100.0;
-            document.getElementById('input-hook-height-wizard').value = parseFloat(document.getElementById('input-hook-height-wizard').value) > 0 ? document.getElementById('input-hook-height-wizard').value : Math.round(Node.DEFAULT_NODE_HEIGHT * sceneManager.currentUnit.value * 100) / 100.0;
+            document.getElementById('input-hook-height-wizard').value = Math.round(sceneManager.sceneSensorHeight * sceneManager.currentUnit.value * 100) / 100.0;
             document.getElementById('input-wall-y-scene-width-wizard').value = document.getElementById('input-wall-y-scene-width-inspector').value;
             document.getElementById('input-wall-y-scene-height-wizard').value = document.getElementById('input-wall-y-scene-height-inspector').value;
 
