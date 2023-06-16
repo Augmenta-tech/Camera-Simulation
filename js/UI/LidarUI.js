@@ -1,4 +1,4 @@
-import { lidarsTypes, units } from '../data.js'
+import { getLidarsTypes, units } from '/js/data.js'
 
 class LidarUI{
     constructor(lidar, sceneManager)
@@ -9,7 +9,7 @@ class LidarUI{
         function buildUIDiv()
         {
             let lidarTypesOptions = ``;
-            lidarsTypes.filter(c => c.recommended).forEach(type => {
+            getLidarsTypes().filter(c => c.recommended).forEach(type => {
                 const optionElement = `<option value="` + type.name + `" ` + (lidar.lidarType.name === type.name ? `selected` : ``) + `>` + type.name;
                 lidarTypesOptions += optionElement;
                 lidarTypesOptions += "</option>"
@@ -210,7 +210,7 @@ class LidarUI{
 
         function changeLidarType()
         {
-            lidar.lidarType = lidarsTypes.find(type => type.name === document.getElementById('lidar-type-' + lidar.id).value);
+            lidar.lidarType = getLidarsTypes().find(type => type.name === document.getElementById('lidar-type-' + lidar.id).value);
 
             sceneManager.scene.remove(lidar.rays);
             lidar.rays.children.forEach(r => {

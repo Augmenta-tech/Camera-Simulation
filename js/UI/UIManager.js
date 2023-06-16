@@ -1,5 +1,5 @@
-import { SceneManager } from '../scene/SceneManager.js';
-
+import { SceneManager } from '/js/scene/SceneManager.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
 import { Wizard } from './Wizard.js';
 
 class UIManager{
@@ -25,8 +25,8 @@ class UIManager{
             document.getElementById('load-file-input').addEventListener('change', (e) => loadJsonFile(e, sceneManager), false);
             document.getElementById('download-scene-file').addEventListener('click', () => downloadSceneFile(viewportManager.sceneManager));
 
-            document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateFloorAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
-            document.getElementById("input-scene-height-inspector").addEventListener('change', () => sceneManager.updateFloorAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-height-inspector").value)));
+            document.getElementById("input-scene-width-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-length-inspector").value)));
+            document.getElementById("input-scene-length-inspector").addEventListener('change', () => sceneManager.updateAugmentaSceneBorder(parseFloat(document.getElementById("input-scene-width-inspector").value), parseFloat(document.getElementById("input-scene-length-inspector").value)));
 
             document.getElementById("input-wall-y-scene-width-inspector").addEventListener('change', () => sceneManager.updateWallYAugmentaSceneBorder(parseFloat(document.getElementById("input-wall-y-scene-width-inspector").value), parseFloat(document.getElementById("input-wall-y-scene-height-inspector").value)));
             document.getElementById("input-wall-y-scene-height-inspector").addEventListener('change', () => sceneManager.updateWallYAugmentaSceneBorder(parseFloat(document.getElementById("input-wall-y-scene-width-inspector").value), parseFloat(document.getElementById("input-wall-y-scene-height-inspector").value)));
@@ -61,16 +61,20 @@ class UIManager{
             document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
             document.getElementById('overlap-height-selection-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
             document.getElementById("input-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
-            document.getElementById("input-scene-height-inspector").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-scene-length-inspector").value = SceneManager.DEFAULT_LENGTH;
             document.getElementById("input-wall-y-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
-            document.getElementById("input-wall-y-scene-height-inspector").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-wall-y-scene-height-inspector").value = SceneManager.DEFAULT_LENGTH;
 
             //WIZARD INPUTS
             document.getElementById("input-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
-            document.getElementById("input-scene-height-wizard").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-scene-length-wizard").value = SceneManager.DEFAULT_LENGTH;
             document.getElementById("input-wall-y-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
-            document.getElementById("input-wall-y-scene-height-wizard").value = SceneManager.DEFAULT_HEIGHT;
+            document.getElementById("input-wall-y-scene-height-wizard").value = SceneManager.DEFAULT_LENGTH;
             document.getElementById("input-hook-height-wizard").value = '';
+
+            //INSPECTOR READONLY INPUTS
+            document.getElementById("input-scene-sensor-height-inspector").value = Node.DEFAULT_NODE_HEIGHT;
+            document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
         }
 
         function copyLink(link)
@@ -212,6 +216,7 @@ class UIManager{
             isAreaCoveredUI(sceneManager);
             changeNumberOfNodes(sceneManager);
         }
+
     }
 }
 

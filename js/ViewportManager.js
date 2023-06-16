@@ -210,7 +210,7 @@ class ViewportManager{
          */
         this.placeCamera = function(newPos = ViewportManager.DEFAULT_CAM_POSITION)
         {
-            const pos = this.activeCamera.isPerspectiveCamera ? newPos.clone().add(new Vector3(this.sceneManager.sceneWidth, 0, this.sceneManager.sceneHeight)) : newPos;
+            const pos = this.activeCamera.isPerspectiveCamera ? newPos.clone().add(new Vector3(this.sceneManager.sceneWidth, 0, this.sceneManager.sceneLength)) : newPos;
             this.activeCamera.position.set(pos.x, pos.y, pos.z);
             this.activeCamera.lookAt(0,0,0);
         }

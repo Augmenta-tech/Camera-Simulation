@@ -26,6 +26,7 @@ jobs:
         with:
           path: Camera-Simulation
           submodules: recursive
+          ssh-key: ${{ secrets.CAMERA_DATA_DEPLOY_KEY }}
       
       - name: Print ref
         run: echo github.ref == ${{ github.ref }}

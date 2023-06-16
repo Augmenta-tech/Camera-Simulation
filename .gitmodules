@@ -4,3 +4,6 @@
 [submodule "js/lib/polybooljs"]
 	path = js/lib/polybooljs
 	url = https://github.com/velipso/polybooljs
+[submodule "js/camera-data"]
+	path = js/camera-data
+	url = git@github.com:Augmenta-tech/camera-data.git
