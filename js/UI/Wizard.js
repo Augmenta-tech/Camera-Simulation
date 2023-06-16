@@ -11,24 +11,28 @@ class Wizard{
         
         this.bindEventListeners = function(viewportManager, uiManager)
         {
+            //TODO remove old modal stuff
             const sceneManager = viewportManager.sceneManager;
             const formModal = document.getElementById('wizard-modal');
+            const popup = document.getElementById('popup');
             //OPEN WIZARD
             document.getElementById('open-wizard-button').addEventListener('click', () => {
                 if(sceneManager.augmentaSceneLoaded)
                 {
-                    //document.getElementById('popup').classList.add('is-visible');
-                    initWizardValues(sceneManager);
-                    formModal.classList.remove('hidden');
+                    popup.classList.add('is-visible');
+                    //initWizardValues(sceneManager);
+                    //formModal.classList.remove('hidden');
                 }
             });
             //CLOSE WIZARD CHEN CLICKING THE CROSS
-            document.getElementById('close-wizard').addEventListener('click', () => formModal.classList.add('hidden'));
+            //document.getElementById('close-wizard').addEventListener('click', () => formModal.classList.add('hidden'));
             //CLOSE WIZARD WHEN CLICKING OUTSIDE MODAL
             window.addEventListener('mousedown', () => {
-                if(event.target === formModal) formModal.classList.add('hidden');
+                //if(event.target === formModal) formModal.classList.add('hidden');
+                if(event.target === popup) popup.classList.remove('is-visible');
             });
-
+            
+            
             //CHANGE TRACKING MODE
             document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => changeTrackingMode(sceneManager, document.getElementById('tracking-mode-selection-wizard').value));
 
@@ -51,7 +55,7 @@ class Wizard{
 
             //CHECKS COHERENCE WHEN MODIFYING ANY FIELD
             document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => checkFormCoherence(sceneManager));
-
+            
             function checkFormCoherence(sceneManager)
             {
                 const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
@@ -617,4 +621,4 @@ function createSceneFromLidarConfig(config, sceneManager)
 
 export { Wizard }
 
-export { checkCameraCoherence, checkLidarCoherence, getMinNearFromSensors, getMaxFarFromSensors, calculateLidarConfig, calculateCameraConfig, createSceneFromLidarConfig, createSceneFromCameraConfig }
+export { checkCameraCoherence, checkLidarCoherence, getMinNearFromSensors, getMaxFarFromSensors, calculateLidarConfig, calculateCameraConfig, createSceneFromLidarConfig, createSceneFromCameraConfig}

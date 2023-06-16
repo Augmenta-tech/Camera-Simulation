@@ -484,7 +484,7 @@ canvas {
   position: relative;
   width: 70%;
   max-width: 80vw;
-  height: 70vh;
+  height: 80vh;
   margin: 6em auto;
   background: #FFF;
   border-radius: .25em .25em .4em .4em;
@@ -506,7 +506,14 @@ canvas {
 }
 
 .cd-popup-container p {
-  padding: 3em 1em;
+  padding: 2em 1em;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 1px;
+}
+
+.cd-popup-container h3 {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 1px;
 }
 
 .cd-popup-container .cd-popup-close {
@@ -548,11 +555,11 @@ canvas {
   -o-transform: translateY(0);
   transform: translateY(0);
 }
-/* @media only screen and (min-width: 1170px) {
+@media only screen and (min-width: 1170px) {
   .cd-popup-container {
     margin: 8em auto;
   }
-} */
+} 
 
 .img-replace {
   /* replace text with an image */
@@ -581,11 +588,6 @@ canvas {
   --color-red-x: #BF4747;
   --color-green-y: #37A48A;
   --color-blue-z: #708EB0;
-}
-
-body{
-  font-family: 'Inter', sans-serif;
-  letter-spacing: 1px;
 }
 
 textarea::placeholder {
@@ -621,6 +623,7 @@ textarea:focus {
 
 .tab > h3 {
   color: var(--color-grey-unselected);
+  font-size: 15px;
 }
 
 .tab > hr {
@@ -637,7 +640,7 @@ textarea:focus {
 
 .tab-line{
   width: 60%;
-  margin-top: 3vh;
+  margin-top: 2vh;
   border-top: 1px solid var(--color-grey-line);
 }
 
@@ -648,18 +651,19 @@ textarea:focus {
 .builder-section{
   height: 68%;
   width: 90%;
-  margin: 1vh 0;
+  margin: 2vh 0;
   padding: 1vh 0;
 }
 
 .builder-section-content{
   height: 60%;
+  padding-top: 2%;
 }
 
 .builder-section-buttons{
-  padding-top: 3%;
-  height: 30%;
-  gap: 2vh;
+  padding-top: 8%;
+  height: 15vh;
+  gap: 1vh;
 }
 
 .builder-section-content.vertical-view{
@@ -704,7 +708,8 @@ textarea:focus {
 .builder-button >  p, svg{
   color: var(--color-blue-buttons);
   letter-spacing: 2px;
-  padding: 4px 0px;
+  padding: 8px 0px;
+  font-size: 15px;
 }
 
 .builder-main-button{
@@ -722,6 +727,11 @@ textarea:focus {
   color: var(--color-red-warning);
 }
 
+.hardware-warning-message{
+  height: 10vh;
+  padding: 1%;
+}
+
 /* HIDE RADIO */
 [type=radio] {
   position:absolute;
@@ -729,8 +739,6 @@ textarea:focus {
   width: 0;
   height: 0;
 }
-
-/** SETUP SECTION **/
 
 /*SETUP IMAGES STYLE */
 .tracking-mode-choice > img {
@@ -841,7 +849,8 @@ textarea:focus {
 
 /** HARDWARES SECTION **/
 #hardware-section-builder{
-  gap: 40%;
+  gap: 20%;
+  padding-top: 5%;
 }
 
 .hardware-radio-label [type=radio] + div {
@@ -857,12 +866,12 @@ textarea:focus {
 
 #hardware-switch-indoor-outdoor {
   width: 50%;
-  height: 25%;
+  height: 35%;
 }
 
 #hardware-switch-indoor-outdoor > label {
   width: 50%;
-  height:100%
+  height: 100%
 }
 
 #hardware-switch-indoor-outdoor [type=radio]:checked + div{
@@ -871,7 +880,7 @@ textarea:focus {
 
 #hardware-sensors-selection{
   width: 100%;
-  gap: 10px;
+  padding-top: 4vh;
 }
 
 #hardware-sensors-selection > label {

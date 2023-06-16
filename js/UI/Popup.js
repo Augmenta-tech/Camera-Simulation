@@ -116,6 +116,7 @@ function initSetupSection()
     if(trackingMode && sceneManager.augmentaSceneLoaded) sceneManager.changeTrackingMode(trackingMode)
 }
 
+//EVENT LISTENERS
 const trackingModeRadios = document.getElementsByName("tracking-mode-selection-builder");
 for(let i = 0; i < trackingModeRadios.length; i++)
 {
@@ -128,6 +129,7 @@ for(let i = 0; i < trackingModeRadios.length; i++)
         //change selector inspector
         main.uiManager.changeTrackingMode(trackingMode);
         document.getElementById("tracking-mode-selection-inspector").value = trackingMode;
+        resetWarnings();
     });
 }
 
@@ -218,11 +220,12 @@ function onChangeDimensionsInput()
     const givenSceneLength = Math.floor(parseFloat(inputSceneLength) / sceneManager.currentUnit.value * 100) / 100;
     const givenSceneHeight = Math.floor(parseFloat(inputSceneHeight) / sceneManager.currentUnit.value * 100) / 100;
     
+    //CHECK INPUT COHERENCE
     if(trackingMode === "wall-tracking" && inputSceneWidth && inputSceneHeight)
     {
         if(inputSceneWidth > 0 && inputSceneHeight > 0)
         {
-            document.getElementById('dimensions-negative-values-warning').classList.remove('hidden');
+            document.getElementById('dimensions-negative-values-warning').classList.add('hidden');
             if(checkLidarCoherence(givenSceneWidth, givenSceneHeight, getMaxFarFromSensors(lidarsTypes.filter(l => l.recommended), trackingMode)))
             {
                 sceneManager.updateWallYAugmentaSceneBorder(inputSceneWidth, inputSceneHeight);
@@ -256,20 +259,39 @@ function onChangeDimensionsInput()
         {
             const camerasTypesRecommended = camerasTypes.filter(c => c.recommended);
             const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
-            if(checkCameraCoherence(givenSceneHeight, overlapHeightDetection, getMaxFarFromSensors(camerasTypesRecommended, trackingMode), getMinNearFromSensors(camerasTypesRecommended)))
+            const maxFar = getMaxFarFromSensors(camerasTypesRecommended, trackingMode);
+            const minNear = getMinNearFromSensors(camerasTypesRecommended);
+            
+            if(checkCameraCoherence(givenSceneHeight, overlapHeightDetection, maxFar, minNear))
             {
-                document.getElementById('dimensions-warning-message').classList.add('hidden');
+                const warningElem = document.getElementById('warning-hook-height');
+                if(warningElem) document.getElementById('surface-warning-message').classList.add('hidden');
                 return true;
             }
             else
             {
-                document.getElementById('dimensions-warning-message').classList.remove('hidden');
+                const warningElem = document.getElementById('warning-hook-height');
+                if(!warningElem)
+                {
+                    const newWarningElem = document.createElement("p");
+                    newWarningElem.classList.add("warning-text");
+                    newWarningElem.id = 'warning-hook-height';
+                    newWarningElem.innerHTML = `The camera(s) you chose cannot see your tracking surface at this distance (min = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(((minNear + overlapHeightDetection) * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>, max = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round((maxFar * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>)`;
+                    document.getElementById('surface-warning-message').appendChild(newWarningElem);
+                }
+                document.getElementById('surface-warning-message').classList.remove('hidden');
                 return false;
             }
         }
     }
     
     return false;
+}
+
+function resetWarnings(){
+    document.getElementById('dimensions-negative-values-warning').classList.add('hidden');
+    document.getElementById('dimensions-warning-message').classList.add('hidden');
+    document.getElementById('surface-warning-message').classList.add('hidden');
 }
 
 function initDimensionsSection()
