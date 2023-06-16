@@ -558,7 +558,7 @@ class SceneObjects{
             //height detected
             if(datas.hasOwnProperty('heightDetected'))
             {
-                const overlapElement = document.getElementById("overlap-height-selection-inspector")
+                const overlapElement = document.getElementById("overlap-height-selection-inspector");
                 if(overlapElement)
                 {
                     overlapElement.value = datas.heightDetected;
