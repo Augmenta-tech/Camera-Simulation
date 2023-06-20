@@ -24,7 +24,6 @@ class SceneObjects{
 
     constructor(sceneManager, isBuilder)
     {
-        const jsonNestedParameters = ["unit","objects","nodes","lidars","dummies"];
         const nodes = [];
         const lidars = [];
         const dummies = [];
@@ -34,183 +33,41 @@ class SceneObjects{
         
         const givenAreaPolygonRegions = [[]];
 
-
-    /* SCENE INITIALISATION */
+        /* SCENE INITIALISATION */
 
         this.initObjects = function()
         {
-            //if local storage, uncomment this
-            //const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
+            const url = new URL(document.location.href);
+            
+            const sceneInfoFromURL = url.searchParams.get("sceneData");
 
-            if(!createSceneFromURL(this))
+            if(!sceneInfoFromURL) //scene from cookie case
             {
+                //if local storage, uncomment this
+                //const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
                 // and comment this
-                const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
-
-                if(sceneInfosStorage)
-                {
-                    this.parseJson(sceneInfosStorage);
-                }
-                else
-                {
-                    if(!isBuilder) this.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
-                    sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_LENGTH);
-
-                    this.populateStorage();
+                const sceneInfo = sessionStorage.getItem('sceneInfos')
+                if(sceneInfo) {
+                    this.parseJson(sceneInfo);
+                    return;
                 }
             }
-            else
+            else if (sceneInfoFromURL) //scene from url case
             {
+                this.parseJson(sceneInfoFromURL);
+                document.getElementById('popup').classList.remove('is-visible');
                 //if local storage, uncomment this
                 //sessionStorage.setItem('sceneInfos', sceneInfosStorage);
                 //and comment this
                 this.populateStorage();
+                return;
             }
+
+            //Default case
+            if(!isBuilder) this.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
+            sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_LENGTH);
+            this.populateStorage();
         }
-        
-        /**
-         * Initialize a scene according to the url
-         * 
-         * @param {SceneObjects} sceneObjects this object
-         */
-        function createSceneFromURL(sceneObjects)
-        {
-            const url = new URL(document.location.href);
-            
-            const sceneData = JSON.parse(url.searchParams.get("sceneData"));
-
-            if(!sceneData){
-                return false;
-            }
-            
-            let mode, sceneWidth, sceneLength, heightDetected;
-            let unitLabelFromURL = "";
-            
-            Object.entries(sceneData).forEach((entry) => {
-                const [key, value] = entry;
-                switch(key)
-                {
-                    case "sceneSize":
-                        sceneWidth = value[0];
-                    case "sceneSize":
-                        sceneLength = value[1];
-                        break;
-                    case "trackingMode":
-                        mode = value;
-                        break;
-                    case "heightDetected":
-                        heightDetected = value;
-                        break;
-                    case "sceneSensorHeight":
-                        document.getElementById("input-scene-sensor-height-inspector").value = value;
-                        sceneManager.sceneSensorHeight = value;
-                        break;
-                    case "unit":
-                        unitLabelFromURL = value.label;
-                        break;
-                    case "objects":
-                        value.nodes.forEach(node => createSensor(node, "node", sceneObjects));
-                        value.lidars.forEach(lidar => createSensor(lidar, "lidar", sceneObjects));
-                    default:
-                        break;
-                }
-            });
-                    
-            const trackingModeSelect = document.getElementById("tracking-mode-selection-inspector");
-            if(trackingModeSelect)
-            {
-                trackingModeSelect.value = mode;
-                trackingModeSelect.dispatchEvent(new Event('change'));
-            }
-            switch(mode)
-            {
-                case 'wall-tracking':
-                {
-                    const inputSceneWidth = document.getElementById("input-wall-y-scene-width-inspector");
-                    if(inputSceneWidth) inputSceneWidth.value = sceneWidth;
-    
-                    const inputSceneHeight = document.getElementById("input-wall-y-scene-height-inspector");
-                    if(inputSceneHeight) inputSceneHeight.value = sceneLength;
-                    sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneLength);
-                }
-                case 'hand-tracking':
-                case 'human-tracking':
-                default:
-                {
-                    const inputSceneWidth = document.getElementById("input-scene-width-inspector");
-                    if(inputSceneWidth) inputSceneWidth.value = sceneWidth;
-    
-                    const inputSceneLength = document.getElementById("input-scene-length-inspector");
-                    if(inputSceneLength) inputSceneLength.value = sceneLength;
-                    sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneLength);
-                }
-            }
-
-            sceneManager.heightDetected = heightDetected;
-
-            // change the unit according to the value in the URL 
-            if(unitLabelFromURL != "" && sceneManager.currentUnit.label != unitLabelFromURL) sceneManager.toggleUnit();
-            console.assert(sceneManager.currentUnit.label == unitLabelFromURL);
-
-            return true;
-        }
-
-        /**
-         * creates a sensor from the json nested data
-         * 
-         * @param {SceneObjects} sceneObjects this object
-         * @param {Object} sensor the sensor to create
-         * @param {string} sensorType the sensor type: node or lidar
-         */
-        function createSensor(sensor, sensorType, sceneObjects){
-            let id, typeID;
-            let px, py, pz, rx, ry, rz;
-            Object.entries(sensor).forEach((entry) => {
-                const [key, value] = entry;
-                
-                switch(key)
-                {
-                    case "id":
-                        id = value;
-                        break;
-                    case "cameraTypeId":
-                        typeID = value;
-                        break;
-                    case "p_x":
-                        px = value;
-                        break;
-                    case "p_y":
-                        py = value;
-                        break;
-                    case "p_z":
-                        pz = value;
-                        break;
-                    case "r_x":
-                        rx = value;
-                        break;
-                    case "r_y":
-                        ry = value;
-                        break;
-                    case "r_z":
-                        rz = value;
-                        break;
-                    default:
-                        break;
-                }
-            })
-            switch(sensorType)
-            {
-                case "node":
-                    sceneObjects.addNode(true, sceneManager.trackingMode, typeID, px, py, pz, rx, ry, rz)
-                    break;
-                case "lidar":
-                    sceneObjects.addLidar(true, typeID, px, pz, ry)
-                    break;
-                default:
-                    break;
-            }
-        }
-
 
     /* SCENE SUBJECTS MANAGEMENT */
 
