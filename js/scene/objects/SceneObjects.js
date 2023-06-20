@@ -24,6 +24,7 @@ class SceneObjects{
 
     constructor(sceneManager, isBuilder)
     {
+        const jsonNestedParameters = ["unit","objects","nodes","lidars","dummies"];
         const nodes = [];
         const lidars = [];
         const dummies = [];
@@ -66,7 +67,7 @@ class SceneObjects{
                 this.populateStorage();
             }
         }
-
+        
         /**
          * Initialize a scene according to the url
          * 
@@ -74,48 +75,47 @@ class SceneObjects{
          */
         function createSceneFromURL(sceneObjects)
         {
-            let url = document.location.href;
-            const index = url.indexOf('&');
+            const url = new URL(document.location.href);
             
-            if(index === -1 || isBuilder) return false;
+            const sceneData = JSON.parse(url.searchParams.get("sceneData"));
 
-            url = url.substring(url.indexOf('?') + 1);
-            const sensors = url.split('&');
-            const sceneInfo = sensors.shift();
-            const infos = sceneInfo.split(',');
-
+            if(!sceneData){
+                return false;
+            }
+            
             let mode, sceneWidth, sceneLength, heightDetected;
             let unitLabelFromURL = "";
-            infos.forEach(info => {
-                const keyVal = info.split('=');
-                const key = keyVal[0];
-                const val = keyVal[1];
+            
+            Object.entries(sceneData).forEach((entry) => {
+                const [key, value] = entry;
                 switch(key)
                 {
-                    case "L":
-                        sceneWidth = parseFloat(val);
+                    case "sceneSize":
+                        sceneWidth = value[0];
+                    case "sceneSize":
+                        sceneLength = value[1];
                         break;
-                    case "l":
-                        sceneLength = parseFloat(val);
+                    case "trackingMode":
+                        mode = value;
                         break;
-                    case "m":
-                        mode = val;
+                    case "heightDetected":
+                        heightDetected = value;
                         break;
-                    case "h":
-                        heightDetected = parseFloat(val);
+                    case "sceneSensorHeight":
+                        document.getElementById("input-scene-sensor-height-inspector").value = value;
+                        sceneManager.sceneSensorHeight = value;
                         break;
-                    case "sh":
-                        document.getElementById("input-scene-sensor-height-inspector").value = parseFloat(val);
-                        sceneManager.sceneSensorHeight = parseFloat(val);
+                    case "unit":
+                        unitLabelFromURL = value.label;
                         break;
-                    case "u":
-                        unitLabelFromURL = val;
-                        break;
+                    case "objects":
+                        value.nodes.forEach(node => createSensor(node, "node", sceneObjects));
+                        value.lidars.forEach(lidar => createSensor(lidar, "lidar", sceneObjects));
                     default:
                         break;
                 }
             });
-
+                    
             const trackingModeSelect = document.getElementById("tracking-mode-selection-inspector");
             if(trackingModeSelect)
             {
@@ -147,71 +147,68 @@ class SceneObjects{
             }
 
             sceneManager.heightDetected = heightDetected;
-            
-            sensors.forEach(c => {
-                const props = c.split(',');
-                let sensor;
-                let id, typeID;
-                let px, py, pz, rx, ry, rz;
-
-                props.forEach(prop => {
-                    const keyVal = prop.split('=');
-                    const key = keyVal[0];
-                    const stringVal = keyVal[1];
-                    if(key && stringVal)
-                    {
-                        const val = parseFloat(stringVal);
-                        switch(key)
-                        {
-                            case "sensor":
-                                sensor = stringVal;
-                            case "id":
-                                id = val
-                                break;
-                            case "typeID":
-                                typeID = val;
-                                break;
-                            case "px":
-                                px = val;
-                                break;
-                            case "py":
-                                py = val;
-                                break;
-                            case "pz":
-                                pz = val;
-                                break;
-                            case "rx":
-                                rx = val;
-                                break;
-                            case "ry":
-                                ry = val;
-                                break;
-                            case "rz":
-                                rz = val;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-                switch(sensor)
-                {
-                    case "node":
-                        sceneObjects.addNode(true, sceneManager.trackingMode, typeID, px, py, pz, rx, ry, rz)
-                        break;
-                    case "lidar":
-                        sceneObjects.addLidar(true, typeID, px, pz, ry)
-                        break;
-                    default:
-                        break;
-                }
-            });
 
             // change the unit according to the value in the URL 
             if(unitLabelFromURL != "" && sceneManager.currentUnit.label != unitLabelFromURL) sceneManager.toggleUnit();
             console.assert(sceneManager.currentUnit.label == unitLabelFromURL);
 
             return true;
+        }
+
+        /**
+         * creates a sensor from the json nested data
+         * 
+         * @param {SceneObjects} sceneObjects this object
+         * @param {Object} sensor the sensor to create
+         * @param {string} sensorType the sensor type: node or lidar
+         */
+        function createSensor(sensor, sensorType, sceneObjects){
+            let id, typeID;
+            let px, py, pz, rx, ry, rz;
+            Object.entries(sensor).forEach((entry) => {
+                const [key, value] = entry;
+                
+                switch(key)
+                {
+                    case "id":
+                        id = value;
+                        break;
+                    case "cameraTypeId":
+                        typeID = value;
+                        break;
+                    case "p_x":
+                        px = value;
+                        break;
+                    case "p_y":
+                        py = value;
+                        break;
+                    case "p_z":
+                        pz = value;
+                        break;
+                    case "r_x":
+                        rx = value;
+                        break;
+                    case "r_y":
+                        ry = value;
+                        break;
+                    case "r_z":
+                        rz = value;
+                        break;
+                    default:
+                        break;
+                }
+            })
+            switch(sensorType)
+            {
+                case "node":
+                    sceneObjects.addNode(true, sceneManager.trackingMode, typeID, px, py, pz, rx, ry, rz)
+                    break;
+                case "lidar":
+                    sceneObjects.addLidar(true, typeID, px, pz, ry)
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -312,6 +309,8 @@ class SceneObjects{
 
             nodes.push(newCamera);
             this.nodeMeshes.push(newCamera.mesh);
+
+            sceneManager.sceneSensorHeight = z;
 
             this.populateStorage();
         }
@@ -424,67 +423,17 @@ class SceneObjects{
         }
 
         /**
-         * Create an url containing all the informations of the scene
+         * Create an url containing all the informations of the scene from sessionStorage json
          * 
          * @returns the url of this scene
          */
         this.generateLink = function()
         {
-            let url = document.location.href;
-            let index = url.indexOf('?');
-            if(index !== -1) url = url.substring(0, index);
-            if(url[url.length-1] != '/') url += '/';
-            url += '?';
-            url += "L=";
-            url += Math.floor(sceneManager.sceneWidth * 100)/100;
-            url += ",l=";
-            url += Math.floor(sceneManager.sceneLength * 100)/100;
-            url += ",m=";
-            url += sceneManager.trackingMode;
-            url += ",h=";
-            url += sceneManager.heightDetected;
-            url += ",sh=";
-            url += sceneManager.sceneSensorHeight;
-            url += ",u=";
-            url += sceneManager.currentUnit.label;
-            url += '&';
-            nodes.forEach(n => {
-                url += "sensor=";
-                url += "node";
-                url += ",id=";
-                url += n.id;
-                url += ",typeID=";
-                url += n.cameraType.id;
-                url += ",px=";
-                url += Math.round(n.xPos*100)/100.0;
-                url += ",py=";
-                url += Math.round(n.yPos*100)/100.0;
-                url += ",pz=";
-                url += Math.round(n.zPos*100)/100.0;
-                url += ",rx=";
-                url += Math.round(n.xRot*10000)/10000.0;
-                url += ",ry=";
-                url += Math.round(n.yRot*10000)/10000.0;
-                url += ",rz=";
-                url += Math.round(n.zRot*10000)/10000.0;
-                url += '&';
-            });
-            lidars.forEach(l => {
-                url += "sensor=";
-                url += "lidar";
-                url += ",id=";
-                url += l.id;
-                url += ",typeID=";
-                url += l.lidarType.id;
-                url += ",px=";
-                url += Math.round(l.xPos*100)/100.0;
-                url += ",pz=";
-                url += Math.round(l.zPos*100)/100.0;
-                url += ",ry=";
-                url += Math.round(l.yRot*10000)/10000.0;
-                url += '&';
-            });
-            url = url.slice(0, -1);
+            //Get only the base url of the site
+            const url = new URL(document.location.href.split('?')[0]);
+
+            //Create an URL with a sceneData parameter with the string json of the scene
+            url.searchParams.append("sceneData", sessionStorage.getItem('sceneInfos'));
         
             return url;
         }
