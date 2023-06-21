@@ -69,7 +69,7 @@ class SceneObjects{
             this.populateStorage();
         }
 
-    /* SCENE SUBJECTS MANAGEMENT */
+        /* SCENE SUBJECTS MANAGEMENT */
 
         // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
         /**

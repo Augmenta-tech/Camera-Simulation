@@ -8,8 +8,37 @@ class UIManager{
         this.wizard = new Wizard();
         resetValues();
 
+        this.setTrackingMode = function (mode){
+            console.log('Initializing tracking mode UI');
+            document.getElementById("tracking-mode-selection-inspector").value = mode;
+        }
+
         this.bindEventListeners = function(viewportManager)
         {
+            /* HANDLE BUTTONS */
+            const toggleUnitButton = document.getElementById('toggle-unit-button');
+            if(toggleUnitButton) toggleUnitButton.addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
+            
+            const frustumButton = document.getElementById('display-frustums-button');
+            if(frustumButton) frustumButton.addEventListener('click', () => viewportManager.sceneManager.objects.displayFrustums());
+            const lidarRaysButton = document.getElementById('display-lidars-rays-button');
+            if(lidarRaysButton) lidarRaysButton.addEventListener('click', () => viewportManager.sceneManager.objects.displayRays());
+
+            const addNodeButton = document.getElementById('add-node-button');
+            if(addNodeButton) addNodeButton.addEventListener('click', () => viewportManager.sceneManager.objects.addNode());
+            const deleteAllNodesButton = document.getElementById('delete-all-nodes-button');
+            if(deleteAllNodesButton) deleteAllNodesButton.addEventListener('click', () => viewportManager.sceneManager.objects.removeNodes());
+
+            const addLidarButton = document.getElementById('add-lidar-button');
+            if(addLidarButton) addLidarButton.addEventListener('click', () => viewportManager.sceneManager.objects.addLidar());
+            const deleteAllLidarsButton = document.getElementById('delete-all-lidars-button');
+            if(deleteAllLidarsButton) deleteAllLidarsButton.addEventListener('click', () => viewportManager.sceneManager.objects.removeLidars());
+
+            const addDummyButton = document.getElementById('add-dummy-button');
+            if(addDummyButton) addDummyButton.addEventListener('click', () => viewportManager.sceneManager.objects.addDummy());
+            const deleteAllDummiesButton = document.getElementById('delete-all-dummies-button');
+            if(deleteAllDummiesButton) deleteAllDummiesButton.addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
+
             const sceneManager = viewportManager.sceneManager
             const copyUrlModal = document.getElementById("share-modal");
             document.getElementById('generate-link').addEventListener('click', () => {
@@ -58,7 +87,7 @@ class UIManager{
             document.getElementById('scene-file-name-input').value = '';
             
             //INSPECTOR INPUTS
-            document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
+            //document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
             document.getElementById('overlap-height-selection-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
             document.getElementById("input-scene-width-inspector").value = SceneManager.DEFAULT_WIDTH;
             document.getElementById("input-scene-length-inspector").value = SceneManager.DEFAULT_LENGTH;
@@ -74,7 +103,7 @@ class UIManager{
 
             //INSPECTOR READONLY INPUTS
             document.getElementById("input-scene-sensor-height-inspector").value = Node.DEFAULT_NODE_HEIGHT;
-            document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
+            //document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
         }
 
         function copyLink(link)

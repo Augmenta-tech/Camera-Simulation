@@ -22,9 +22,23 @@ import { units } from '/js/data.js';
 import { Checkerboard } from '/js/scene/Checkerboard.js';
 import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 import { Node } from '/js/scene/objects/sensors/Node.js';
+import { Observable } from '/js/scene/Observable.js';
+import { TransformControls } from '/js/lib/TransformControls.js';
+import { ViewportManager } from '/js/ViewportManager.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
+
+class TrackingMode extends Observable {
+    constructor() {
+        super();
+    }
+
+    initialize(mode) {
+        console.log('Initializing tracking mode');
+        this.notifyObservers(mode);
+    }
+}
 
 class SceneManager{
     static loadFont(isBuilder, callback)
@@ -47,13 +61,44 @@ class SceneManager{
     static TABLE_ELEVATION = 0.75;
     static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
 
-    constructor(isBuilder, _transformControl)
+    constructor(isBuilder, uiManager)
     {
+        const viewportElement = document.getElementById('viewport');
+
+        /* initialize viewport, scene and objects */ 
+        this.viewportManager = new ViewportManager(viewportElement, this);
+
+        const viewportManager = this.viewportManager;
+
+        this.trackingModeObservable = new TrackingMode();
+        this.trackingModeObservable.addObserver(uiManager.setTrackingMode);
+
+        var previousInfo = false;
+        var sceneInfo = "";
+        const url = new URL(document.location.href);
+        sceneInfo = url.searchParams.get("sceneData");
+
+        if(sceneInfo) //scene from URL case
+        {
+            previousInfo = true;
+        } else { //scene from cookie case
+            sceneInfo = sessionStorage.getItem('sceneInfos')
+            if(sceneInfo) {
+               previousInfo = true; 
+            }
+        }
+
+        if(previousInfo){
+            this.trackingModeObservable.initialize(sceneInfo.trackingMode);
+            this.trackingMode = sceneInfo.trackingMode;
+        } else {
+            this.trackingModeObservable.initialize(SceneManager.DEFAULT_TRACKING_MODE);
+            this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
+        }
+
         this.scene = buildScene();
 
         this.currentUnit = SceneManager.DEFAULT_UNIT;
-
-        this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
 
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
@@ -77,7 +122,7 @@ class SceneManager{
         this.checkerboardWallY;
         this.checkerboardWallX;
 
-        this.transformControl = _transformControl;
+        this.transformControl = buildTransformControl();
         this.objects = new SceneObjects(this, isBuilder);
 
         this.augmentaSceneLoaded = false;
@@ -87,7 +132,7 @@ class SceneManager{
         const rays = [];
     
 
-    /* SCENE INITIALISATION */
+        /* SCENE INITIALISATION */
 
         this.initScene = function(floor, wallX, wallY)
         {
@@ -134,7 +179,7 @@ class SceneManager{
             this.objects.initObjects();
         }
 
-    /* BUILDERS */
+        /* BUILDERS */
         function buildScene()
         {
             const scene = new Scene();
@@ -199,9 +244,27 @@ class SceneManager{
             return gridHelper;
         }
 
-    /* USER'S ACTIONS */
+        /* ALLOW TO TRANSFORM SCENE SUBJECTS IN THE VIEWPORT */
+        function buildTransformControl()
+        {
+            const transformControl = new TransformControls(viewportManager.activeCamera, viewportManager.renderer.domElement );
+            transformControl.addEventListener('change', () => viewportManager.render());
+            transformControl.addEventListener('dragging-changed', function (event) {
+                orbitControls.enabled = ! event.value;
+            });
 
-    /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
+            return transformControl;
+        }
+
+        this.transformControl.addEventListener( 'objectChange', function () {
+            viewportManager.element.removeEventListener( 'pointermove', onDrag);
+            this.objects.updateObjectsPosition();
+            this.objects.populateStorage();
+        });
+
+        /* USER'S ACTIONS */
+
+        /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
         this.toggleUnit = function(unit = this.currentUnit.value === units.meters.value ? units.feets : units.meters)
         {
             if(this.augmentaSceneLoaded) 

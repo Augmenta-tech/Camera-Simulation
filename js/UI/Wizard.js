@@ -469,7 +469,7 @@ class Wizard{
                 }
             }
 
-            document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
+            //document.getElementById('tracking-mode-selection-inspector').value = trackingMode;
 
             //viewportManager.placeCamera();
             viewportManager.setupCameraChangement(!!viewportManager.activeCamera.isOrthographicCamera);

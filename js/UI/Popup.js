@@ -3,7 +3,7 @@ import { main } from '../main.js';
 import { SceneManager } from '../scene/SceneManager.js';
 import { calculateCameraConfig, calculateLidarConfig, checkCameraCoherence, checkLidarCoherence, createSceneFromCameraConfig, createSceneFromLidarConfig, getMinNearFromSensors, getMaxFarFromSensors } from '../UI/Wizard.js';
 
-const sceneManager = main.viewportManager.sceneManager;
+const sceneManager = main.sceneManager;
 
 /** UI */
 window.addEventListener('resize', onWindowResize);

@@ -14,14 +14,10 @@ import {
 
 import { OrbitControls } from './lib/OrbitControls.js';
 import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
-import { TransformControls } from './lib/TransformControls.js';
-
-import { SceneManager } from './scene/SceneManager.js';
-
 
 class ViewportManager{
     static DEFAULT_CAM_POSITION = new Vector3(12,8,12);
-    constructor(viewportElement, isBuilder)
+    constructor(viewportElement, sceneManager)
     {
         const scope = this;
 
@@ -29,6 +25,7 @@ class ViewportManager{
         let viewportHeight = viewportElement.offsetHeight;
         
         const renderer = buildRenderer();
+        this.renderer = renderer;
 
         this.element = renderer.domElement;
 
@@ -41,22 +38,15 @@ class ViewportManager{
 
         let orbitControls = buildOrbitControls();
         let controlsGizmo = buildGuizmo(orbitControls);
-        this.sceneManager = new SceneManager(isBuilder, isBuilder ? undefined : buildTransformControl());
+        this.sceneManager = sceneManager;
 
-    /* HANDLE VIEWPORT EVENTS */
+        /* HANDLE VIEWPORT EVENTS */
 
         this.bindEventListeners = function()
         {
             this.element.addEventListener( 'pointerdown', onPointerDown);
             this.element.addEventListener( 'pointerup', onPointerUp);
             this.element.addEventListener( 'pointermove', onPointerMove);
-        
-            const transfControl = this.sceneManager.transformControl;
-            if(transfControl) transfControl.addEventListener( 'objectChange', function () {
-                scope.element.removeEventListener( 'pointermove', onDrag);
-                scope.sceneManager.objects.updateObjectsPosition();
-                scope.sceneManager.objects.populateStorage();
-            });
 
             //DEBUG
             document.addEventListener( 'keydown', onKeyDown);
@@ -240,18 +230,6 @@ class ViewportManager{
 
             controlsGizmo.dispose();
             controlsGizmo = buildGuizmo(orbitControls, this)
-        }
-
-        /* ALLOW TO TRANSFORM SCENE SUBJECTS IN THE VIEWPORT */
-        function buildTransformControl()
-        {
-            const transformControl = new TransformControls(scope.activeCamera, renderer.domElement );
-            transformControl.addEventListener('change', () => scope.render());
-            transformControl.addEventListener('dragging-changed', function (event) {
-                orbitControls.enabled = ! event.value;
-            });
-
-            return transformControl;
         }
 
 
