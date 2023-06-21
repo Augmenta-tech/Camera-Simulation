@@ -37,6 +37,7 @@ class ViewportManager{
         this.activeCamera = perspCam;
 
         let orbitControls = buildOrbitControls();
+        this.orbitControls = orbitControls;
         let controlsGizmo = buildGuizmo(orbitControls);
         this.sceneManager = sceneManager;
 
@@ -47,6 +48,12 @@ class ViewportManager{
             this.element.addEventListener( 'pointerdown', onPointerDown);
             this.element.addEventListener( 'pointerup', onPointerUp);
             this.element.addEventListener( 'pointermove', onPointerMove);
+
+            sceneManager.transformControl.addEventListener( 'objectChange', function () {
+                scope.element.removeEventListener( 'pointermove', onDrag);
+                sceneManager.objects.updateObjectsPosition();
+                sceneManager.objects.populateStorage();
+            });
 
             //DEBUG
             document.addEventListener( 'keydown', onKeyDown);

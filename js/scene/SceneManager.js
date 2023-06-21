@@ -127,6 +127,8 @@ class SceneManager{
 
         this.augmentaSceneLoaded = false;
 
+        const scope = this;
+
         //DEBUG
         const spheres = [];
         const rays = [];
@@ -250,17 +252,11 @@ class SceneManager{
             const transformControl = new TransformControls(viewportManager.activeCamera, viewportManager.renderer.domElement );
             transformControl.addEventListener('change', () => viewportManager.render());
             transformControl.addEventListener('dragging-changed', function (event) {
-                orbitControls.enabled = ! event.value;
+                viewportManager.orbitControls.enabled = ! event.value;
             });
 
             return transformControl;
         }
-
-        this.transformControl.addEventListener( 'objectChange', function () {
-            viewportManager.element.removeEventListener( 'pointermove', onDrag);
-            this.objects.updateObjectsPosition();
-            this.objects.populateStorage();
-        });
 
         /* USER'S ACTIONS */
 
