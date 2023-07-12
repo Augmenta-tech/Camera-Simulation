@@ -9,7 +9,8 @@ class Engine{
         const uiManager = this.uiManager;
 
         this.sceneManager = new SceneManager(isBuilder, uiManager);
-        const viewportManager = this.sceneManager.viewportManager;
+        const sceneManager = this.sceneManager;
+        const viewportManager = sceneManager.viewportManager;
 
         bindEventListeners();
         animate();
@@ -18,8 +19,10 @@ class Engine{
         {
             window.addEventListener('resize', () => onWindowResize(viewportManager));
 
-            if(uiManager) uiManager.bindEventListeners(viewportManager);
+            uiManager.bindEventListeners(viewportManager);
             viewportManager.bindEventListeners();
+
+            sceneManager.bindObservers();
         }
 
         function onWindowResize(viewportManager)

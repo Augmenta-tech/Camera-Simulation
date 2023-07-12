@@ -1,20 +1,22 @@
 import { SceneManager } from '/js/scene/SceneManager.js';
 import { Node } from '/js/scene/objects/sensors/Node.js';
 import { Wizard } from './Wizard.js';
+import { Popup } from './Popup.js';
 
 class UIManager{
     constructor()
     {
-        this.wizard = new Wizard();
-        resetValues();
+        //this.wizard = new Wizard();
+        const scope = this;
+        this.popup = null;
+        var sceneManager;
 
-        this.setTrackingMode = function (mode){
-            console.log('Initializing tracking mode UI');
-            document.getElementById("tracking-mode-selection-inspector").value = mode;
-        }
+        resetValues();
 
         this.bindEventListeners = function(viewportManager)
         {
+            this.popup = new Popup(viewportManager.sceneManager);
+
             /* HANDLE BUTTONS */
             const toggleUnitButton = document.getElementById('toggle-unit-button');
             if(toggleUnitButton) toggleUnitButton.addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
@@ -39,7 +41,7 @@ class UIManager{
             const deleteAllDummiesButton = document.getElementById('delete-all-dummies-button');
             if(deleteAllDummiesButton) deleteAllDummiesButton.addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
 
-            const sceneManager = viewportManager.sceneManager
+            sceneManager = viewportManager.sceneManager
             const copyUrlModal = document.getElementById("share-modal");
             document.getElementById('generate-link').addEventListener('click', () => {
                 copyLink(sceneManager.objects.generateLink());
@@ -60,11 +62,17 @@ class UIManager{
             document.getElementById("input-wall-y-scene-width-inspector").addEventListener('change', () => sceneManager.updateWallYAugmentaSceneBorder(parseFloat(document.getElementById("input-wall-y-scene-width-inspector").value), parseFloat(document.getElementById("input-wall-y-scene-height-inspector").value)));
             document.getElementById("input-wall-y-scene-height-inspector").addEventListener('change', () => sceneManager.updateWallYAugmentaSceneBorder(parseFloat(document.getElementById("input-wall-y-scene-width-inspector").value), parseFloat(document.getElementById("input-wall-y-scene-height-inspector").value)));
 
+            document.getElementById('open-wizard-button').addEventListener('click', () => {
+                if(sceneManager.augmentaSceneLoaded)
+                {
+                    document.getElementById('popup').classList.add('is-visible');
+                }
+            });
+
             document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {
                 const mode = document.getElementById("tracking-mode-selection-inspector").value;
-                this.changeTrackingMode(mode);
-                sceneManager.changeTrackingMode(mode);
-                this.displayWarning(sceneManager);
+                sceneManager.trackingModeObservable.set(mode);
+                scope.displayWarning(sceneManager);
             });
             
             document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
@@ -72,7 +80,7 @@ class UIManager{
                 sceneManager.objects.populateStorage();
             });
             
-            this.wizard.bindEventListeners(viewportManager, this);
+            //this.wizard.bindEventListeners(viewportManager, this);
         }
 
         function resetValues()
@@ -95,11 +103,11 @@ class UIManager{
             document.getElementById("input-wall-y-scene-height-inspector").value = SceneManager.DEFAULT_LENGTH;
 
             //WIZARD INPUTS
-            document.getElementById("input-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
-            document.getElementById("input-scene-length-wizard").value = SceneManager.DEFAULT_LENGTH;
-            document.getElementById("input-wall-y-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
-            document.getElementById("input-wall-y-scene-height-wizard").value = SceneManager.DEFAULT_LENGTH;
-            document.getElementById("input-hook-height-wizard").value = '';
+            // document.getElementById("input-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
+            // document.getElementById("input-scene-length-wizard").value = SceneManager.DEFAULT_LENGTH;
+            // document.getElementById("input-wall-y-scene-width-wizard").value = SceneManager.DEFAULT_WIDTH;
+            // document.getElementById("input-wall-y-scene-height-wizard").value = SceneManager.DEFAULT_LENGTH;
+            // document.getElementById("input-hook-height-wizard").value = '';
 
             //INSPECTOR READONLY INPUTS
             document.getElementById("input-scene-sensor-height-inspector").value = Node.DEFAULT_NODE_HEIGHT;
@@ -163,6 +171,9 @@ class UIManager{
 
         this.changeTrackingMode = function(trackingMode)
         {
+            console.log('Setting tracking mode UI to ', trackingMode);
+            document.getElementById("tracking-mode-selection-inspector").value = trackingMode;
+
             switch(trackingMode)
             {
                 case 'hand-tracking':

@@ -11,8 +11,14 @@ class Observable {
         };
     }
 
-    notifyObservers(...args) {
+    notifyAllObservers(...args) {
         this._observers.forEach(observer => {
+            observer(...args);
+        });
+    }
+
+    notifyObserversExceptOrigin(origin, ...args) {
+        this._observers.filter(o => o !== origin).forEach(observer => {
             observer(...args);
         });
     }
