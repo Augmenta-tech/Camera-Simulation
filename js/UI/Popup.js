@@ -257,12 +257,14 @@ class Popup{
                     }
                     else
                     {
+                        resetWarnings();
                         document.getElementById('dimensions-warning-message').classList.remove('hidden');
                         return false;
                     }
                 }
                 else
                 {
+                    resetWarnings();
                     document.getElementById('dimensions-negative-values-warning').classList.remove('hidden');
                 }
             }
@@ -278,6 +280,7 @@ class Popup{
                 }
                 else
                 {
+                    resetWarnings();
                     document.getElementById('dimensions-negative-values-warning').classList.remove('hidden');
                 }
 
@@ -308,6 +311,7 @@ class Popup{
                             newWarningElem.innerHTML = `The camera(s) you chose cannot see your tracking surface at this distance (min = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(((minNear + overlapHeightDetection) * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>, max = <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round((maxFar * sceneManager.currentUnit.value) * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.label + `>` + sceneManager.currentUnit.label + `</span>)`;
                             document.getElementById('surface-warning-message').appendChild(newWarningElem);
                         }
+                        resetWarnings();
                         document.getElementById('surface-warning-message').classList.remove('hidden');
                         return false;
                     }
@@ -321,6 +325,7 @@ class Popup{
             document.getElementById('dimensions-negative-values-warning').classList.add('hidden');
             document.getElementById('dimensions-warning-message').classList.add('hidden');
             document.getElementById('surface-warning-message').classList.add('hidden');
+            document.getElementById('dimensions-no-value-warning').classList.add('hidden');
         }
 
         function initDimensionsSection()
@@ -375,16 +380,21 @@ class Popup{
 
         document.getElementById('next-button-dimensions').addEventListener('click', () => 
         {
+            resetWarnings();
+            document.getElementById('dimensions-no-value-warning').classList.remove('hidden');
             if(!onChangeDimensionsInput()) return;
 
             getDimensions()
 
             if((trackingMode !== 'wall-tracking' && ( !givenWidth || !givenLength || !givenHeight)) || 
-                (trackingMode === 'wall-tracking' && (!givenWidth || !givenHeight))) return;
+                (trackingMode === 'wall-tracking' && (!givenWidth || !givenHeight))) {
+                    return;
+                }
 
             if((trackingMode !== 'wall-tracking' && (givenWidth <= 0 || givenLength <= 0 || givenHeight <= 0)) || 
                 (trackingMode === 'wall-tracking' && (givenWidth <= 0 || givenHeight <= 0))) return;
 
+            resetWarnings();
             initHardwareSection();
             selectFirstSensorAvailable();
 
