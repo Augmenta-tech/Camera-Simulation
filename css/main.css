@@ -594,17 +594,15 @@ a.main-button {
 /*** new UI ***/
 
 :root {
-  --color-white :#fefefe;
-
-  --color-grey-background-selected-item: #242424;
-  --color-grey-background: #313132;
-  --color-grey-unselected: #676767;
-  --color-grey-line: #949494;
-  --color-grey-selectable: #9A9A9A;
-  --color-blue-buttons: #AFCEF2;
+  --color-grey-background-selected-item: #1b0c386c;
+  --color-grey-background: #fcfcfc;
+  --color-grey-unselected: #868585;
+  --color-grey-line: #afafaf;
+  --color-grey-selectable: #665c5c;
+  --color-blue-buttons: #68a3e7;
   
-  --color-grey-text: #676767;
-  --color-red-warning: #BF4747;
+  --color-grey-text: #494949;
+  --color-red-warning: #d12525;
 
   --color-red-x: #BF4747;
   --color-green-y: #37A48A;
@@ -652,11 +650,11 @@ textarea:focus {
 }
 
 .tab.passed-tab > h3 {
-  color: var(--color-white);
+  color: var(--color-dark-purple);
 }
 
 .tab.passed-tab > hr {
-  color: var(--color-white);
+  color: var(--color-dark-purple);
 }
 
 .tab-line{
@@ -666,7 +664,7 @@ textarea:focus {
 }
 
 .tab.passed-tab > .tab-line{
-  border-top-color: var(--color-white);
+  border-top-color: var(--color-dark-purple);
 }
 
 .builder-section{
@@ -734,18 +732,18 @@ textarea:focus {
 }
 
 .builder-button >  p, svg{
-  color: var(--color-blue-buttons);
+  color: var(--color-blue);
   letter-spacing: 2px;
   padding: 8px 0px;
   font-size: 15px;
 }
 
 .builder-main-button{
-  outline: 1px solid var(--color-blue-buttons);
+  outline: 1px solid var(--color-blue);
 }
 
 .text-button{
-  color: var(--color-blue-buttons);
+  color: var(--color-blue);
   text-decoration: underline;
   cursor: pointer;
   padding-left: 4px;
@@ -765,14 +763,12 @@ textarea:focus {
 }
 
 .popup-target-overlap-select > select{
-  background-color:#313132;
-  color: var(--color-blue-buttons);
-  border-color: var(--color-blue-buttons);
+  color: var(--color-blue);
+  border-color: var(--color-blue);
   width: 10em;
 }
 
 .popup-target-overlap-select > option{
-  background-color:#313132;
   border-radius: 0;
 }
 
@@ -792,6 +788,7 @@ textarea:focus {
   outline: 1px solid var(--color-grey-unselected);
   border-radius: 4px;
   margin: 2vh;
+  background-color: var(--color-grey-background-selected-item);
 }
 
 .vertical-view .tracking-mode-choice > img {
@@ -829,7 +826,7 @@ textarea:focus {
 
 .dimensions-inputs input {
 	background-color: rgba(0,0,0,0);
-	color: var(--color-white);
+	color: var(--color-dark-purple);
 	border-width: 1px 1px 1px 10px;
 	border-style: solid;
   width: 12vw;
@@ -880,8 +877,7 @@ textarea:focus {
 
 #sensor-height-infos-text{
   background-color: var(--color-grey-selectable);
-  width: 150px;
-  height: 100px;
+  max-width: 150px;
   padding: 10px;
   border-radius: 5px;
   position: absolute;
@@ -889,6 +885,8 @@ textarea:focus {
 
 #sensor-height-infos-text p{
   color: var(--color-grey-background-selected-item);
+  padding: 0;
+  margin:0;
 }
 
 /** HARDWARES SECTION **/
@@ -919,7 +917,7 @@ textarea:focus {
 }
 
 #hardware-switch-indoor-outdoor [type=radio]:checked + div{
-  background-color: var(--color-white);
+  background-color: var(--color-grey-background-selected-item);
 }
 
 #hardware-sensors-selection{
@@ -945,7 +943,7 @@ textarea:focus {
 }
 
 .hardware-sensors-type [type=radio]:checked + div{
-  background-color: var(--color-white);
+  background-color: var(--color-grey-background-selected-item);
 }
 
 .hardware-sensors-type.unselectable [type=radio] + div{
@@ -1036,4 +1034,14 @@ textarea:focus {
 #open-wizard-button p {
   font-weight: bold;
   font-size: large;
+}
+
+a{
+  color: var(--color-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-blue-2);
+  text-decoration: none;
 }
