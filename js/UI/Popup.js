@@ -8,6 +8,8 @@ class Popup{
         /** VALUES FILLED THROUGH FROM */
         this.trackingMode = "human-tracking";
         let trackingMode = this.trackingMode;
+        this.heightDetected = 1.2;
+        let heightDetected = this.heightDetected;
         this.givenWidth = 0;
         let givenWidth = this.givenWidth;
         this.givenLength = 0;
@@ -110,6 +112,12 @@ class Popup{
             }
         }
 
+        this.setHeightDetected = function(value){
+            console.log("Setting detected height to ", value);
+            heightDetected = value;
+            document.getElementById("overlap-height-selection-popup").value = heightDetected;
+        }
+
         /** SETUP SECTION */
         function initSetupSection()
         {
@@ -156,8 +164,7 @@ class Popup{
         */
 
         document.getElementById("overlap-height-selection-popup").addEventListener('change', () => {
-            sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-popup").value);
-            sceneManager.objects.populateStorage();
+            sceneManager.heightDetectedObservable.set(parseFloat(document.getElementById("overlap-height-selection-popup").value));
         });
 
         document.getElementById('next-button-setup').addEventListener('click', () => 

@@ -94,6 +94,8 @@ class SceneManager{
         var trackingMode = this.trackingMode;
 
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
+        var heightDetected = this.heightDetected;
+
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
         this.sceneLength = SceneManager.DEFAULT_LENGTH;
         this.sceneSensorHeight = Node.DEFAULT_NODE_HEIGHT;
@@ -133,16 +135,25 @@ class SceneManager{
             const changeTrackingModeBinded = this.changeTrackingMode.bind(this)
             this.trackingModeObservable.addObserver(changeTrackingModeBinded);
 
+            this.heightDetectedObservable = new ObservableParameter();
+            this.heightDetectedObservable.addObserver(uiManager.changeHeightDetected);
+            this.heightDetectedObservable.addObserver(uiManager.popup.setHeightDetected);
+            const changeHeightDetectedBinded = this.changeHeightDetected.bind(this)
+            this.heightDetectedObservable.addObserver(changeHeightDetectedBinded);
+
             if(sceneInfo){
                 if(sceneInfo.trackingMode){
                     this.trackingModeObservable.set(sceneInfo.trackingMode);
-                    // = sceneInfo.trackingMode;
+                    return;
+                }
+                if(sceneInfo.heightDetected){
+                    this.heightDetectedObservable.set(sceneInfo.heightDetected);
                     return;
                 }
             }
 
             this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
-            //this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
+            this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
         }
 
         /* SCENE INITIALISATION */
@@ -349,7 +360,7 @@ class SceneManager{
 
         this.changeTrackingMode = function(mode, build = true)
         {
-            trackingMode = mode;
+            this.trackingMode = mode;
             if(!build) return;
 
             switch(mode)
@@ -413,6 +424,11 @@ class SceneManager{
                     toAdd[i].setSceneElevation(sceneElevations[i]);
                 }
             }
+        }
+
+        this.changeHeightDetected = function(value){
+            this.heightDetected = value;
+            this.objects.populateStorage();
         }
 
         this.changeEnvironment = function(env = ((this.sceneEnvironment) === 'indoor' ? 'outdoor' : 'indoor'))

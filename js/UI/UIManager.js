@@ -76,8 +76,7 @@ class UIManager{
             });
             
             document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
-                sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-inspector").value);
-                sceneManager.objects.populateStorage();
+                sceneManager.heightDetectedObservable.set(parseFloat(document.getElementById("overlap-height-selection-inspector").value));
             });
             
             //this.wizard.bindEventListeners(viewportManager, this);
@@ -214,6 +213,11 @@ class UIManager{
                     document.getElementById('lidars-buttons').classList.add('hidden');
                     break;
             }
+        }
+
+        this.changeHeightDetected = function(value){
+            console.log("changing height to ", value);
+            document.getElementById('overlap-height-selection-inspector').value = value;
         }
 
         this.displayWarning = function(sceneManager)
