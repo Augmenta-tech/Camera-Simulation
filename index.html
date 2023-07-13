@@ -35,10 +35,6 @@
               <h3>Hardware</h3>
               <div class="tab-line"></div>
             </div>
-            <div id="my-system-tab" class="column center-x tab">
-              <h3>My system</h3>
-              <div class="tab-line"></div>
-            </div>
           </div>
   
           <!-- SETUP CONTENT -->
@@ -74,6 +70,16 @@
                 <img id="fast-objects-tracking-img" src="img/fast-objects-tracking.png" alt="Fast objects">
               </label>
             -->
+            </div>
+            <div id="setup-target-overlap" class="popup-target-overlap-select hidden">
+              <p>Target overlap height detection</p>
+              <select title="overlap-height-popup" name="overlap-height-popup" id="overlap-height-selection-popup">
+                <!-- <option value="0.3">Feet</option>
+                <option value="0.7">Knees</option> -->
+                <option value="1.2" selected>Hips</option>
+                <option value="1.6">Shoulders</option>
+                <option value="2">Entire body</option>
+              </select>
             </div>
             <div id="setup-warning-message" class="row center-x hidden">
               <p id="setup-warning-text" class="warning-text">Please choose a surface to track</p>
@@ -193,7 +199,7 @@
                 </div>
                 <!-- NEXT BUTTON -->
                 <div id="next-button-hardware" class="builder-button builder-main-button">
-                  <p id="next-button-hardware-text" class="bold-font"> NEXT </p>
+                  <p id="next-button-hardware-text" class="bold-font"> GENERATE </p>
                   <span class="iconify" data-icon="dashicons:arrow-right-alt2"></span>
                 </div>
               </div>
@@ -235,8 +241,6 @@
               </div>
             </div>
           </div>
-  
-          <div id="bottom-line" class="bottom-line"></div>
         </div> 
         <a id="close-popup" href="#0" class="cd-popup-close img-replace">Close</a>
       </div>

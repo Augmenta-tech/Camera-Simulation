@@ -95,6 +95,19 @@ class Popup{
         this.setTrackingMode = function(mode){
             console.log('Setting tracking mode popup to', mode);
             trackingMode = mode;
+
+            switch(trackingMode)
+            {
+                case 'wall-tracking':
+                case 'hand-tracking':
+                    document.getElementById("setup-target-overlap").classList.add("hidden")
+                    break;
+                case 'human-tracking':
+                    document.getElementById("setup-target-overlap").classList.remove("hidden");
+                    break;
+                default:
+                    break;
+            }
         }
 
         /** SETUP SECTION */
@@ -141,6 +154,11 @@ class Popup{
             document.getElementById('tracking-mode-advanced').classList.add('hidden');
         });
         */
+
+        document.getElementById("overlap-height-selection-popup").addEventListener('change', () => {
+            sceneManager.heightDetected = parseFloat(document.getElementById("overlap-height-selection-popup").value);
+            sceneManager.objects.populateStorage();
+        });
 
         document.getElementById('next-button-setup').addEventListener('click', () => 
         {
@@ -616,19 +634,21 @@ class Popup{
 
         document.getElementById('next-button-hardware').addEventListener('click', () => 
         {
-            getHardware();
+            document.getElementById('popup').classList.remove('is-visible');
+
+            // getHardware();
             
-            if(!usedSensor) return;
+            // if(!usedSensor) return;
 
-            // fill "My system" section
-            initMySystemSection();
+            // // fill "My system" section
+            // initMySystemSection();
 
-            document.getElementById('hardware-content').classList.add('hidden');
-            document.getElementById('my-system-content').classList.remove('hidden');
+            // document.getElementById('hardware-content').classList.add('hidden');
+            // document.getElementById('my-system-content').classList.remove('hidden');
 
-            document.getElementById('my-system-tab').classList.add('passed-tab');
+            // document.getElementById('my-system-tab').classList.add('passed-tab');
 
-            sessionStorage.setItem('builderStep', 3);
+            // sessionStorage.setItem('builderStep', 3);
         });
 
         document.getElementById('previous-button-hardware').addEventListener('click', () => 

@@ -505,7 +505,7 @@ a.main-button {
   position: relative;
   width: 70%;
   max-width: 80vw;
-  height: 80vh;
+  height: 75vh;
   margin: 6em auto;
   background: #FFF;
   border-radius: .25em .25em .4em .4em;
@@ -682,7 +682,7 @@ textarea:focus {
 }
 
 .builder-section-buttons{
-  padding-top: 8%;
+  padding-top: 3%;
   height: 15vh;
   gap: 1vh;
 }
@@ -751,6 +751,22 @@ textarea:focus {
 .hardware-warning-message{
   height: 10vh;
   padding: 1%;
+}
+
+.popup-target-overlap-select > p{
+  padding: 1em 0.5em;
+}
+
+.popup-target-overlap-select > select{
+  background-color:#313132;
+  color: var(--color-blue-buttons);
+  border-color: var(--color-blue-buttons);
+  width: 10em;
+}
+
+.popup-target-overlap-select > option{
+  background-color:#313132;
+  border-radius: 0;
 }
 
 /* HIDE RADIO */
