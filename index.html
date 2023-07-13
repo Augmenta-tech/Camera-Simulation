@@ -524,7 +524,8 @@
             <!-- SCENE SECTION IN INSPECTOR -->
 
             <!-- FLOOR SCENE -->
-            <div id="floor-scene-size-inspector" >
+            <div class="hidden">
+            <div id="floor-scene-size-inspector">
               <h3 id="floor-scene-size-title-inspector">Floor scene size</h3>
 
               <!-- WIDTH INPUT -->
@@ -544,32 +545,46 @@
                 <p>Sensor height (<span data-unittext="1">m</span>)</p>
                 <input id="input-scene-sensor-height-inspector" type="number" placeholder="sh" min="0" max="30" step="0.1" disabled>
               </div>
-              <!-- SCENE COVERED FEEDBACK -->
-              <div class="row">
-                <p>Scene fully covered: </p><span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
-              </div>
+            </div>
             </div>
 
-            <!-- WALL Y SCENE -->
-            <div id="wall-y-scene-size-inspector" class="hidden">
-              <h3>Front wall scene size</h3>
+            <!-- INSPECTOR READONLY SCENE SIZE -->
+            <div id="scene-size-text-div">
+              <h3 id="scene-size-text">Scene size: <span data-unit="1">5</span>x<span data-unit="1">5</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">6</span>(<span data-unittext="1">m</span>)</h3>
+            </div>
 
-              <!-- WIDTH INPUT -->
-              <div>
-                <p>Width (<span data-unittext="1">m</span>)</p>
-                <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
+            <div id="info-table-height-inspector"></div>
+
+              <div class="hidden">
+                
+                <!-- WALL Y SCENE -->
+                <div id="wall-y-scene-size-inspector">
+                  <h3>Front wall scene size</h3>
+                  
+                <!-- WIDTH INPUT -->
+                <div>
+                  <p>Width (<span data-unittext="1">m</span>)</p>
+                  <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
+                </div>
+                
+                <!-- HEIGHT INPUT -->
+                <div>
+                  <p>Height (<span data-unittext="1">m</span>)</p>
+                  <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1" disabled>
+                </div>
               </div>
 
-              <!-- HEIGHT INPUT -->
-              <div>
-                <p>Height (<span data-unittext="1">m</span>)</p>
-                <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1" disabled>
-              </div>
             </div>
           </div>
 
           <!-- SENSORS PANEL -->
           <div id="sensors-infos" class="column sections-container">
+            <!-- SCENE COVERED FEEDBACK -->
+            <div class="row">
+              <p class="scene-fully-covered-text">Scene fully covered: </p>
+              <span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
+            </div>
+
             <!-- NUMBER OF NODES FEEDBACK -->
             <div id="number-sensors" class="row center-x center-y">
               <p class="main-text">Number of sensors: <span id="number-nodes-value">0</span></p>

@@ -110,6 +110,8 @@ class UIManager{
 
             //INSPECTOR READONLY INPUTS
             document.getElementById("input-scene-sensor-height-inspector").value = Node.DEFAULT_NODE_HEIGHT;
+            document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + SceneManager.DEFAULT_WIDTH +'</span>x<span data-unit=1>'+ SceneManager.DEFAULT_LENGTH +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + Node.DEFAULT_NODE_HEIGHT + '</span>(<span data-unittext="1">m</span>)</h3>';
+
             //document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
         }
 
@@ -124,8 +126,10 @@ class UIManager{
         function downloadSceneFile(sceneManager)
         {
             const fileNameInput = document.getElementById('scene-file-name-input');
+            console.log("downloading...");
             if(fileNameInput && fileNameInput.value)
             {
+                console.log("file name ok");
                 const illegalSymbols = ['*', '.', '"', '/', '\\', '[', ']', ':', ';', '|', ',', '?', '<', '>'];
                 const fileName = fileNameInput.value.toString();
                 
@@ -139,10 +143,11 @@ class UIManager{
                         return;
                     }
                 }
+                console.log("file name ok ok");
 
                 const data = sceneManager.objects.generateJson();
                 const blob = new Blob([data], { type: 'application/json' });
-                saveAs(blob, fileName + '.json'); // module FileSaver
+                saveAs(blob, fileName + '.builder'); // module FileSaver
                 document.getElementById('warning-text-input-illegal-symbol').classList.add('hidden');
             }
         }
@@ -185,7 +190,7 @@ class UIManager{
                 default:
                     break;
             }
-            
+
             //Old inspector system
             document.getElementById("tracking-mode-selection-inspector").value = trackingMode;
             switch(trackingMode)
@@ -201,6 +206,12 @@ class UIManager{
 
                     document.getElementById('nodes-buttons').classList.remove('hidden');
                     document.getElementById('lidars-buttons').classList.add('hidden');
+
+                    const infoTableElemInspector = document.getElementById('info-table-height-inspector');
+
+                    infoTableElemInspector.innerHTML = `<h3>The table is <span data-unit=1>` + SceneManager.TABLE_ELEVATION +`</span><span data-unittext=1>m</span> high</h3>`;
+                    
+                    infoTableElemInspector.classList.remove("hidden");
                     break;
                 case 'wall-tracking':
                     document.getElementById('overlap-height-inspector').classList.add('hidden');
@@ -212,6 +223,7 @@ class UIManager{
 
                     document.getElementById('lidars-buttons').classList.remove('hidden');
                     document.getElementById('nodes-buttons').classList.add('hidden');
+                    document.getElementById('info-table-height-inspector').classList.add("hidden");
                     break;
                 case 'human-tracking':
                 default:
@@ -226,6 +238,8 @@ class UIManager{
 
                     document.getElementById('nodes-buttons').classList.remove('hidden');
                     document.getElementById('lidars-buttons').classList.add('hidden');
+                    document.getElementById('info-table-height-inspector').classList.add("hidden");
+
                     break;
             }
         }
@@ -250,27 +264,6 @@ class UIManager{
             document.getElementById("height-detection-text").innerText = text;
 
             //document.getElementById('overlap-height-selection-inspector').value = value;
-        }
-
-        this.displayWarning = function(sceneManager)
-        {
-            if(sceneManager.trackingMode === 'hand-tracking')
-            {
-                const infoTableElemInspector = document.getElementById('info-table-height-inspector');
-                if(!infoTableElemInspector)
-                {
-                    const newInfoTableElemInspector = document.createElement('p');
-                    newInfoTableElemInspector.id = 'info-table-height-inspector';
-                    newInfoTableElemInspector.innerHTML = `The table is <span data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(sceneManager.sceneElevation*sceneManager.currentUnit.value * 100) / 100.0) + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span> high`;
-                    newInfoTableElemInspector.style.color = 'orange';
-                    document.getElementById('tracking-section-inspector').appendChild(newInfoTableElemInspector);
-                }
-            }
-            else
-            {
-                const infoTableElemInspector = document.getElementById('info-table-height-inspector');
-                if(infoTableElemInspector) infoTableElemInspector.remove();
-            }
         }
 
         /* UPDATE */

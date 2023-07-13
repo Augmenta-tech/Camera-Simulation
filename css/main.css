@@ -221,7 +221,7 @@ canvas {
 }
 
 .sections-container {
-  gap: 30px;
+  gap: 25px;
 }
 
 .close {
@@ -253,7 +253,7 @@ canvas {
   margin: 0 20px 0 20px;
   text-align: center;
 
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15));
   transition: .2s all ease;
 }
 
@@ -420,7 +420,7 @@ a.main-button {
 }
 
 #scene-infos {
-  background-color: var(--color-dark-grey);
+  background-color: var(--color-grey);
 }
 
 #scene-infos.dark-mode {
@@ -476,6 +476,10 @@ a.main-button {
   color: #2b2
 }
 
+.scene-fully-covered-text{
+  margin: auto 0;
+}
+
 /*** POPUP classes ***/
 
 .cd-popup {
@@ -510,7 +514,7 @@ a.main-button {
   background: #FFF;
   border-radius: .25em .25em .4em .4em;
   text-align: center;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   -webkit-transform: translateY(-40px);
   -moz-transform: translateY(-40px);
   -ms-transform: translateY(-40px);
@@ -596,9 +600,9 @@ a.main-button {
 :root {
   --color-grey-background-selected-item: #1b0c386c;
   --color-grey-background: #fcfcfc;
-  --color-grey-unselected: #868585;
+  --color-grey-unselected: #b3b3b3;
   --color-grey-line: #afafaf;
-  --color-grey-selectable: #665c5c;
+  --color-grey-selectable: #5c5c5c;
   --color-blue-buttons: #68a3e7;
   
   --color-grey-text: #494949;
@@ -638,6 +642,7 @@ textarea:focus {
   height: 100%;
   width: 10vw;
   padding: 1vh 0;
+  cursor: pointer;
 }
 
 .tab > h3 {
@@ -704,6 +709,9 @@ textarea:focus {
   position: relative;
   width: 50%;
   margin: auto;
+  background-color: var(--color-grey-background-selected-item);
+  border-radius: 4px;
+  padding: 10px;
 }
 
 /** BUTTONS **/
@@ -717,7 +725,7 @@ textarea:focus {
   justify-content: center;
   align-items: center;
   text-align: center;
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15));
   transition: .2s all ease;
 }
 
@@ -807,7 +815,7 @@ textarea:focus {
 .tracking-mode-choice [type=radio]:checked + img {
   outline: 0;
   background-color: var(--color-grey-background-selected-item);
-  filter: drop-shadow(0px 4px 4px rgba(16,6,77, 0.65));
+  filter: drop-shadow(0px 2px 2px rgba(12, 5, 58, 0.877));
 }
 
 
