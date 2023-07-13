@@ -1,7 +1,7 @@
 :root {
   --color-dark-purple: #0E021C;
   --color-grey: #f0f0f0;
-  --color-dark-grey: #E1E1E1;
+  --color-dark-grey: #cfcfcf;
   --color-grey-p: #9A9A9A;
   --color-blue :#708EB0;
   --color-blue-2 :#57718F;
@@ -420,7 +420,7 @@ a.main-button {
 }
 
 #scene-infos {
-  background-color: var(--color-grey);
+  background-color: var(--color-dark-grey);
 }
 
 #scene-infos.dark-mode {
@@ -682,8 +682,8 @@ textarea:focus {
 }
 
 .builder-section-buttons{
-  padding-top: 3%;
-  height: 15vh;
+  padding-top: 5cqb;
+  height: 18vh;
   gap: 1vh;
 }
 
@@ -699,6 +699,13 @@ textarea:focus {
   width: 70%;
   margin-top: 3vh;
   border-top: 1px solid var(--color-grey-line);
+}
+
+.tracking-img{
+  display:inline-block;
+  position: relative;
+  width: 50%;
+  margin: auto;
 }
 
 /** BUTTONS **/
@@ -886,8 +893,8 @@ textarea:focus {
 
 /** HARDWARES SECTION **/
 #hardware-section-builder{
-  gap: 20%;
-  padding-top: 5%;
+  gap: 30%;
+  padding-top: 2%;
 }
 
 .hardware-radio-label [type=radio] + div {

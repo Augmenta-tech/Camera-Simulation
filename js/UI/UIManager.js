@@ -69,15 +69,15 @@ class UIManager{
                 }
             });
 
-            document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {
-                const mode = document.getElementById("tracking-mode-selection-inspector").value;
-                sceneManager.trackingModeObservable.set(mode);
-                scope.displayWarning(sceneManager);
-            });
+            // document.getElementById("tracking-mode-selection-inspector").addEventListener('change', () => {
+            //     const mode = document.getElementById("tracking-mode-selection-inspector").value;
+            //     sceneManager.trackingModeObservable.set(mode);
+            //     scope.displayWarning(sceneManager);
+            // });
             
-            document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
-                sceneManager.heightDetectedObservable.set(parseFloat(document.getElementById("overlap-height-selection-inspector").value));
-            });
+            // document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
+            //     sceneManager.heightDetectedObservable.set(parseFloat(document.getElementById("overlap-height-selection-inspector").value));
+            // });
             
             //this.wizard.bindEventListeners(viewportManager, this);
         }
@@ -171,8 +171,23 @@ class UIManager{
         this.changeTrackingMode = function(trackingMode)
         {
             console.log('Setting tracking mode UI to ', trackingMode);
+            //Displayed image
+            document.getElementById("tracking-img").src = "img/" + String(trackingMode) + ".png";
+            
+            switch (trackingMode) {
+                case 'hand-tracking': 
+                case 'wall-tracking':
+                    document.getElementById("height-detection-text").classList.add("hidden");
+                    break;
+                case 'human-tracking':
+                    document.getElementById("height-detection-text").classList.remove("hidden");
+                    break;
+                default:
+                    break;
+            }
+            
+            //Old inspector system
             document.getElementById("tracking-mode-selection-inspector").value = trackingMode;
-
             switch(trackingMode)
             {
                 case 'hand-tracking':
@@ -217,7 +232,24 @@ class UIManager{
 
         this.changeHeightDetected = function(value){
             console.log("changing height to ", value);
-            document.getElementById('overlap-height-selection-inspector').value = value;
+            let text;
+            switch (value) {
+                case 1.2:
+                    text = "Target overlap height detection: HIPS"
+                    break;
+                case 1.6:
+                    text = "Target overlap height detection: SHOULDERS"
+                    break; 
+                case 2:
+                    text = "Target overlap height detection: ENTIRE BODY"
+                    break;
+                default:
+                    text = ""
+                    break;
+            }
+            document.getElementById("height-detection-text").innerText = text;
+
+            //document.getElementById('overlap-height-selection-inspector').value = value;
         }
 
         this.displayWarning = function(sceneManager)

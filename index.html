@@ -43,11 +43,11 @@
             <div id="tracking-mode-selection-builder" class="row wrap center-x center-y builder-section-content">
               <label id="tracking-mode-human-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="human-tracking" checked>
-                <img id="human-tracking-img" src="img/floor-tracking.png" alt="Human tracking">
+                <img id="human-tracking-img" src="img/human-tracking.png" alt="Human tracking">
               </label>
               <label id="tracking-mode-hand-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="hand-tracking">
-                <img id="hand-tracking-img" src="img/table-tracking.png" alt="Hand tracking">
+                <img id="hand-tracking-img" src="img/hand-tracking.png" alt="Hand tracking">
               </label>
               <label id="tracking-mode-wall-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="wall-tracking">
@@ -492,8 +492,11 @@
             </div>
             <!-- END WIZARD MODAL -->
 
+            <img id="tracking-img" src="img/human-tracking.png" alt="Tracking image" class="tracking-img">
+            <h3 id="height-detection-text">Target overlap height detection: HIPS</h3>
+
             <!-- TRACKING SECTION IN INSPECTOR -->
-            <div id="tracking-section-inspector">
+            <div id="tracking-section-inspector" class="hidden">
 
               <!-- TRACKING MODE -->
               <div id="tracking-mode-inspector">
@@ -506,7 +509,7 @@
               </div>
 
               <!-- HEIGHT DETECTED FOR OVERLAPS -->
-              <div id="overlap-height-inspector" class="">
+              <div id="overlap-height-inspector" class="hidden">
                 <p>Target overlap height detection</p>
                 <select title="overlap-height-inspector" name="overlap-height-inspector" id="overlap-height-selection-inspector">
                   <!-- <option value="0.3">Feet</option>
@@ -554,13 +557,13 @@
               <!-- WIDTH INPUT -->
               <div>
                 <p>Width (<span data-unittext="1">m</span>)</p>
-                <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
               </div>
 
               <!-- HEIGHT INPUT -->
               <div>
                 <p>Height (<span data-unittext="1">m</span>)</p>
-                <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1" disabled>
               </div>
             </div>
           </div>

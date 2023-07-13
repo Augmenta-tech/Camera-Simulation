@@ -14,7 +14,8 @@ import {
     Ray,
     Plane,
     Frustum,
-    Color
+    Color,
+    ObjectSpaceNormalMap
 } from 'three';
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
@@ -85,6 +86,7 @@ class SceneManager{
             //scene from cookies
             sceneInfo = sessionStorage.getItem('sceneInfos')
         }
+        let sceneObjects = JSON.parse(sceneInfo);
 
         this.scene = buildScene();
 
@@ -141,19 +143,22 @@ class SceneManager{
             const changeHeightDetectedBinded = this.changeHeightDetected.bind(this)
             this.heightDetectedObservable.addObserver(changeHeightDetectedBinded);
 
-            if(sceneInfo){
-                if(sceneInfo.trackingMode){
-                    this.trackingModeObservable.set(sceneInfo.trackingMode);
-                    return;
-                }
-                if(sceneInfo.heightDetected){
-                    this.heightDetectedObservable.set(sceneInfo.heightDetected);
-                    return;
-                }
-            }
+            if(sceneObjects){
 
-            this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
-            this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+                if(sceneObjects.trackingMode){
+                    this.trackingModeObservable.set(sceneObjects.trackingMode);
+                } else {
+                    this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                }
+                if(sceneObjects.heightDetected){
+                    this.heightDetectedObservable.set(sceneObjects.heightDetected);
+                } else {
+                    this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+                }
+            } else {
+                this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+            }
         }
 
         /* SCENE INITIALISATION */
