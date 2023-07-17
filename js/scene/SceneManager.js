@@ -36,12 +36,12 @@ class ObservableParameter extends Observable {
     }
 
     set(value) {
-        console.log('Setting tracking mode');
+        console.log('Setting parameter');
         this.notifyAllObservers(value);
     }
 
     update(origin, value) {
-        console.log('Updating tracking mode');
+        console.log('Updating parameter');
         this.notifyObserversExceptOrigin(origin, value);
     }
 }
@@ -59,7 +59,7 @@ class SceneManager{
     static font;
     static DEFAULT_UNIT = units.meters;
     static DEFAULT_TRACKING_MODE = 'human-tracking';
-    static DEFAULT_DETECTION_HEIGHT = document.getElementById('default-height-detected') ? parseFloat(document.getElementById('default-height-detected').value) : 1.2;
+    static DEFAULT_DETECTION_HEIGHT = 1.2;
     static DEFAULT_WIDTH = 5;
     static DEFAULT_LENGTH = 5;
     static DEFAULT_ENV = 'indoor';
@@ -129,37 +129,6 @@ class SceneManager{
         //DEBUG
         const spheres = [];
         const rays = [];
-    
-        this.bindObservers = function(){
-            this.trackingModeObservable = new ObservableParameter();
-            this.trackingModeObservable.addObserver(uiManager.changeTrackingMode);
-            this.trackingModeObservable.addObserver(uiManager.popup.setTrackingMode);
-            const changeTrackingModeBinded = this.changeTrackingMode.bind(this)
-            this.trackingModeObservable.addObserver(changeTrackingModeBinded);
-
-            this.heightDetectedObservable = new ObservableParameter();
-            this.heightDetectedObservable.addObserver(uiManager.changeHeightDetected);
-            this.heightDetectedObservable.addObserver(uiManager.popup.setHeightDetected);
-            const changeHeightDetectedBinded = this.changeHeightDetected.bind(this)
-            this.heightDetectedObservable.addObserver(changeHeightDetectedBinded);
-
-            if(sceneObjects){
-
-                if(sceneObjects.trackingMode){
-                    this.trackingModeObservable.set(sceneObjects.trackingMode);
-                } else {
-                    this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
-                }
-                if(sceneObjects.heightDetected){
-                    this.heightDetectedObservable.set(sceneObjects.heightDetected);
-                } else {
-                    this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
-                }
-            } else {
-                this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
-                this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
-            }
-        }
 
         /* SCENE INITIALISATION */
 
@@ -207,6 +176,34 @@ class SceneManager{
 
             //SceneObjects
             this.objects.initObjects();
+
+            this.trackingModeObservable = new ObservableParameter();
+            this.trackingModeObservable.addObserver(uiManager.changeTrackingMode);
+            this.trackingModeObservable.addObserver(uiManager.popup.setTrackingMode);
+            const changeTrackingModeBinded = this.changeTrackingMode.bind(this)
+            this.trackingModeObservable.addObserver(changeTrackingModeBinded);
+
+            this.heightDetectedObservable = new ObservableParameter();
+            this.heightDetectedObservable.addObserver(uiManager.changeHeightDetected);
+            this.heightDetectedObservable.addObserver(uiManager.popup.setHeightDetected);
+            const changeHeightDetectedBinded = this.changeHeightDetected.bind(this)
+            this.heightDetectedObservable.addObserver(changeHeightDetectedBinded);
+
+            if(sceneObjects){
+                if(sceneObjects.trackingMode){
+                    this.trackingModeObservable.set(sceneObjects.trackingMode);
+                } else {
+                    this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                }
+                if(sceneObjects.heightDetected){
+                    this.heightDetectedObservable.set(sceneObjects.heightDetected);
+                } else {
+                    this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+                }
+            } else {
+                this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+            }
         }
 
         /* BUILDERS */
@@ -371,7 +368,6 @@ class SceneManager{
             switch(mode)
             {
                 case 'hand-tracking':
-                    this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     this.sceneElevation = SceneManager.TABLE_ELEVATION;
                     
                     if(this.augmentaSceneLoaded) {
@@ -382,7 +378,6 @@ class SceneManager{
                     this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
                     break;
                 case 'wall-tracking':
-                    this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     
                     if(this.augmentaSceneLoaded) {
@@ -394,7 +389,6 @@ class SceneManager{
                     break;
                 case 'human-tracking':
                     default:
-                    this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
                     
                     if(this.augmentaSceneLoaded) {

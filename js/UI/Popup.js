@@ -289,7 +289,7 @@ class Popup{
                         document.getElementById('input-wall-y-scene-height-inspector').value = inputSceneHeight;
 
                         document.getElementById('dimensions-warning-message').classList.add('hidden');
-                        document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + inputSceneWidth +'</span>x<span data-unit=1>'+ inputSceneLength +'</span>(<span data-unittext="1">m</span>)</h3>';
+                        document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + inputSceneWidth +'</span>x<span data-unit=1>'+ inputSceneHeight +'</span>(<span data-unittext="1">m</span>)</h3>';
                         return true;
                     }
                     else

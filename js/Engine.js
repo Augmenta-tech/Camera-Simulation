@@ -21,8 +21,6 @@ class Engine{
 
             uiManager.bindEventListeners(viewportManager);
             viewportManager.bindEventListeners();
-
-            sceneManager.bindObservers();
         }
 
         function onWindowResize(viewportManager)

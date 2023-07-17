@@ -181,11 +181,16 @@ class UIManager{
             
             switch (trackingMode) {
                 case 'hand-tracking': 
+                    document.getElementById("height-detection-text").classList.add("hidden");
+                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span>(<span data-unittext="1">m</span>)</h3>';
+                    break;
                 case 'wall-tracking':
                     document.getElementById("height-detection-text").classList.add("hidden");
+                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneLength +'</span>(<span data-unittext="1">m</span>)</h3>';
                     break;
                 case 'human-tracking':
                     document.getElementById("height-detection-text").classList.remove("hidden");
+                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span>(<span data-unittext="1">m</span>)</h3>';
                     break;
                 default:
                     break;
@@ -202,7 +207,7 @@ class UIManager{
                     document.getElementById('floor-scene-size-title-inspector').innerHTML = "Table scene size";
                     document.getElementById('wall-y-scene-size-inspector').classList.add('hidden');
 
-                    document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
+                    //document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
 
                     document.getElementById('nodes-buttons').classList.remove('hidden');
                     document.getElementById('lidars-buttons').classList.add('hidden');
@@ -219,7 +224,7 @@ class UIManager{
                     document.getElementById('wall-y-scene-size-inspector').classList.remove('hidden');
                     document.getElementById('floor-scene-size-inspector').classList.add('hidden');
 
-                    document.getElementById("delete-all-nodes-button").dispatchEvent(new Event('click'));
+                    //document.getElementById("delete-all-nodes-button").dispatchEvent(new Event('click'));
 
                     document.getElementById('lidars-buttons').classList.remove('hidden');
                     document.getElementById('nodes-buttons').classList.add('hidden');
@@ -234,7 +239,7 @@ class UIManager{
                     document.getElementById('floor-scene-size-title-inspector').innerHTML = "Floor scene size";
                     document.getElementById('wall-y-scene-size-inspector').classList.add('hidden');
 
-                    document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
+                    //document.getElementById("delete-all-lidars-button").dispatchEvent(new Event('click'));
 
                     document.getElementById('nodes-buttons').classList.remove('hidden');
                     document.getElementById('lidars-buttons').classList.add('hidden');

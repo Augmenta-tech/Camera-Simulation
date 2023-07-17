@@ -47,12 +47,13 @@ class SceneObjects{
                 //const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
                 // and comment this
                 const sceneInfo = sessionStorage.getItem('sceneInfos')
+                console.log(JSON.parse(sceneInfo));
                 if(sceneInfo) {
                     this.parseJson(sceneInfo);
                     return;
                 }
             }
-            else if (sceneInfoFromURL) //scene from url case
+            else //scene from url case
             {
                 this.parseJson(sceneInfoFromURL);
                 document.getElementById('popup').classList.remove('is-visible');
@@ -312,6 +313,7 @@ class SceneObjects{
             if(datas.hasOwnProperty('trackingMode'))
             {
                 mode = datas.trackingMode;
+                sceneManager.trackingMode = mode;
             }
             
             if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
