@@ -172,7 +172,7 @@
           <div id="hardware-content" class="column builder-section hidden">
             <!-- HARDWARES SELECTION -->
             <div id="hardware-section-builder" class="column center-x center-y builder-section-content ">
-              <div id="hardware-switch-indoor-outdoor" class="row center-x center-y">
+              <div id="hardware-switch-indoor-outdoor" class="row center-x center-y hidden">
                 <label class="hardware-radio-label">
                   <input id="hardware-input-radio-indoor" type="radio" name="switch-indoor-outdoor-builder" value="indoor" checked>
                   <div class="row center-x center-y hardware-switch">
@@ -186,11 +186,33 @@
                   </div>
                 </label>
               </div>
-              <div id="hardware-sensors-selection" class="row wrap center-x center-y">
+
+              <div class="row">
+                <!-- New Sensor selection -->
+                <div id="new-selector">
+                  <h3 id="multi-select-label" for="multi-select">Select sensor</h3>
+                  <div class="select select--multiple">
+                    <select id="multi-select-sensors" size="3">
+                    <!-- FILLED IN JS WITH CORRECT SENSORS -->
+                    </select>
+                  </div>
+                </div>
+                <!-- Outdoor/Indoor toggle -->
+                <div id="new-toggle">
+                  <p id="button-toggle-text">INDOOR</p>
+                  <div class="button-toggle r" id="button-1">
+                    <input id="toggle-outdoor-indoor" type="checkbox" class="checkbox" />
+                    <div class="knobs"></div>
+                    <div class="layer"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="hardware-sensors-selection" class="row wrap center-x center-y hidden">
                 <!-- FILLED IN JS WITH CORRECT SENSORS -->
               </div>
               <div id="hardware-warning-message" class="row center-x wrap hardware-warning-message hidden">
-                <p id="hardware-warning-text" class="warning-text">No hardware setup found,</p><p id="hardware-warning-button" class="text-button">click here to get in touch with our experts.</p>
+                <p id="hardware-warning-text" class="warning-text">No hardware setup found,</p><p id="hardware-warning-button" class="text-button"><a href="https://augmenta.tech/contact/" target="_blank">click here to get in touch with our experts.</a></p>
               </div>
             </div>
             <!-- HARDWARES BUTTONS-->
@@ -493,7 +515,7 @@
             <!-- END WIZARD MODAL -->
 
             <img id="tracking-img" src="img/human-tracking.png" alt="Tracking image" class="tracking-img">
-            <h3 id="height-detection-text">Target overlap height detection: HIPS</h3>
+            <h3 id="height-detection-text">Target overlap height detection: Hips</h3>
 
             <!-- TRACKING SECTION IN INSPECTOR -->
             <div id="tracking-section-inspector" class="hidden">

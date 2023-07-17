@@ -110,7 +110,7 @@ class UIManager{
 
             //INSPECTOR READONLY INPUTS
             document.getElementById("input-scene-sensor-height-inspector").value = Node.DEFAULT_NODE_HEIGHT;
-            document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + SceneManager.DEFAULT_WIDTH +'</span>x<span data-unit=1>'+ SceneManager.DEFAULT_LENGTH +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + Node.DEFAULT_NODE_HEIGHT + '</span>(<span data-unittext="1">m</span>)</h3>';
+            document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + SceneManager.DEFAULT_WIDTH +'</span>x<span data-unit=1>'+ SceneManager.DEFAULT_LENGTH +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + Node.DEFAULT_NODE_HEIGHT + '</span><span data-unittext="1">m</span></h3>';
 
             //document.getElementById("tracking-mode-selection-inspector").value = 'human-tracking';
         }
@@ -182,15 +182,15 @@ class UIManager{
             switch (trackingMode) {
                 case 'hand-tracking': 
                     document.getElementById("height-detection-text").classList.add("hidden");
-                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span>(<span data-unittext="1">m</span>)</h3>';
+                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span><span data-unittext="1">m</span></h3>';
                     break;
                 case 'wall-tracking':
                     document.getElementById("height-detection-text").classList.add("hidden");
-                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneLength +'</span>(<span data-unittext="1">m</span>)</h3>';
+                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneLength +'</span><span data-unittext="1">m</span></h3>';
                     break;
                 case 'human-tracking':
                     document.getElementById("height-detection-text").classList.remove("hidden");
-                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span>(<span data-unittext="1">m</span>)</h3>';
+                    document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span><span data-unittext="1">m</span></h3>';
                     break;
                 default:
                     break;
@@ -254,13 +254,13 @@ class UIManager{
             let text;
             switch (value) {
                 case 1.2:
-                    text = "Target overlap height detection: HIPS"
+                    text = "Target overlap height detection: Hips"
                     break;
                 case 1.6:
-                    text = "Target overlap height detection: SHOULDERS"
+                    text = "Target overlap height detection: Shoulders"
                     break; 
                 case 2:
-                    text = "Target overlap height detection: ENTIRE BODY"
+                    text = "Target overlap height detection: Entire body"
                     break;
                 default:
                     text = ""

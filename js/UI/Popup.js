@@ -180,7 +180,7 @@ class Popup{
             document.getElementById('hardware-content').classList.remove('hidden');
 
             sessionStorage.setItem('builderStep', 2);
-        });
+        }); 
 
         /* TODO ADVANCED TRACKING MODES
         document.getElementById('tracking-mode-advanced').addEventListener('click', () => {
@@ -289,7 +289,7 @@ class Popup{
                         document.getElementById('input-wall-y-scene-height-inspector').value = inputSceneHeight;
 
                         document.getElementById('dimensions-warning-message').classList.add('hidden');
-                        document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + inputSceneWidth +'</span>x<span data-unit=1>'+ inputSceneHeight +'</span>(<span data-unittext="1">m</span>)</h3>';
+                        document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + inputSceneWidth +'</span>x<span data-unit=1>'+ inputSceneHeight +'</span><span data-unittext="1">m</span></h3>';
                         return true;
                     }
                     else
@@ -335,7 +335,7 @@ class Popup{
                         //update inspector
                         document.getElementById('input-scene-sensor-height-inspector').value = inputSceneHeight;
                         //New readonly display of values
-                        document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + inputSceneWidth +'</span>x<span data-unit=1>'+ inputSceneLength +'</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">' + inputSceneHeight + '</span>(<span data-unittext="1">m</span>)</h3>';
+                        document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + inputSceneWidth +'</span>x<span data-unit=1>'+ inputSceneLength +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + inputSceneHeight + '</span><span data-unittext="1">m</span></h3>';
 
                         return true;
                     }
@@ -463,12 +463,26 @@ class Popup{
 
 
         /** HARDWARES SECTION */
+        document.getElementById("toggle-outdoor-indoor").addEventListener('change', () => {
+            let bool = document.getElementById("toggle-outdoor-indoor").checked;
+            let text;
+            if(bool){
+                text = "OUTDOOR";
+            } else{
+                text = "INDOOR";
+            }
+            document.getElementById("button-toggle-text").innerHTML = text;
+        });
+
         function resetHardwareSection()
         {
             usedSensor = undefined;
 
             sensorsCompatible.length = 0;
+            //Old sensor selection
             deleteAllChildren(document.getElementById('hardware-sensors-selection'));
+            //New sensor selection
+            deleteAllChildren(document.getElementById('multi-select-sensors'));
 
             document.getElementById('hardware-input-radio-indoor').checked = true;
             document.getElementById('hardware-input-radio-outdoor').checked = false;
@@ -476,6 +490,7 @@ class Popup{
             document.getElementById('hardware-warning-message').classList.add('hidden');
         }
 
+        //Initialise sensor selection
         function initHardwareSection()
         {
             if(trackingMode === "wall-tracking")
@@ -496,19 +511,35 @@ class Popup{
 
             if(sensorsCompatible.length === 0) return;
 
-            const sensorsDiv = document.getElementById('hardware-sensors-selection');
-            sensorsCompatible.forEach(s => {
-                const sensorChoice = document.createElement('label');
-                sensorChoice.id = "hardware-input-" + s.textId;
-                sensorChoice.classList.add("row", "center-x", "hardware-sensors-type", "hardware-radio-label");
+            //Old sensor selection
+            // const sensorsDiv = document.getElementById('hardware-sensors-selection');
+            // sensorsCompatible.forEach(s => {
+            //     const sensorChoice = document.createElement('label');
+            //     sensorChoice.id = "hardware-input-" + s.textId;
+            //     sensorChoice.classList.add("row", "center-x", "hardware-sensors-type", "hardware-radio-label");
 
+            //     const near = Math.floor(s.rangeNear * sceneManager.currentUnit.value * 100) / 100;
+            //     const far = Math.floor((trackingMode === 'hand-tracking' ? s.handFar : s.rangeFar) * sceneManager.currentUnit.value * 100) / 100;
+            //     sensorChoice.innerHTML = `
+            //         <input id="` + s.textId + `" type="radio" name="sensor-choice" value="` + s.textId + `">
+            //         <div class="row center-x center-y hardware-switch">
+            //         <p>` + s.niceName + ` (<span data-unit=` + sceneManager.currentUnit.value + `>` + near + `</span> - <span data-unit=` + sceneManager.currentUnit.value + `>` + far + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span>)</p>
+            //         </div>`;
+            //     sensorsDiv.appendChild(sensorChoice);
+            // });
+
+            //New select sensor multiple layout
+            const sensorsDiv = document.getElementById('multi-select-sensors');
+            sensorsCompatible.forEach(s => {
+                const sensorChoice = document.createElement('option');
+                sensorChoice.id = s.textId;
+                sensorChoice.value = s.textId;
+                //sensorChoice.id = "hardware-input-" + s.textId;
+                //sensorChoice.classList.add("row", "center-x", "hardware-sensors-type", "hardware-radio-label");
+                
                 const near = Math.floor(s.rangeNear * sceneManager.currentUnit.value * 100) / 100;
                 const far = Math.floor((trackingMode === 'hand-tracking' ? s.handFar : s.rangeFar) * sceneManager.currentUnit.value * 100) / 100;
-                sensorChoice.innerHTML = `
-                    <input id="` + s.textId + `" type="radio" name="sensor-choice" value="` + s.textId + `">
-                    <div class="row center-x center-y hardware-switch">
-                    <p>` + s.niceName + ` (<span data-unit=` + sceneManager.currentUnit.value + `>` + near + `</span> - <span data-unit=` + sceneManager.currentUnit.value + `>` + far + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span>)</p>
-                    </div>`;
+                sensorChoice.innerHTML = `<p>` + s.niceName + ` (<span data-unit=` + sceneManager.currentUnit.value + `>` + near + `</span> - <span data-unit=` + sceneManager.currentUnit.value + `>` + far + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span>)</p>`;
                 sensorsDiv.appendChild(sensorChoice);
             });
         
@@ -516,99 +547,176 @@ class Popup{
         
             const sceneInfos = sessionStorage.getItem('sceneInfos');
             let sceneEnvironment = undefined;
-            if(sceneInfos) sceneEnvironment = JSON.parse(sceneInfos).sceneEnvironment;
-
-            const switchElement = document.getElementById('hardware-switch-indoor-outdoor');
-            const switchInputs = switchElement.querySelectorAll('input');
-            for(let i = 0; i < switchInputs.length; i++)
-            {
-                if(switchInputs[i].value === (sceneEnvironment ? sceneEnvironment : 'indoor'))
-                {
-                    disableSensorsConsideringEnvironment(switchInputs[i].value);
-                    switchInputs[i].checked = true;
+            if(sceneInfos) {
+                sceneEnvironment = JSON.parse(sceneInfos).sceneEnvironment;
+            } else {
+                //New hardware selection system
+                const toggleElem = document.getElementById("toggle-outdoor-indoor");
+                if(toggleElem.checked){
+                    sceneEnvironment = 'outdoor'
+                } else{
+                    sceneEnvironment = 'indoor'
                 }
-                else switchInputs[i].checked = false;
             }
+            
+            disableSensorsConsideringEnvironment(sceneEnvironment);
+
+            //Old system
+            // const switchElement = document.getElementById('hardware-switch-indoor-outdoor');
+            // const switchInputs = switchElement.querySelectorAll('input');
+            // for(let i = 0; i < switchInputs.length; i++)
+            // {
+            //     if(switchInputs[i].value === (sceneEnvironment ? sceneEnvironment : 'indoor'))
+            //     {
+            //         disableSensorsConsideringEnvironment(switchInputs[i].value);
+            //         switchInputs[i].checked = true;
+            //     }
+            //     else switchInputs[i].checked = false;
+            // }
         }
 
         function bindHardwareEventListeners(sensorsElements)
         {
-            // Switch indoor-outdoor events
-            const switchElement = document.getElementById('hardware-switch-indoor-outdoor');
-            const switchInputs = switchElement.querySelectorAll('input');
-            for(let i = 0; i < switchInputs.length; i++)
-            {
-                switchInputs[i].addEventListener('click', () => {
-                    disableSensorsConsideringEnvironment(switchInputs[i].value);
-                    sceneManager.changeEnvironment(switchInputs[i].value); 
-                });
-            }
-
-            //Click on sensor events
-            for(let i = 0; i < sensorsElements.length; i++)
-            {
-                if(!sensorsElements[i].disabled)
-                {
-                    sensorsElements[i].addEventListener('click', () => {
-                        const sensorInput = sensorsElements[i].querySelector('input');
-                        if(!sensorInput.disabled && !sensorInput.checked)
-                        {
-                            const sensorTextId = sensorsElements[i].id.substring("hardware-input-".length);
-
-                            //on click on a sensor, display the scene calculated with this sensor
-                            switch(trackingMode)
-                            {
-                                case 'wall-tracking':
-                                {
-                                    const sensor = getLidarsTypes().find(sensorType => sensorType.textId === sensorTextId);
-                                    const config = calculateLidarConfig(sensor, givenWidth, givenHeight);
-                                    if(!config){
-                                        console.error('no config found with this setup');
-                                        return;
-                                    }
-                                    sceneManager.objects.removeSensors();
-                                    createSceneFromLidarConfig(config, sceneManager);
-                                    break;
-                                }
-                                case 'human-tracking':
-                                case 'hand-tracking':
-                                {
-                                    const sensor = getCamerasTypes().find(sensorType => sensorType.textId === sensorTextId);
-                                    const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
-                                    const config = calculateCameraConfig(trackingMode, sensor, givenWidth, givenLength, givenHeight, overlapHeightDetection);
-                                    if(!config){
-                                        console.error('no config found with this setup');
-                                        return;
-                                    }
-                                    sceneManager.objects.removeSensors();
-                                    createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLength, givenHeight + sceneManager.sceneElevation, sceneManager);
-                                    break;
-                                }
-                                default:
-                                    break;
-                            }
-                        }
-                    });
+            //New toggle indoor-outoor events
+            const toggleElem = document.getElementById("toggle-outdoor-indoor");
+            toggleElem.addEventListener('change', () => {
+                let sceneEnvironment;
+                console.log(toggleElem.checked);
+                if(toggleElem.checked){
+                    sceneEnvironment = 'outdoor'
+                } else{
+                    sceneEnvironment = 'indoor'
                 }
-            }
+                disableSensorsConsideringEnvironment(sceneEnvironment);
+                sceneManager.changeEnvironment(sceneEnvironment);
+            });
+
+            // OLD Switch indoor-outdoor events
+            // const switchElement = document.getElementById('hardware-switch-indoor-outdoor');
+            // const switchInputs = switchElement.querySelectorAll('input');
+            // for(let i = 0; i < switchInputs.length; i++)
+            // {
+            //     switchInputs[i].addEventListener('click', () => {
+            //         disableSensorsConsideringEnvironment(switchInputs[i].value);
+            //         sceneManager.changeEnvironment(switchInputs[i].value); 
+            //     });
+            // }
+
+            //New hardware selection system
+            document.getElementById("multi-select-sensors").addEventListener('change', () => {
+                const sensorTextId = document.getElementById("multi-select-sensors").value;
+                    //on click on a sensor, display the scene calculated with this sensor
+                    switch(trackingMode)
+                    {
+                        case 'wall-tracking':
+                        {
+                            const sensor = getLidarsTypes().find(sensorType => sensorType.textId === sensorTextId);
+                            const config = calculateLidarConfig(sensor, givenWidth, givenHeight);
+                            if(!config){
+                                console.error('no config found with this setup');
+                                return;
+                            }
+                            sceneManager.objects.removeSensors();
+                            createSceneFromLidarConfig(config, sceneManager);
+                            break;
+                        }
+                        case 'human-tracking':
+                        case 'hand-tracking':
+                        {
+                            const sensor = getCamerasTypes().find(sensorType => sensorType.textId === sensorTextId);
+                            const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                            const config = calculateCameraConfig(trackingMode, sensor, givenWidth, givenLength, givenHeight, overlapHeightDetection);
+                            if(!config){
+                                console.error('no config found with this setup');
+                                return;
+                            }
+                            sceneManager.objects.removeSensors();
+                            createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLength, givenHeight + sceneManager.sceneElevation, sceneManager);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+            });
+
+            //Old selection system
+            // //Click on sensor events
+            // for(let i = 0; i < sensorsElements.length; i++)
+            // {
+            //     if(!sensorsElements[i].disabled)
+            //     {
+            //         sensorsElements[i].addEventListener('click', () => {
+            //             const sensorInput = sensorsElements[i].querySelector('input');
+            //             if(!sensorInput.disabled && !sensorInput.checked)
+            //             {
+            //                 const sensorTextId = sensorsElements[i].id.substring("hardware-input-".length);
+
+            //                 //on click on a sensor, display the scene calculated with this sensor
+            //                 switch(trackingMode)
+            //                 {
+            //                     case 'wall-tracking':
+            //                     {
+            //                         const sensor = getLidarsTypes().find(sensorType => sensorType.textId === sensorTextId);
+            //                         const config = calculateLidarConfig(sensor, givenWidth, givenHeight);
+            //                         if(!config){
+            //                             console.error('no config found with this setup');
+            //                             return;
+            //                         }
+            //                         sceneManager.objects.removeSensors();
+            //                         createSceneFromLidarConfig(config, sceneManager);
+            //                         break;
+            //                     }
+            //                     case 'human-tracking':
+            //                     case 'hand-tracking':
+            //                     {
+            //                         const sensor = getCamerasTypes().find(sensorType => sensorType.textId === sensorTextId);
+            //                         const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+            //                         const config = calculateCameraConfig(trackingMode, sensor, givenWidth, givenLength, givenHeight, overlapHeightDetection);
+            //                         if(!config){
+            //                             console.error('no config found with this setup');
+            //                             return;
+            //                         }
+            //                         sceneManager.objects.removeSensors();
+            //                         createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLength, givenHeight + sceneManager.sceneElevation, sceneManager);
+            //                         break;
+            //                     }
+            //                     default:
+            //                         break;
+            //                 }
+            //             }
+            //         });
+            //     }
+            // }
         }
 
         function disableSensorsConsideringEnvironment(environment)
         {
             let disabledSensorsNumber = 0;
+            //Old sensor selection UI
+            // sensorsCompatible.forEach(s => {
+            //     if(s.canBeUsed.includes(environment)){
+            //         document.getElementById(s.textId).disabled = false;
+            //         document.getElementById("hardware-input-" + s.textId).classList.remove("unselectable");
+            //     }
+            //     else{
+            //         document.getElementById(s.textId).disabled = true;
+            //         document.getElementById("hardware-input-" + s.textId).classList.add("unselectable")
+            //         document.getElementById(s.textId).checked = false;
+
+            //         disabledSensorsNumber++;
+            //     }
+            // });
             sensorsCompatible.forEach(s => {
                 if(s.canBeUsed.includes(environment)){
-                    document.getElementById(s.textId).disabled = false;
-                    document.getElementById("hardware-input-" + s.textId).classList.remove("unselectable");
+                    document.getElementById(s.textId).classList.remove("hidden");
                 }
                 else{
-                    document.getElementById(s.textId).disabled = true;
-                    document.getElementById("hardware-input-" + s.textId).classList.add("unselectable")
-                    document.getElementById(s.textId).checked = false;
+                    document.getElementById(s.textId).classList.add("hidden")
 
                     disabledSensorsNumber++;
                 }
             });
+
             if(sensorsCompatible.length === disabledSensorsNumber){
                 document.getElementById('hardware-warning-message').classList.remove('hidden');
             }
@@ -620,16 +728,16 @@ class Popup{
 
         function selectFirstSensorAvailable()
         {
-            const sensorsDiv = document.getElementById('hardware-sensors-selection');
-            for(let i = 0; i < sensorsDiv.children.length; i++)
-            {
-                if(!sensorsDiv.children[i].classList.contains('unselectable'))
-                {
-                    if(sceneManager.augmentaSceneLoaded) sensorsDiv.children[i].dispatchEvent(new Event('click'));
-                    sensorsDiv.children[i].children[0].checked = true;
-                    break;
-                }
-            }
+            // const sensorsDiv = document.getElementById('hardware-sensors-selection');
+            // for(let i = 0; i < sensorsDiv.children.length; i++)
+            // {
+            //     if(!sensorsDiv.children[i].classList.contains('unselectable'))
+            //     {
+            //         if(sceneManager.augmentaSceneLoaded) sensorsDiv.children[i].dispatchEvent(new Event('click'));
+            //         sensorsDiv.children[i].children[0].checked = true;
+            //         break;
+            //     }
+            // }
         }
 
         function selectUsedSensor()
