@@ -24,9 +24,9 @@ class SceneObjects{
 
     constructor(sceneManager, isBuilder)
     {
-        const nodes = [];
-        const lidars = [];
-        const dummies = [];
+        let nodes = [];
+        let lidars = [];
+        let dummies = [];
         this.nodeMeshes = [];
         this.lidarsMeshes = [];
         this.dummiesMeshes = [];
@@ -197,6 +197,15 @@ class SceneObjects{
             this.populateStorage();
         }
 
+        this.removeNode = function(node)
+        {
+            this.deleteObject(node);
+            nodes = nodes.filter(n => n != node);
+            this.nodeMeshes = this.nodeMeshes.filter(nm => nm != node.mesh)
+
+            this.populateStorage();
+        }
+
         this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, z = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
         {
             if(!SceneObjects.font)
@@ -254,6 +263,14 @@ class SceneObjects{
             this.populateStorage();
         }
         
+        this.removeLidar = function(lidar)
+        {
+            this.deleteObject(lidar);
+            lidars = lidars.filter(l => l != lidar)
+            this.lidarsMeshes = this.lidarsMeshes.filter(lm => lm != lidar.mesh)
+
+            this.populateStorage();
+        }
 
         this.removeSensors = function()
         {
