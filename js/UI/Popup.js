@@ -101,11 +101,19 @@ class Popup{
             switch(trackingMode)
             {
                 case 'wall-tracking':
+                    document.getElementById("setup-target-overlap-wall").classList.remove("hidden");
+                    document.getElementById("setup-target-overlap-table").classList.add("hidden");
+                    document.getElementById("setup-target-overlap").classList.add("hidden");
+                    break;
                 case 'hand-tracking':
-                    document.getElementById("setup-target-overlap").classList.add("hidden")
+                    document.getElementById("setup-target-overlap-table").classList.remove("hidden");
+                    document.getElementById("setup-target-overlap").classList.add("hidden");
+                    document.getElementById("setup-target-overlap-wall").classList.add("hidden");
                     break;
                 case 'human-tracking':
                     document.getElementById("setup-target-overlap").classList.remove("hidden");
+                    document.getElementById("setup-target-overlap-wall").classList.add("hidden");
+                    document.getElementById("setup-target-overlap-table").classList.add("hidden");
                     break;
                 default:
                     break;
@@ -151,36 +159,6 @@ class Popup{
                 resetWarnings();
             });
         }
-
-        document.getElementById('setup-tab').addEventListener('click', () => {
-            initSetupSection();
-
-            document.getElementById('dimensions-content').classList.add('hidden');
-            document.getElementById('hardware-content').classList.add('hidden');
-            document.getElementById('setup-content').classList.remove('hidden');
-
-            sessionStorage.setItem('builderStep', 0);
-        });
-
-        document.getElementById('dimensions-tab').addEventListener('click', () => {
-            initDimensionsSection();
-
-            document.getElementById('setup-content').classList.add('hidden');
-            document.getElementById('hardware-content').classList.add('hidden');
-            document.getElementById('dimensions-content').classList.remove('hidden');
-
-            sessionStorage.setItem('builderStep', 1);
-        });
-
-        document.getElementById('hardware-tab').addEventListener('click', () => {
-            initHardwareSection();
-
-            document.getElementById('setup-content').classList.add('hidden');
-            document.getElementById('dimensions-content').classList.add('hidden');
-            document.getElementById('hardware-content').classList.remove('hidden');
-
-            sessionStorage.setItem('builderStep', 2);
-        }); 
 
         /* TODO ADVANCED TRACKING MODES
         document.getElementById('tracking-mode-advanced').addEventListener('click', () => {
