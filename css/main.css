@@ -921,7 +921,7 @@ textarea:focus {
 }
 
 #sensor-height-infos-text{
-  background-color: var(--color-grey-selectable);
+  background-color: var(--color-grey);
   max-width: 150px;
   padding: 10px;
   border-radius: 5px;
@@ -929,7 +929,7 @@ textarea:focus {
 }
 
 #sensor-height-infos-text p{
-  color: var(--color-grey-background-selected-item);
+  color: var(--color-dark-purple);
   padding: 0;
   margin:0;
 }

@@ -109,6 +109,7 @@ class Popup{
                     document.getElementById("setup-target-overlap-table").classList.remove("hidden");
                     document.getElementById("setup-target-overlap").classList.add("hidden");
                     document.getElementById("setup-target-overlap-wall").classList.add("hidden");
+                    sceneManager.heightDetectedObservable.set(0.25);
                     break;
                 case 'human-tracking':
                     document.getElementById("setup-target-overlap").classList.remove("hidden");
@@ -123,7 +124,7 @@ class Popup{
         this.setHeightDetected = function(value){
             //console.log("Setting detected height to ", value);
             heightDetected = value;
-            document.getElementById("overlap-height-selection-popup").value = heightDetected;
+            if(trackingMode == "human-tracking") document.getElementById("overlap-height-selection-popup").value = heightDetected;
         }
 
         /** SETUP SECTION */
@@ -378,7 +379,8 @@ class Popup{
                             document.getElementById('dimensions-width-input').value = Math.floor(sceneSize[0] * sceneManager.currentUnit.value * 100) / 100;
                             document.getElementById('dimensions-length-input').value = Math.floor(sceneSize[1] * sceneManager.currentUnit.value * 100) / 100;
                             const nodes = JSON.parse(sceneInfos).objects.nodes;
-                            if(nodes.length > 0) document.getElementById('dimensions-distance-input').value = Math.floor((nodes[0].p_z - (trackingMode === 'hand-tracking' ? SceneManager.TABLE_ELEVATION : 0)) * sceneManager.currentUnit.value * 100) / 100;
+                            //The value 2.5 for hand-tracking is just to address the fact that the sensor is by default the human-tracking one
+                            if(nodes.length > 0) document.getElementById('dimensions-distance-input').value = Math.floor((nodes[0].p_z - (trackingMode === 'hand-tracking' ? 2.5 : 0)) * sceneManager.currentUnit.value * 100) / 100;
                             else document.getElementById('dimensions-distance-input').value = '';
                             break;
                         default:

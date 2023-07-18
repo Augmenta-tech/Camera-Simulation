@@ -186,14 +186,17 @@ class UIManager{
             
             switch (trackingMode) {
                 case 'hand-tracking': 
+                    document.getElementById("coverage-section").classList.remove("hidden");
                     document.getElementById("height-detection-text").classList.add("hidden");
                     document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span><span data-unittext="1">m</span></h3>';
                     break;
                 case 'wall-tracking':
+                    document.getElementById("coverage-section").classList.add("hidden");
                     document.getElementById("height-detection-text").classList.add("hidden");
                     document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneLength +'</span><span data-unittext="1">m</span></h3>';
                     break;
                 case 'human-tracking':
+                    document.getElementById("coverage-section").classList.remove("hidden");
                     document.getElementById("height-detection-text").classList.remove("hidden");
                     document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span><span data-unittext="1">m</span></h3>';
                     break;
