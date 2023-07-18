@@ -95,7 +95,7 @@ class Popup{
 
         /** PARAMETERS FUNCTIONS */
         this.setTrackingMode = function(mode){
-            console.log('Setting tracking mode popup to', mode);
+            //console.log('Setting tracking mode popup to', mode);
             trackingMode = mode;
 
             switch(trackingMode)
@@ -113,7 +113,7 @@ class Popup{
         }
 
         this.setHeightDetected = function(value){
-            console.log("Setting detected height to ", value);
+            //console.log("Setting detected height to ", value);
             heightDetected = value;
             document.getElementById("overlap-height-selection-popup").value = heightDetected;
         }
@@ -581,7 +581,6 @@ class Popup{
             const toggleElem = document.getElementById("toggle-outdoor-indoor");
             toggleElem.addEventListener('change', () => {
                 let sceneEnvironment;
-                console.log(toggleElem.checked);
                 if(toggleElem.checked){
                     sceneEnvironment = 'outdoor'
                 } else{

@@ -26,7 +26,7 @@ class NodeUI{
                 <div id="node-` + (node.id) + `-UI-header" class="row center-x-spaced center-y">
                     <div class="row center-y">
                         <div class="sensor-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
-                        <p class="main-text">Node + Sensor ` + (node.id + 1) + `</p>
+                        <p class="main-text">Sensor ` + (node.id + 1) + `</p>
                     </div>
                     <div class="row center-y">
                         <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->

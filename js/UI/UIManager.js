@@ -175,7 +175,7 @@ class UIManager{
 
         this.changeTrackingMode = function(trackingMode)
         {
-            console.log('Setting tracking mode UI to ', trackingMode);
+            //console.log('Setting tracking mode UI to ', trackingMode);
             //Displayed image
             document.getElementById("tracking-img").src = "img/" + String(trackingMode) + ".png";
             
@@ -250,7 +250,7 @@ class UIManager{
         }
 
         this.changeHeightDetected = function(value){
-            console.log("changing height to ", value);
+            //console.log("changing height to ", value);
             let text;
             switch (value) {
                 case 1.2:

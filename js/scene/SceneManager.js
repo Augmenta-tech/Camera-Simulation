@@ -36,12 +36,12 @@ class ObservableParameter extends Observable {
     }
 
     set(value) {
-        console.log('Setting parameter');
+        //console.log('Setting parameter');
         this.notifyAllObservers(value);
     }
 
     update(origin, value) {
-        console.log('Updating parameter');
+        //console.log('Updating parameter');
         this.notifyObserversExceptOrigin(origin, value);
     }
 }
