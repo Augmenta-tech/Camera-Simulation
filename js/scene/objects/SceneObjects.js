@@ -9,7 +9,6 @@ import { Dummy, loadModel } from './props/Dummy.js';
 import { Node } from './sensors/Node.js';
 import { Lidar } from './sensors/Lidar.js';
 
-
 class SceneObjects{
     static loadFont(isBuilder, callback)
     {
@@ -94,6 +93,13 @@ class SceneObjects{
                 return;
             }
             const newDummy = new Dummy(dummies.length);
+
+            //Rotation towards wall
+            if(sceneManager.trackingMode == "wall-tracking"){
+                newDummy.model.rotateY(180);
+                newDummy.mesh.position.set(0, 1, 1)
+                newDummy.updatePosition();
+            }
 
             //Offset
             for(let i = 0; i < dummies.length; i++)
@@ -417,6 +423,10 @@ class SceneObjects{
                 }
                 if(datas.objects.hasOwnProperty('dummies'))
                 {
+                    if(!Dummy.maleModel || !Dummy.femaleModel)
+                    {
+                        return;
+                    }
                     datas.objects.dummies.forEach(d => {
                         this.addDummy();
                         const dummy = dummies[dummies.length - 1];
