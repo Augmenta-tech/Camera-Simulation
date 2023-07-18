@@ -42,8 +42,13 @@ class UIManager{
             if(deleteAllDummiesButton) deleteAllDummiesButton.addEventListener('click', () => viewportManager.sceneManager.objects.removeDummies());
 
             sceneManager = viewportManager.sceneManager
+            //Share button click
             const copyUrlModal = document.getElementById("share-modal");
             document.getElementById('generate-link').addEventListener('click', () => {
+                copyLink(sceneManager.objects.generateLink());
+            });
+            //Copy to clipboard click
+            document.getElementById('copy-scene-link').addEventListener('click', () => {
                 copyLink(sceneManager.objects.generateLink());
             });
             //CLOSE MODAL CHEN CLICKING THE CROSS
@@ -158,12 +163,12 @@ class UIManager{
             if (!file) {
                 return;
             }
-            if(file.type !== 'application/json')
+            console.log(file);
+            if(file.type !== 'application/json' && file.name.split(".")[1] != "builder")
             {
                 alert(`Invalid file. Your file must end with ".json"`);
                 return;
             }
-            console.log(file);
             const reader = new FileReader();
             reader.onload = function(e) {
                 const contents = e.target.result;
