@@ -581,39 +581,7 @@ class Popup{
 
             //New hardware selection system
             document.getElementById("multi-select-sensors").addEventListener('change', () => {
-                const sensorTextId = document.getElementById("multi-select-sensors").value;
-                    //on click on a sensor, display the scene calculated with this sensor
-                    switch(trackingMode)
-                    {
-                        case 'wall-tracking':
-                        {
-                            const sensor = getLidarsTypes().find(sensorType => sensorType.textId === sensorTextId);
-                            const config = calculateLidarConfig(sensor, givenWidth, givenHeight);
-                            if(!config){
-                                console.error('no config found with this setup');
-                                return;
-                            }
-                            sceneManager.objects.removeSensors();
-                            createSceneFromLidarConfig(config, sceneManager);
-                            break;
-                        }
-                        case 'human-tracking':
-                        case 'hand-tracking':
-                        {
-                            const sensor = getCamerasTypes().find(sensorType => sensorType.textId === sensorTextId);
-                            const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
-                            const config = calculateCameraConfig(trackingMode, sensor, givenWidth, givenLength, givenHeight, overlapHeightDetection);
-                            if(!config){
-                                console.error('no config found with this setup');
-                                return;
-                            }
-                            sceneManager.objects.removeSensors();
-                            createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLength, givenHeight + sceneManager.sceneElevation, sceneManager);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
+                createSceneFromSelectedSensor();
             });
 
             //Old selection system
@@ -666,6 +634,42 @@ class Popup{
             // }
         }
 
+        function createSceneFromSelectedSensor(){
+            const sensorTextId = document.getElementById("multi-select-sensors").value;
+                    //on click on a sensor, display the scene calculated with this sensor
+                    switch(trackingMode)
+                    {
+                        case 'wall-tracking':
+                        {
+                            const sensor = getLidarsTypes().find(sensorType => sensorType.textId === sensorTextId);
+                            const config = calculateLidarConfig(sensor, givenWidth, givenHeight);
+                            if(!config){
+                                console.error('no config found with this setup');
+                                return;
+                            }
+                            sceneManager.objects.removeSensors();
+                            createSceneFromLidarConfig(config, sceneManager);
+                            break;
+                        }
+                        case 'human-tracking':
+                        case 'hand-tracking':
+                        {
+                            const sensor = getCamerasTypes().find(sensorType => sensorType.textId === sensorTextId);
+                            const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                            const config = calculateCameraConfig(trackingMode, sensor, givenWidth, givenLength, givenHeight, overlapHeightDetection);
+                            if(!config){
+                                console.error('no config found with this setup');
+                                return;
+                            }
+                            sceneManager.objects.removeSensors();
+                            createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLength, givenHeight + sceneManager.sceneElevation, sceneManager);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+        }
+
         function disableSensorsConsideringEnvironment(environment)
         {
             let disabledSensorsNumber = 0;
@@ -705,6 +709,11 @@ class Popup{
 
         function selectFirstSensorAvailable()
         {
+            const sensorsDiv = document.getElementById('multi-select-sensors');
+            if(!sensorsDiv) return;
+            sensorsDiv.value = sensorsDiv.children[0].value;
+            createSceneFromSelectedSensor();
+            //Old way
             // const sensorsDiv = document.getElementById('hardware-sensors-selection');
             // for(let i = 0; i < sensorsDiv.children.length; i++)
             // {
