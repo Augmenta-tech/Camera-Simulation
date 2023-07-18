@@ -450,7 +450,7 @@ a.main-button {
 /** INSPECTOR **/
 
 #inspector > * {
-  padding: 20px 29px;
+  padding: 16px 16px;
 }
 
 #inspector.dark-mode {
