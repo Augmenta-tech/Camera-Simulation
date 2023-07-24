@@ -5,15 +5,15 @@ import {
     Object3D
 } from 'three';
 
-import { MTLLoader } from 'three-loaders/MTLLoader.js';
-import { OBJLoader } from 'three-loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 
 class Dummy {
     static DEFAULT_DUMMIES_HEIGHT = document.getElementById('dummy-height-reference') ? document.getElementById('dummy-height-reference').value : 2;
     static maleModel;
     static femaleModel;
-    
+
     constructor(id)
     {
         this.id = id;
@@ -23,7 +23,7 @@ class Dummy {
         this.zPos = 0;
 
         this.mesh = buildMesh(this.xPos, this.yPos)
-        
+
         //this.model = new Object3D();
 
         this.model = buildModel();
@@ -45,7 +45,7 @@ class Dummy {
         function buildModel()
         {
             const model = new Object3D().copy((Math.random() < 0.5) ? Dummy.maleModel : Dummy.femaleModel);
-            const scaling = Dummy.DEFAULT_DUMMIES_HEIGHT / 180.0; 
+            const scaling = Dummy.DEFAULT_DUMMIES_HEIGHT / 180.0;
             model.scale.set(scaling, scaling, scaling);
             //model.position.set(dummy.xPos, dummy.zPos, dummy.yPos);
 
