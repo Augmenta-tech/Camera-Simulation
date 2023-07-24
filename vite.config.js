@@ -6,4 +6,13 @@ export default defineConfig({
         { ...threeMinifier(), enforce: "pre" },
         splitVendorChunkPlugin()
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                entryFileNames: `assets/[name].js`,
+                chunkFileNames: `assets/[name].js`,
+                assetFileNames: `assets/[name].[ext]`
+            }
+        }
+    }
 })
