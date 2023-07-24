@@ -9,7 +9,6 @@ import { Dummy, loadModel } from './props/Dummy.js';
 import { Node } from './sensors/Node.js';
 import { Lidar } from './sensors/Lidar.js';
 
-
 class SceneObjects{
     static loadFont(isBuilder, callback)
     {
@@ -24,9 +23,9 @@ class SceneObjects{
 
     constructor(sceneManager, isBuilder)
     {
-        const nodes = [];
-        const lidars = [];
-        const dummies = [];
+        let nodes = [];
+        let lidars = [];
+        let dummies = [];
         this.nodeMeshes = [];
         this.lidarsMeshes = [];
         this.dummiesMeshes = [];
@@ -47,12 +46,13 @@ class SceneObjects{
                 //const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
                 // and comment this
                 const sceneInfo = sessionStorage.getItem('sceneInfos')
+                console.log(JSON.parse(sceneInfo));
                 if(sceneInfo) {
                     this.parseJson(sceneInfo);
                     return;
                 }
             }
-            else if (sceneInfoFromURL) //scene from url case
+            else //scene from url case
             {
                 this.parseJson(sceneInfoFromURL);
                 document.getElementById('popup').classList.remove('is-visible');
@@ -69,7 +69,7 @@ class SceneObjects{
             this.populateStorage();
         }
 
-    /* SCENE SUBJECTS MANAGEMENT */
+        /* SCENE SUBJECTS MANAGEMENT */
 
         // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
         /**
@@ -93,6 +93,13 @@ class SceneObjects{
                 return;
             }
             const newDummy = new Dummy(dummies.length);
+
+            //Rotation towards wall
+            if(sceneManager.trackingMode == "wall-tracking"){
+                newDummy.model.rotateY(180);
+                newDummy.mesh.position.set(0, 1, 1)
+                newDummy.updatePosition();
+            }
 
             //Offset
             for(let i = 0; i < dummies.length; i++)
@@ -196,6 +203,15 @@ class SceneObjects{
             this.populateStorage();
         }
 
+        this.removeNode = function(node)
+        {
+            this.deleteObject(node);
+            nodes = nodes.filter(n => n != node);
+            this.nodeMeshes = this.nodeMeshes.filter(nm => nm != node.mesh)
+
+            this.populateStorage();
+        }
+
         this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, z = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
         {
             if(!SceneObjects.font)
@@ -253,6 +269,14 @@ class SceneObjects{
             this.populateStorage();
         }
         
+        this.removeLidar = function(lidar)
+        {
+            this.deleteObject(lidar);
+            lidars = lidars.filter(l => l != lidar)
+            this.lidarsMeshes = this.lidarsMeshes.filter(lm => lm != lidar.mesh)
+
+            this.populateStorage();
+        }
 
         this.removeSensors = function()
         {
@@ -312,6 +336,7 @@ class SceneObjects{
             if(datas.hasOwnProperty('trackingMode'))
             {
                 mode = datas.trackingMode;
+                sceneManager.trackingMode = mode;
             }
             
             if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
@@ -398,6 +423,10 @@ class SceneObjects{
                 }
                 if(datas.objects.hasOwnProperty('dummies'))
                 {
+                    if(!Dummy.maleModel || !Dummy.femaleModel)
+                    {
+                        return;
+                    }
                     datas.objects.dummies.forEach(d => {
                         this.addDummy();
                         const dummy = dummies[dummies.length - 1];

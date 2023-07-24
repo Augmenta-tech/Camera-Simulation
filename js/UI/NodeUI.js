@@ -26,13 +26,14 @@ class NodeUI{
                 <div id="node-` + (node.id) + `-UI-header" class="row center-x-spaced center-y">
                     <div class="row center-y">
                         <div class="sensor-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
-                        <p class="main-text">Node + Sensor ` + (node.id + 1) + `</p>
+                        <p class="main-text">Sensor ` + (node.id + 1) + `</p>
                     </div>
                     <div class="row center-y">
                         <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
                         <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                         <div id="node-` + (node.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
+                        <div id="node-` + (node.id) + `-delete"><span class="iconify" data-icon="fluent:delete-16-filled"></span></div>
                     </div>
                 </div>
                 <div id="node-infos-` + (node.id) + `-UI" class="column sections-container space-y">
@@ -98,6 +99,7 @@ class NodeUI{
     
             document.getElementById('node-' + (node.id) + '-hide-UI').addEventListener('click', () => hideUICam());
             document.getElementById('node-' + (node.id) + '-visible').addEventListener('click', () => node.changeVisibility());
+            document.getElementById('node-' + (node.id) + '-delete').addEventListener('click', () => sceneManager.objects.removeNode(node))
         
             document.getElementById('cam-type-' + node.id).addEventListener('change', () => changeCameraType());
         }
@@ -286,7 +288,9 @@ class NodeUI{
 
         this.dispose = function()
         {
-            document.getElementById('node-' + node.id + '-UI').remove();
+            let nodeUI = document.getElementById('node-' + node.id + '-UI');
+            //Check if wasn't removed singularly yet
+            if(nodeUI) nodeUI.remove();
         }
     }
 }

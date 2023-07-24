@@ -30,6 +30,7 @@ class LidarUI{
                         <div id="lidar-` + (lidar.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                         <div id="lidar-` + (lidar.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
+                        <div id="lidar-` + (lidar.id) + `-delete"><span class="iconify" data-icon="fluent:delete-16-filled"></span></div>
                     </div>
                 </div>
                 <div id="lidar-infos-` + (lidar.id) + `-UI" class="column sections-container space-y">
@@ -79,6 +80,7 @@ class LidarUI{
     
             document.getElementById('lidar-' + (lidar.id) + '-hide-UI').addEventListener('click', () => hideUILidar());
             document.getElementById('lidar-' + (lidar.id) + '-visible').addEventListener('click', () => lidar.changeVisibility());
+            document.getElementById('lidar-' + (lidar.id) + '-delete').addEventListener('click', () => sceneManager.objects.removeLidar(lidar));
         
             document.getElementById('lidar-type-' + lidar.id).addEventListener('change', () => changeLidarType());
         }
@@ -247,7 +249,9 @@ class LidarUI{
 
         this.dispose = function()
         {
-            document.getElementById('lidar-' + lidar.id + '-UI').remove();
+            let lidarUI = document.getElementById('lidar-' + lidar.id + '-UI');
+            //Check if wasn't removed singularly yet
+            if(lidarUI) lidarUI.remove();
         }
     }
 }

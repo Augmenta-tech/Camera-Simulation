@@ -35,10 +35,6 @@
               <h3>Hardware</h3>
               <div class="tab-line"></div>
             </div>
-            <div id="my-system-tab" class="column center-x tab">
-              <h3>My system</h3>
-              <div class="tab-line"></div>
-            </div>
           </div>
   
           <!-- SETUP CONTENT -->
@@ -47,11 +43,11 @@
             <div id="tracking-mode-selection-builder" class="row wrap center-x center-y builder-section-content">
               <label id="tracking-mode-human-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="human-tracking" checked>
-                <img id="human-tracking-img" src="img/floor-tracking.png" alt="Human tracking">
+                <img id="human-tracking-img" src="img/human-tracking.png" alt="Human tracking">
               </label>
               <label id="tracking-mode-hand-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="hand-tracking">
-                <img id="hand-tracking-img" src="img/table-tracking.png" alt="Hand tracking">
+                <img id="hand-tracking-img" src="img/hand-tracking.png" alt="Hand tracking">
               </label>
               <label id="tracking-mode-wall-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="wall-tracking">
@@ -74,6 +70,30 @@
                 <img id="fast-objects-tracking-img" src="img/fast-objects-tracking.png" alt="Fast objects">
               </label>
             -->
+            </div>
+            <div id="setup-target-overlap" class="popup-target-overlap-select hidden">
+              <p>Target overlap height detection</p>
+              <select title="overlap-height-popup" name="overlap-height-popup" id="overlap-height-selection-popup">
+                <!-- <option value="0.3">Feet</option>
+                <option value="0.7">Knees</option> -->
+                <option value="1.2" selected>Hips</option>
+                <option value="1.6">Shoulders</option>
+                <option value="2">Entire body</option>
+              </select>
+            </div>
+            <div id="setup-target-overlap-wall" class="popup-target-overlap-select hidden">
+              <p>Target overlap detection</p>
+              <select title="overlap-wall-popup" name="overlap-wall-popup" id="overlap-wall-selection-popup">
+                <option value="1.2" selected>Hand tracking</option>
+                <option value="1.6">Finger tracking</option>
+                <option value="2">Large objects</option>
+              </select>
+            </div>
+            <div id="setup-target-overlap-table" class="popup-target-overlap-select hidden">
+              <p>Target overlap detection</p>
+              <select title="overlap-table-popup" name="overlap-table-popup" id="overlap-table-selection-popup">
+                <option value="1.2" selected>Hand tracking</option>
+              </select>
             </div>
             <div id="setup-warning-message" class="row center-x hidden">
               <p id="setup-warning-text" class="warning-text">Please choose a surface to track</p>
@@ -120,7 +140,7 @@
                     <p id="dimensions-distance-text-default">Sensor height (<span data-unittext="1">m</span>)</p>
                     <p id="dimensions-distance-text-hand-tracking" class="hidden">Sensor height (<span data-unittext="1">m</span>) <span id="sensor-height-infos" class="iconify" data-icon="el:info-circle"></span></p>
                     <div id="sensor-height-infos-text" class="hidden">
-                      <p>Sensor height from your tracking area. Please indicate here the distance between your hook and your table.</p>
+                      <p>Please indicate the distance between the sensor and the table.</p>
                     </div>
                     <p id="dimensions-distance-text-wall-tracking" class="hidden">Height (<span data-unittext="1">m</span>)</p>
                   </div>
@@ -134,6 +154,9 @@
               </div>
               <div id="dimensions-negative-values-warning" class="row center-x wrap hidden">
                 <p id="dimensions-negative-values-warning-text" class="warning-text">Please enter positive values.</p>
+              </div>
+              <div id="dimensions-no-value-warning" class="row center-x wrap hidden">
+                <p id="dimensions-no-value-warning-text" class="warning-text">Please fill all the fields.</p>
               </div>
               <div id="surface-warning-message" class="row center-x wrap hidden">
                 <!-- Injected by script -->
@@ -154,7 +177,7 @@
               </div>
               <!-- NEED SOMETHING DIFFERENT BUTTON -->
               <div id="dimensions-need-something-different-button" class="row center-x">
-                <p id="dimensions-need-something-different-button" class="text-button">Need something different ?</p>
+                <p id="dimensions-need-something-different-button" class="text-button"><a href="https://augmenta.tech/contact/" target="_blank">Need something different ?</a></p>
               </div>
             </div>
           </div>
@@ -163,7 +186,7 @@
           <div id="hardware-content" class="column builder-section hidden">
             <!-- HARDWARES SELECTION -->
             <div id="hardware-section-builder" class="column center-x center-y builder-section-content ">
-              <div id="hardware-switch-indoor-outdoor" class="row center-x center-y">
+              <div id="hardware-switch-indoor-outdoor" class="row center-x center-y hidden">
                 <label class="hardware-radio-label">
                   <input id="hardware-input-radio-indoor" type="radio" name="switch-indoor-outdoor-builder" value="indoor" checked>
                   <div class="row center-x center-y hardware-switch">
@@ -177,11 +200,33 @@
                   </div>
                 </label>
               </div>
-              <div id="hardware-sensors-selection" class="row wrap center-x center-y">
+
+              <div class="row">
+                <!-- New Sensor selection -->
+                <div id="new-selector">
+                  <h3 id="multi-select-label" for="multi-select">Select sensor</h3>
+                  <div class="select select--multiple">
+                    <select id="multi-select-sensors" size="3">
+                    <!-- FILLED IN JS WITH CORRECT SENSORS -->
+                    </select>
+                  </div>
+                </div>
+                <!-- Outdoor/Indoor toggle -->
+                <div id="new-toggle">
+                  <p id="button-toggle-text">INDOOR</p>
+                  <div class="button-toggle r" id="button-1">
+                    <input id="toggle-outdoor-indoor" type="checkbox" class="checkbox" />
+                    <div class="knobs"></div>
+                    <div class="layer"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="hardware-sensors-selection" class="row wrap center-x center-y hidden">
                 <!-- FILLED IN JS WITH CORRECT SENSORS -->
               </div>
               <div id="hardware-warning-message" class="row center-x wrap hardware-warning-message hidden">
-                <p id="hardware-warning-text" class="warning-text">No hardware setup found,</p><p id="hardware-warning-button" class="text-button">click here to get in touch with our experts.</p>
+                <p id="hardware-warning-text" class="warning-text">No hardware setup found,</p><p id="hardware-warning-button" class="text-button"><a href="https://augmenta.tech/contact/" target="_blank">click here to get in touch with our experts.</a></p>
               </div>
             </div>
             <!-- HARDWARES BUTTONS-->
@@ -193,13 +238,13 @@
                 </div>
                 <!-- NEXT BUTTON -->
                 <div id="next-button-hardware" class="builder-button builder-main-button">
-                  <p id="next-button-hardware-text" class="bold-font"> NEXT </p>
+                  <p id="next-button-hardware-text" class="bold-font"> GENERATE </p>
                   <span class="iconify" data-icon="dashicons:arrow-right-alt2"></span>
                 </div>
               </div>
               <!-- NEED SOMETHING DIFFERENT BUTTON -->
               <div id="hardware-need-something-different-button" class="row center-x">
-                <p id="hardware-need-something-different-button" class="text-button">Need something different ?</p>
+                <p id="hardware-need-something-different-button" class="text-button"><a href="https://augmenta.tech/contact/" target="_blank">Need something different ?</a></p>
               </div>
             </div>
           </div>
@@ -235,8 +280,6 @@
               </div>
             </div>
           </div>
-  
-          <div id="bottom-line" class="bottom-line"></div>
         </div> 
         <a id="close-popup" href="#0" class="cd-popup-close img-replace">Close</a>
       </div>
@@ -284,6 +327,12 @@
               <div id="share-modal-content" class="column center-x center-y modal-content">
                 <span id="close-share-modal" class="close">&times;</span>
                 <p id="copy-feedback-text" class="main-text">An URL of your scene has been copied to clipboard.</p>
+                <div class="center-x space-y">  
+                  <div id="copy-scene-link" class="button main-button">
+                    <span class="iconify main-icon" data-icon="ph:copy"></span>
+                    <p> Copy to clipboard </p>
+                  </div>
+                </div>
                 <p class="main-text">You can also download a file for your scene below:</p>
                 <div class="row center-x space-y">
                   <input type="text" id="scene-file-name-input" placeholder="Your file name">
@@ -485,8 +534,11 @@
             </div>
             <!-- END WIZARD MODAL -->
 
+            <img id="tracking-img" src="img/human-tracking.png" alt="Tracking image" class="tracking-img">
+            <h3 id="height-detection-text">Target overlap height detection: Hips</h3>
+
             <!-- TRACKING SECTION IN INSPECTOR -->
-            <div id="tracking-section-inspector">
+            <div id="tracking-section-inspector" class="hidden">
 
               <!-- TRACKING MODE -->
               <div id="tracking-mode-inspector">
@@ -499,7 +551,7 @@
               </div>
 
               <!-- HEIGHT DETECTED FOR OVERLAPS -->
-              <div id="overlap-height-inspector" class="">
+              <div id="overlap-height-inspector" class="hidden">
                 <p>Target overlap height detection</p>
                 <select title="overlap-height-inspector" name="overlap-height-inspector" id="overlap-height-selection-inspector">
                   <!-- <option value="0.3">Feet</option>
@@ -514,19 +566,20 @@
             <!-- SCENE SECTION IN INSPECTOR -->
 
             <!-- FLOOR SCENE -->
-            <div id="floor-scene-size-inspector" >
+            <div class="hidden">
+            <div id="floor-scene-size-inspector">
               <h3 id="floor-scene-size-title-inspector">Floor scene size</h3>
 
               <!-- WIDTH INPUT -->
               <div>
                 <p>Width (<span data-unittext="1">m</span>)</p>
-                <input id="input-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1">
+                <input id="input-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
               </div>
 
               <!-- LENGTH INPUT -->
               <div>
                 <p>Length (<span data-unittext="1">m</span>)</p>
-                <input id="input-scene-length-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
+                <input id="input-scene-length-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1" disabled>
               </div>
 
               <!-- SENSOR HEIGHT -->
@@ -534,32 +587,46 @@
                 <p>Sensor height (<span data-unittext="1">m</span>)</p>
                 <input id="input-scene-sensor-height-inspector" type="number" placeholder="sh" min="0" max="30" step="0.1" disabled>
               </div>
-              <!-- SCENE COVERED FEEDBACK -->
-              <div class="row">
-                <p>Scene fully covered: </p><span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
-              </div>
+            </div>
             </div>
 
-            <!-- WALL Y SCENE -->
-            <div id="wall-y-scene-size-inspector" class="hidden">
-              <h3>Front wall scene size</h3>
+            <!-- INSPECTOR READONLY SCENE SIZE -->
+            <div id="scene-size-text-div">
+              <h3 id="scene-size-text">Scene size: <span data-unit="1">5</span>x<span data-unit="1">5</span>(<span data-unittext="1">m</span>) with a sensor height of <span data-unit="1">6</span>(<span data-unittext="1">m</span>)</h3>
+            </div>
 
-              <!-- WIDTH INPUT -->
-              <div>
-                <p>Width (<span data-unittext="1">m</span>)</p>
-                <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1">
+            <div id="info-table-height-inspector"></div>
+
+              <div class="hidden">
+                
+                <!-- WALL Y SCENE -->
+                <div id="wall-y-scene-size-inspector">
+                  <h3>Front wall scene size</h3>
+                  
+                <!-- WIDTH INPUT -->
+                <div>
+                  <p>Width (<span data-unittext="1">m</span>)</p>
+                  <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
+                </div>
+                
+                <!-- HEIGHT INPUT -->
+                <div>
+                  <p>Height (<span data-unittext="1">m</span>)</p>
+                  <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1" disabled>
+                </div>
               </div>
 
-              <!-- HEIGHT INPUT -->
-              <div>
-                <p>Height (<span data-unittext="1">m</span>)</p>
-                <input id="input-wall-y-scene-height-inspector" type="number" placeholder="h" min="0" max="100" step = "0.1">
-              </div>
             </div>
           </div>
 
           <!-- SENSORS PANEL -->
           <div id="sensors-infos" class="column sections-container">
+            <!-- SCENE COVERED FEEDBACK -->
+            <div class="row" id="coverage-section">
+              <p class="scene-fully-covered-text">Scene fully covered: </p>
+              <span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
+            </div>
+
             <!-- NUMBER OF NODES FEEDBACK -->
             <div id="number-sensors" class="row center-x center-y">
               <p class="main-text">Number of sensors: <span id="number-nodes-value">0</span></p>

@@ -14,7 +14,8 @@ import {
     Ray,
     Plane,
     Frustum,
-    Color
+    Color,
+    ObjectSpaceNormalMap
 } from 'three';
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
@@ -22,9 +23,28 @@ import { units } from '/js/data.js';
 import { Checkerboard } from '/js/scene/Checkerboard.js';
 import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
 import { Node } from '/js/scene/objects/sensors/Node.js';
+import { Observable } from '/js/scene/Observable.js';
+import { TransformControls } from '/js/lib/TransformControls.js';
+import { ViewportManager } from '/js/ViewportManager.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
+
+class ObservableParameter extends Observable {
+    constructor() {
+        super();
+    }
+
+    set(value) {
+        //console.log('Setting parameter');
+        this.notifyAllObservers(value);
+    }
+
+    update(origin, value) {
+        //console.log('Updating parameter');
+        this.notifyObserversExceptOrigin(origin, value);
+    }
+}
 
 class SceneManager{
     static loadFont(isBuilder, callback)
@@ -39,7 +59,7 @@ class SceneManager{
     static font;
     static DEFAULT_UNIT = units.meters;
     static DEFAULT_TRACKING_MODE = 'human-tracking';
-    static DEFAULT_DETECTION_HEIGHT = document.getElementById('default-height-detected') ? parseFloat(document.getElementById('default-height-detected').value) : 1.2;
+    static DEFAULT_DETECTION_HEIGHT = 1.2;
     static DEFAULT_WIDTH = 5;
     static DEFAULT_LENGTH = 5;
     static DEFAULT_ENV = 'indoor';
@@ -47,15 +67,37 @@ class SceneManager{
     static TABLE_ELEVATION = 0.75;
     static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
 
-    constructor(isBuilder, _transformControl)
+    constructor(isBuilder, uiManager)
     {
+        const viewportElement = document.getElementById('viewport');
+
+        /* initialize viewport, scene and objects */ 
+        this.viewportManager = new ViewportManager(viewportElement, this);
+
+        const viewportManager = this.viewportManager;
+
+        var sceneInfo = "";
+        const url = new URL(document.location.href);
+        //scene from URL
+        sceneInfo = url.searchParams.get("sceneData");
+
+        if(!sceneInfo)
+        {
+            //scene from cookies
+            sceneInfo = sessionStorage.getItem('sceneInfos')
+        }
+        let sceneObjects = JSON.parse(sceneInfo);
+
         this.scene = buildScene();
 
         this.currentUnit = SceneManager.DEFAULT_UNIT;
 
         this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
+        var trackingMode = this.trackingMode;
 
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
+        var heightDetected = this.heightDetected;
+
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
         this.sceneLength = SceneManager.DEFAULT_LENGTH;
         this.sceneSensorHeight = Node.DEFAULT_NODE_HEIGHT;
@@ -65,7 +107,7 @@ class SceneManager{
 
         this.size = 160;
 
-        this.wallX = buildWallXMesh(this.size, -10, -10); // if you want to get the wall on checkerboard border, change this AND values in changeTrackingMode()
+        this.wallX = buildWallXMesh(this.size, -10, -10); // if you want to get the wall on checkerboard border, change this AND values in changeObservableParameter()
         this.wallY = buildWallYMesh(this.size, -10, -10);
         this.floor = buildFloorMesh(this.size, this.wallX.position.x, this.wallY.position.z);
 
@@ -77,17 +119,18 @@ class SceneManager{
         this.checkerboardWallY;
         this.checkerboardWallX;
 
-        this.transformControl = _transformControl;
+        this.transformControl = buildTransformControl();
         this.objects = new SceneObjects(this, isBuilder);
 
         this.augmentaSceneLoaded = false;
 
+        const scope = this;
+
         //DEBUG
         const spheres = [];
         const rays = [];
-    
 
-    /* SCENE INITIALISATION */
+        /* SCENE INITIALISATION */
 
         this.initScene = function(floor, wallX, wallY)
         {
@@ -129,12 +172,41 @@ class SceneManager{
             if(this.transformControl) this.scene.add(this.transformControl);
 
             this.augmentaSceneLoaded = true;
+            console.log("Augmenta scene loaded");
 
             //SceneObjects
             this.objects.initObjects();
+
+            this.trackingModeObservable = new ObservableParameter();
+            this.trackingModeObservable.addObserver(uiManager.changeTrackingMode);
+            this.trackingModeObservable.addObserver(uiManager.popup.setTrackingMode);
+            const changeTrackingModeBinded = this.changeTrackingMode.bind(this)
+            this.trackingModeObservable.addObserver(changeTrackingModeBinded);
+
+            this.heightDetectedObservable = new ObservableParameter();
+            this.heightDetectedObservable.addObserver(uiManager.changeHeightDetected);
+            this.heightDetectedObservable.addObserver(uiManager.popup.setHeightDetected);
+            const changeHeightDetectedBinded = this.changeHeightDetected.bind(this)
+            this.heightDetectedObservable.addObserver(changeHeightDetectedBinded);
+
+            if(sceneObjects){
+                if(sceneObjects.trackingMode){
+                    this.trackingModeObservable.set(sceneObjects.trackingMode);
+                } else {
+                    this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                }
+                if(sceneObjects.heightDetected){
+                    this.heightDetectedObservable.set(sceneObjects.heightDetected);
+                } else {
+                    this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+                }
+            } else {
+                this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+            }
         }
 
-    /* BUILDERS */
+        /* BUILDERS */
         function buildScene()
         {
             const scene = new Scene();
@@ -199,9 +271,21 @@ class SceneManager{
             return gridHelper;
         }
 
-    /* USER'S ACTIONS */
+        /* ALLOW TO TRANSFORM SCENE SUBJECTS IN THE VIEWPORT */
+        function buildTransformControl()
+        {
+            const transformControl = new TransformControls(viewportManager.activeCamera, viewportManager.renderer.domElement );
+            transformControl.addEventListener('change', () => viewportManager.render());
+            transformControl.addEventListener('dragging-changed', function (event) {
+                viewportManager.orbitControls.enabled = ! event.value;
+            });
 
-    /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
+            return transformControl;
+        }
+
+        /* USER'S ACTIONS */
+
+        /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
         this.toggleUnit = function(unit = this.currentUnit.value === units.meters.value ? units.feets : units.meters)
         {
             if(this.augmentaSceneLoaded) 
@@ -276,35 +360,41 @@ class SceneManager{
             }
         }
 
-        this.changeTrackingMode = function(mode)
+        this.changeTrackingMode = function(mode, build = true)
         {
             this.trackingMode = mode;
+            if(!build) return;
 
             switch(mode)
             {
                 case 'hand-tracking':
-                    this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     this.sceneElevation = SceneManager.TABLE_ELEVATION;
-                    this.sceneWidth = this.checkerboardFloor.width;
-                    this.sceneLength = this.checkerboardFloor.height;
-                    if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
+                    
+                    if(this.augmentaSceneLoaded) {
+                        this.sceneWidth = this.checkerboardFloor.width;
+                        this.sceneLength = this.checkerboardFloor.height;
+                        changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);
+                    }
                     this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
                     break;
                 case 'wall-tracking':
-                    this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
-                    this.sceneWidth = this.checkerboardWallY.width;
-                    this.sceneLength = this.checkerboardWallY.height;
-                    if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
+                    
+                    if(this.augmentaSceneLoaded) {
+                        this.sceneWidth = this.checkerboardWallY.width;
+                        this.sceneLength = this.checkerboardWallY.height;
+                        console.log("Changing surface");
+                        changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
                     this.wallY.position.z = 0;
                     break;
                 case 'human-tracking':
                     default:
-                    this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
                     this.sceneElevation = 0;
-                    this.sceneWidth = this.checkerboardFloor.width;
-                    this.sceneLength = this.checkerboardFloor.height;
-                    if(this.augmentaSceneLoaded) {changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
+                    
+                    if(this.augmentaSceneLoaded) {
+                        this.sceneWidth = this.checkerboardFloor.width;
+                        this.sceneLength = this.checkerboardFloor.height;
+                        changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
                     this.wallY.position.z = -10;
                     break;
             }
@@ -333,6 +423,11 @@ class SceneManager{
                     toAdd[i].setSceneElevation(sceneElevations[i]);
                 }
             }
+        }
+
+        this.changeHeightDetected = function(value){
+            this.heightDetected = value;
+            this.objects.populateStorage();
         }
 
         this.changeEnvironment = function(env = ((this.sceneEnvironment) === 'indoor' ? 'outdoor' : 'indoor'))

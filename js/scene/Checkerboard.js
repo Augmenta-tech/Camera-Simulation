@@ -29,6 +29,7 @@ class Checkerboard{
         const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         const planes = new Group();
         const dimensionsText = buildTextMesh(this.width, this.height);
+        const tableLegs = new Group();
 
 
         function buildPlanes(width, height, elevation, unitValue)
@@ -132,6 +133,25 @@ class Checkerboard{
 
             buildPlanes(width, height, elevation, unit.value);
             updateText(width, height, elevation, unit);
+            createTableLegs(width, height, elevation, unit);
+        }
+
+        function createTableLegs(width, height, elevation, unit){
+            tableLegs.clear();
+            const tableLegsGeometry = new BoxGeometry( 1/15, elevation, 1/15 );
+            const material = new MeshBasicMaterial( {color: 0x111111, side: DoubleSide} );
+            let leg1 = new Mesh( tableLegsGeometry, material );
+            leg1.position.set(width, elevation/2, height);
+            tableLegs.add(leg1);
+            let leg2 = new Mesh( tableLegsGeometry, material );
+            leg2.position.set(0, elevation/2, height);
+            tableLegs.add(leg2);
+            let leg3 = new Mesh( tableLegsGeometry, material );
+            leg3.position.set(0, elevation/2, 0);
+            tableLegs.add(leg3);
+            let leg4 = new Mesh( tableLegsGeometry, material );
+            leg4.position.set(width, elevation/2, 0);
+            tableLegs.add(leg4);
         }
 
         function applyTransforms(object, width, height, elevation)
@@ -154,6 +174,7 @@ class Checkerboard{
             scene.add(sceneBorder);
             scene.add(planes);
             scene.add(dimensionsText);
+            scene.add(tableLegs);
         }
 
         this.toggleUnit = function(unit)
@@ -183,6 +204,7 @@ class Checkerboard{
             scene.remove(sceneBorder);
             scene.remove(planes);
             scene.remove(dimensionsText);
+            scene.remove(tableLegs);
         }
 
         this.dispose = function()
