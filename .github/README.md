@@ -9,11 +9,11 @@ npm i
 ### Development
 
 ```bash
-npm run dev # build + watch
+npm run dev # build + watch + hotreload
 ```
 
 ### Build for prod
 
 ```bash
-npm run build # generate build /dist folder with assets
+npm run build # generate optimal assets in /dist
 ```
