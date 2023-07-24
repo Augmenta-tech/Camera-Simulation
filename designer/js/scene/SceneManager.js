@@ -14,23 +14,43 @@ import {
     Ray,
     Plane,
     Frustum,
-    Color
+    Color,
+    ObjectSpaceNormalMap
 } from 'three';
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
-
-import { units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js';
-import { Checkerboard } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/Checkerboard.js';
-import { SceneObjects } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/SceneObjects.js';
-import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js';
+import { units } from '/js/data.js';
+import { Checkerboard } from '/js/scene/Checkerboard.js';
+import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
+import { Node } from '/js/scene/objects/sensors/Node.js';
+import { Observable } from '/js/scene/Observable.js';
+import { TransformControls } from '/js/lib/TransformControls.js';
+import { ViewportManager } from '/js/ViewportManager.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
 
+class ObservableParameter extends Observable {
+    constructor() {
+        super();
+    }
+
+    set(value) {
+        //console.log('Setting parameter');
+        this.notifyAllObservers(value);
+    }
+
+    update(origin, value) {
+        //console.log('Updating parameter');
+        this.notifyObserversExceptOrigin(origin, value);
+    }
+}
+
 class SceneManager{
-    static loadFont(callback)
+    static loadFont(isBuilder, callback)
     {
-        new FontLoader().load( '../wp-content/themes/salient-child/builder-v2/designer/fonts/helvetiker_regular.typeface.json', function ( response ) {
+        const path = './';
+        new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneManager.font = response;
             callback();
             return;
@@ -39,65 +59,96 @@ class SceneManager{
     static font;
     static DEFAULT_UNIT = units.meters;
     static DEFAULT_TRACKING_MODE = 'human-tracking';
-    static DEFAULT_DETECTION_HEIGHT = parseFloat(document.getElementById('default-height-detected').value);
+    static DEFAULT_DETECTION_HEIGHT = 1.2;
     static DEFAULT_WIDTH = 5;
     static DEFAULT_LENGTH = 5;
+    static DEFAULT_ENV = 'indoor';
 
     static TABLE_ELEVATION = 0.75;
     static HAND_TRACKING_OVERLAP_HEIGHT = 0.25;
 
-    constructor(_transformControl)
+    constructor(isBuilder, uiManager)
     {
+        const viewportElement = document.getElementById('viewport');
+
+        /* initialize viewport, scene and objects */ 
+        this.viewportManager = new ViewportManager(viewportElement, this);
+
+        const viewportManager = this.viewportManager;
+
+        var sceneInfo = "";
+        const url = new URL(document.location.href);
+        //scene from URL
+        sceneInfo = url.searchParams.get("sceneData");
+
+        if(!sceneInfo)
+        {
+            //scene from cookies
+            sceneInfo = sessionStorage.getItem('sceneInfos')
+        }
+        let sceneObjects = JSON.parse(sceneInfo);
+
         this.scene = buildScene();
 
         this.currentUnit = SceneManager.DEFAULT_UNIT;
 
         this.trackingMode = SceneManager.DEFAULT_TRACKING_MODE;
+        var trackingMode = this.trackingMode;
 
         this.heightDetected = SceneManager.DEFAULT_DETECTION_HEIGHT;
+        var heightDetected = this.heightDetected;
+
         this.sceneWidth = SceneManager.DEFAULT_WIDTH;
         this.sceneLength = SceneManager.DEFAULT_LENGTH;
         this.sceneSensorHeight = Node.DEFAULT_NODE_HEIGHT;
         this.sceneElevation = 0;
 
+        this.sceneEnvironment = SceneManager.DEFAULT_ENV;
+
         this.size = 160;
 
-        this.wallXDepth = - 10;
-        this.wallZDepth = - 10;
+        this.wallX = buildWallXMesh(this.size, -10, -10); // if you want to get the wall on checkerboard border, change this AND values in changeObservableParameter()
+        this.wallY = buildWallYMesh(this.size, -10, -10);
+        this.floor = buildFloorMesh(this.size, this.wallX.position.x, this.wallY.position.z);
 
         const floorNormal = new Vector3(0,1,0);
         const wallXNormal = new Vector3(1,0,0);
-        const wallZNormal = new Vector3(0,0,1);
+        const wallYNormal = new Vector3(0,0,1);
 
-        this.checkerboard;
-        this.objects = new SceneObjects(_transformControl, this);;
+        this.checkerboardFloor;
+        this.checkerboardWallY;
+        this.checkerboardWallX;
+
+        this.transformControl = buildTransformControl();
+        this.objects = new SceneObjects(this, isBuilder);
 
         this.augmentaSceneLoaded = false;
+
+        const scope = this;
 
         //DEBUG
         const spheres = [];
         const rays = [];
 
+        /* SCENE INITIALISATION */
 
-    /* SCENE INITIALISATION */
-
-        this.initScene = function()
+        this.initScene = function(floor, wallX, wallY)
         {
             // Lighting
             const ambient = new AmbientLight( 0xffffff, 0.5 );
             this.scene.add(ambient);
 
             // Floor
-            const floor = buildFloorMesh(this.size, this.wallXDepth, this.wallZDepth);
+            //const floor = buildFloorMesh(this.size, wallX.position.x, wallY.position.z);
             this.scene.add(floor);
 
             // WallX
-            const wallX = buildWallXMesh(this.size, this.wallXDepth, this.wallZDepth);
+            //const wallX = buildWallXMesh(this.size, this.wallXDepth, this.wallYDepth);
             this.scene.add(wallX);
-
-            // WallZ
-            const wallZ = buildWallZMesh(this.size, this.wallZDepth, this.wallXDepth);
-            this.scene.add(wallZ);
+        
+            // wallY
+            //const wallY = buildWallYMesh(this.size, this.wallYDepth, this.wallXDepth);
+            this.scene.add(wallY);
 
             //Origin
             const axesHelper = buildAxesHelper();
@@ -111,16 +162,51 @@ class SceneManager{
         this.initAugmentaScene = function()
         {
             // Scene Checkerboard
-            this.checkerboard = new Checkerboard(this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
-            this.checkerboard.addPlanesToScene(this.scene);
+            this.checkerboardFloor = new Checkerboard(this.floor, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
+            this.checkerboardFloor.addToScene(this.scene);
+
+            this.checkerboardWallY = new Checkerboard(this.wallY, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
+
+            //this.checkerboardWallX = new Checkerboard(this.wallX, this.currentUnit, this.sceneElevation, this.sceneWidth, this.sceneLength);
+
+            if(this.transformControl) this.scene.add(this.transformControl);
 
             this.augmentaSceneLoaded = true;
+            console.log("Augmenta scene loaded");
 
             //SceneObjects
             this.objects.initObjects();
+
+            this.trackingModeObservable = new ObservableParameter();
+            this.trackingModeObservable.addObserver(uiManager.changeTrackingMode);
+            this.trackingModeObservable.addObserver(uiManager.popup.setTrackingMode);
+            const changeTrackingModeBinded = this.changeTrackingMode.bind(this)
+            this.trackingModeObservable.addObserver(changeTrackingModeBinded);
+
+            this.heightDetectedObservable = new ObservableParameter();
+            this.heightDetectedObservable.addObserver(uiManager.changeHeightDetected);
+            this.heightDetectedObservable.addObserver(uiManager.popup.setHeightDetected);
+            const changeHeightDetectedBinded = this.changeHeightDetected.bind(this)
+            this.heightDetectedObservable.addObserver(changeHeightDetectedBinded);
+
+            if(sceneObjects){
+                if(sceneObjects.trackingMode){
+                    this.trackingModeObservable.set(sceneObjects.trackingMode);
+                } else {
+                    this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                }
+                if(sceneObjects.heightDetected){
+                    this.heightDetectedObservable.set(sceneObjects.heightDetected);
+                } else {
+                    this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+                }
+            } else {
+                this.trackingModeObservable.set(SceneManager.DEFAULT_TRACKING_MODE);
+                this.heightDetectedObservable.set(SceneManager.DEFAULT_DETECTION_HEIGHT);
+            }
         }
 
-    /* BUILDERS */
+        /* BUILDERS */
         function buildScene()
         {
             const scene = new Scene();
@@ -129,52 +215,50 @@ class SceneManager{
             return scene;
         }
 
-        function buildFloorMesh(size, wallXDepth, wallZDepth)
+        function buildFloorMesh(size, wallXDepth, wallYDepth)
         {
             const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
-
+            
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( size / 2.0 + wallXDepth, - 0.01, size / 2.0 + wallZDepth ); //to avoid z-fight with area covered by cam (y = sceneElevation for area covered)
+            floor.position.set( size / 2.0 + wallXDepth, -0.01, size / 2.0 + wallYDepth ); //to avoid z-fight with area covered by cam (y = sceneElevation for area covered)
             floor.rotation.x = - Math.PI / 2.0;
 
             return floor;
         }
 
-        function buildWallXMesh(size, wallXDepth, wallZDepth)
+        function buildWallXMesh(size, wallXDepth, wallYDepth)
         {
             const materialWallX = new MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
-
+        
             const geometryWallX = new PlaneGeometry( size + 0.02, size + 0.02 );
-
+        
             const wallX = new Mesh(geometryWallX, materialWallX);
-            wallX.position.set(wallXDepth - 0.01, size / 2.0, size / 2.0 + wallZDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            wallX.position.set(wallXDepth, size / 2.0, size / 2.0 + wallYDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             wallX.rotation.y = Math.PI / 2.0;
 
             return wallX;
         }
 
-        function buildWallZMesh(size, wallZDepth, wallXDepth)
+        function buildWallYMesh(size, wallYDepth, wallXDepth)
         {
-            const materialWallZ = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
-
-            const geometryWallZ = new PlaneGeometry( size + 0.02, size + 0.02 );
-
-            const wallZ = new Mesh(geometryWallZ, materialWallZ);
-            wallZ.position.set(size / 2.0 + wallXDepth, size/2.0, wallZDepth - 0.01); //to avoid z-fight with area covered by cam (y = 0 for area covered)
-
-            return wallZ;
+            const materialWallY = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
+        
+            const geometryWallY = new PlaneGeometry( size + 0.02, size + 0.02 );
+        
+            const wallY = new Mesh(geometryWallY, materialWallY);
+            wallY.position.set(size / 2.0 + wallXDepth, size/2.0, wallYDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
+            
+            return wallY;
         }
 
         function buildAxesHelper()
         {
-            const axesHelper = new AxesHelper( 0.5 );
-            axesHelper.position.set(-0.01,0,-0.01);
+            const axesHelper = new AxesHelper( 1 );
+            axesHelper.position.set(0.01,0.01,0.01);
 
-            axesHelper.material = new LineBasicMaterial( {
-                color: 0xffffff,
-                linewidth: 3});
+            axesHelper.setColors(new Color(0xbf4747), new Color(0x708eb0), new Color(0x37a48a));
 
             return axesHelper;
         }
@@ -187,16 +271,31 @@ class SceneManager{
             return gridHelper;
         }
 
-    /* USER'S ACTIONS */
-
-        this.toggleUnit = function()
+        /* ALLOW TO TRANSFORM SCENE SUBJECTS IN THE VIEWPORT */
+        function buildTransformControl()
         {
-            const unit = this.currentUnit === units.meters ? units.feets : units.meters;
+            const transformControl = new TransformControls(viewportManager.activeCamera, viewportManager.renderer.domElement );
+            transformControl.addEventListener('change', () => viewportManager.render());
+            transformControl.addEventListener('dragging-changed', function (event) {
+                viewportManager.orbitControls.enabled = ! event.value;
+            });
 
-            if(this.augmentaSceneLoaded) this.checkerboard.toggleUnit(unit);
+            return transformControl;
+        }
+
+        /* USER'S ACTIONS */
+
+        /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
+        this.toggleUnit = function(unit = this.currentUnit.value === units.meters.value ? units.feets : units.meters)
+        {
+            if(this.augmentaSceneLoaded) 
+            {
+                this.checkerboardFloor.toggleUnit(unit);
+                this.checkerboardWallY.toggleUnit(unit);
+            }
             const unitNumberElements = document.querySelectorAll('[data-unit]');
             unitNumberElements.forEach(e => {
-                if(e.tagName === 'INPUT') e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
+                if(e.tagName === 'INPUT' && e.value) e.value = Math.round(e.value / this.currentUnit.value * unit.value * 100) / 100.0;
                 else e.innerHTML = Math.round(e.innerHTML / this.currentUnit.value * unit.value * 100) / 100.0;
                 e.dataset.unit = unit.value;
             });
@@ -206,21 +305,25 @@ class SceneManager{
                 e.innerHTML = unit.label;
             });
 
-            document.getElementById('toggle-unit-button-' + this.currentUnit.label).classList.remove("bold-font");
-            document.getElementById('toggle-unit-button-' + this.currentUnit.label).classList.add("normal-font");
-            document.getElementById('toggle-unit-button-' + unit.label).classList.remove("normal-font");
-            document.getElementById('toggle-unit-button-' + unit.label).classList.add("bold-font");
-
+            const toggleUnitButtonCurrent = document.getElementById('toggle-unit-button-' + this.currentUnit.label)
+            if(toggleUnitButtonCurrent) toggleUnitButtonCurrent.classList.remove("bold-font");
+            if(toggleUnitButtonCurrent) toggleUnitButtonCurrent.classList.add("normal-font");
+            const toggleUnitButtonUnit = document.getElementById('toggle-unit-button-' + unit.label)
+            if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.remove("normal-font");
+            if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.add("bold-font");
+            
             this.currentUnit = unit;
+
+            this.objects.populateStorage();
         }
 
         /**
          * Define the border of the scene to track
-         *
+         * 
          * @param {*} givenWidthValue horizontal length value entered input in the current unit.
          * @param {*} givenLengthValue vertical length value entered input in the current unit.
          */
-        this.updateAugmentaSceneBorder = function(givenWidthValue, givenLengthValue)
+        this.updateFloorAugmentaSceneBorder = function(givenWidthValue, givenLengthValue)
         {
             if(givenWidthValue && givenLengthValue)
             {
@@ -231,79 +334,153 @@ class SceneManager{
                 this.sceneLength = givenLength;
 
                 //update checkerboard
-                if(this.augmentaSceneLoaded) this.checkerboard.setSize(givenWidth, givenLength);
+                if(this.augmentaSceneLoaded) this.checkerboardFloor.setSize(givenWidth, givenLength);
 
                 this.objects.calculateScenePolygon(givenWidth, givenLength);
+
+                this.objects.populateStorage();
             }
         }
 
-        this.changeTrackingMode = function(mode)
+        this.updateWallYAugmentaSceneBorder = function(givenWidthValue, givenHeightValue)
+        {
+            if(givenWidthValue && givenHeightValue)
+            {
+                const givenWidth = parseFloat(givenWidthValue) / this.currentUnit.value;
+                const givenHeight = parseFloat(givenHeightValue) / this.currentUnit.value;
+
+                /* TODO: add wallYSceneWidth and wallYsceneLength */
+                this.sceneWidth = givenWidth;
+                this.sceneLength = givenHeight;
+
+                //update checkerboard
+                if(this.augmentaSceneLoaded) this.checkerboardWallY.setSize(givenWidth, givenHeight);
+
+                this.objects.populateStorage();
+            }
+        }
+
+        this.changeTrackingMode = function(mode, build = true)
         {
             this.trackingMode = mode;
+            if(!build) return;
 
             switch(mode)
             {
                 case 'hand-tracking':
-                    this.heightDetected = SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     this.sceneElevation = SceneManager.TABLE_ELEVATION;
-                    if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
+                    
+                    if(this.augmentaSceneLoaded) {
+                        this.sceneWidth = this.checkerboardFloor.width;
+                        this.sceneLength = this.checkerboardFloor.height;
+                        changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);
+                    }
+                    this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
+                    break;
+                case 'wall-tracking':
+                    this.sceneElevation = 0;
+                    
+                    if(this.augmentaSceneLoaded) {
+                        this.sceneWidth = this.checkerboardWallY.width;
+                        this.sceneLength = this.checkerboardWallY.height;
+                        console.log("Changing surface");
+                        changeSurface(this.scene, [this.checkerboardFloor], [this.checkerboardWallY], [this.sceneElevation]);}
+                    this.wallY.position.z = 0;
                     break;
                 case 'human-tracking':
-                default:
-                    this.heightDetected = 1;
+                    default:
                     this.sceneElevation = 0;
-                    if(this.augmentaSceneLoaded) this.checkerboard.setSceneElevation(this.sceneElevation);
+                    
+                    if(this.augmentaSceneLoaded) {
+                        this.sceneWidth = this.checkerboardFloor.width;
+                        this.sceneLength = this.checkerboardFloor.height;
+                        changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);}
+                    this.wallY.position.z = -10;
                     break;
             }
 
             this.objects.changeSensorsTrackingMode(mode);
+
+            this.objects.populateStorage();
+
+            /**
+             * Change checkerboards
+             * @param {Scene} scene threejs scene
+             * @param {Array<Checkerboard>} toRemove array of checkerboards that you don't want in your scene
+             * @param {Array<Checkerboard>} toAdd array of checkerboards you want in your scene
+             * @param {Array<float>} sceneElevation offsets between the toAdd checkerboards and their suface. 
+             */
+            function changeSurface(scene, toRemove, toAdd, sceneElevations)
+            {
+                if(toAdd.length !== sceneElevations.length)
+                {
+                    console.error("Your sceneElevations array indicates elevations for the checkerboards of your to toAdd array. They must be the same size.");
+                }
+                toRemove.forEach(c => c.removeFromScene(scene));
+                for(let i = 0; i < toAdd.length; i++)
+                {
+                    toAdd[i].addToScene(scene);
+                    toAdd[i].setSceneElevation(sceneElevations[i]);
+                }
+            }
+        }
+
+        this.changeHeightDetected = function(value){
+            this.heightDetected = value;
+            this.objects.populateStorage();
+        }
+
+        this.changeEnvironment = function(env = ((this.sceneEnvironment) === 'indoor' ? 'outdoor' : 'indoor'))
+        {
+            this.sceneEnvironment = env;
+            this.objects.populateStorage();
         }
 
 
         /* SCENE UPDATE */
 
-        /* NOES PROJECTION */
+        /* NODES PROJECTION */ 
 
         /**
          * Calculate area covered by the node to draw it and display it
-         *
-         * @param {Node} node the node to draw the projection
+         * 
+         * @param {Node} node the node to draw the projection 
          */
         this.drawProjection = function(node)
         {
             //TODO: Comment ++
 
             /** GLOBAL OPERATING PHILOSPHY
-             *
+             * 
              * 1/ remove all drawn projections
-             * 2/ for each plane of the scene (floor, walls ...), calculates the intersection rays
+             * 2/ for each plane of the scene (floor, walls ...), calculates the intersection rays with frustum
              * 3/ for each plane of the scene, calculates the intersection points of those rays
              * 4/ keeps only points into the frustum of the camera cam
-             * 5/ calculate area covered by the camera and display it
+             * 5/ calculate area value covered by the camera and display it
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
-
+            
             this.scene.remove(node.areaCoveredFloor);
             this.scene.remove(node.areaCoveredAbove);
             this.scene.remove(node.areaCoveredWallX);
-            this.scene.remove(node.areaCoveredWallZ);
+            this.scene.remove(node.areaCoveredWallY);
 
             const floorPlane = new Plane(floorNormal, -this.sceneElevation);
-            const abovePlane = new Plane(floorNormal, -(this.sceneElevation + this.heightDetected));
-            const wallXPlane = new Plane(wallXNormal, -this.wallXDepth);
-            const wallZPlane = new Plane(wallZNormal, -this.wallZDepth);
+            const abovePlane = new Plane(floorNormal, -(this.sceneElevation + this.heightDetected)); // hips height, shoulders height, ... (heightDetected)
+            const wallXPlane = new Plane(wallXNormal, -this.wallX.position.x);
+            const wallYPlane = new Plane(wallYNormal, -this.wallY.position.z);
 
             if(node.areaAppear)
             {
                 const floorRays = [];
                 const aboveRays = [];
                 const wallXRays = [];
-                const wallZRays = [];
+                const wallYRays = [];
 
                 const frustum = new Frustum();
                 frustum.setFromProjectionMatrix(node.cameraPerspective.projectionMatrix);
                 //calculate the rays representing the intersection between frustum's planes and the floor or the walls
-                for(let i = 0; i < 6; i++)
+                for(let i = 0; i < 6; i++) 
                 {
                     const plane = frustum.planes[i].applyMatrix4(node.cameraPerspective.matrixWorld);
 
@@ -320,55 +497,55 @@ class SceneManager{
                     if(rayIntersectWallX !== -1) wallXRays.push(rayIntersectWallX);
 
                     //crossing the far wall
-                    const rayIntersectWallZ = getIntersectionOfPlanes(plane, wallZPlane);
-                    if(rayIntersectWallZ !== -1) wallZRays.push(rayIntersectWallZ);
+                    const rayIntersectWallY = getIntersectionOfPlanes(plane, wallYPlane);
+                    if(rayIntersectWallY !== -1) wallYRays.push(rayIntersectWallY);
                 }
 
                 //adding rays for walls intersections
                 const floorWallXRay = getIntersectionOfPlanes(floorPlane, wallXPlane);
-                const wallXWallZRay = getIntersectionOfPlanes(wallXPlane, wallZPlane);
-                const floorWallZRay = getIntersectionOfPlanes(floorPlane, wallZPlane);
+                const wallXWallYRay = getIntersectionOfPlanes(wallXPlane, wallYPlane);
+                const floorWallYRay = getIntersectionOfPlanes(floorPlane, wallYPlane);
 
-                if(floorWallXRay !== -1)
+                if(floorWallXRay !== -1) 
                 {
                     floorRays.push(floorWallXRay);
                     wallXRays.push(floorWallXRay);
                 }
-                if(wallXWallZRay !== -1)
+                if(wallXWallYRay !== -1)
                 {
-                    wallXRays.push(wallXWallZRay);
-                    wallZRays.push(wallXWallZRay);
+                    wallXRays.push(wallXWallYRay);
+                    wallYRays.push(wallXWallYRay);
                 }
-                if(floorWallZRay !== -1)
+                if(floorWallYRay !== -1)
                 {
-                    floorRays.push(floorWallZRay);
-                    wallZRays.push(floorWallZRay);
+                    floorRays.push(floorWallYRay);
+                    wallYRays.push(floorWallYRay);
                 }
-
-
+                
+                
                 //get intersection points
                 const intersectionPointsFloor = getIntersectionPoints(floorRays);
                 const intersectionPointsAbove = getIntersectionPoints(aboveRays);
                 const intersectionPointsWallX = getIntersectionPoints(wallXRays);
-                const intersectionPointsWallZ = getIntersectionPoints(wallZRays);
+                const intersectionPointsWallY = getIntersectionPoints(wallYRays);
 
 
                 //filter points in the camera frustum
                 const frustumScaled = new Frustum();
                 frustumScaled.setFromProjectionMatrix(node.cameraPerspective.projectionMatrix);
 
-                for(let i = 0; i < 6; i++)
+                for(let i = 0; i < 6; i++) 
                 {
                     frustumScaled.planes[i].applyMatrix4(node.cameraPerspective.matrixWorld);
                     frustumScaled.planes[i].constant += 0.01;
                 }
 
-                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
-                const coveredPointsWallZ = intersectionPointsWallZ.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01);
+                const coveredPointsFloor = intersectionPointsFloor.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallX.position.x - 0.01 && p.z > this.wallY.position.z - 0.01 && p.y > this.sceneElevation - 0.01);
+                const coveredPointsWallX = intersectionPointsWallX.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallX.position.x - 0.01 && p.z > this.wallY.position.z - 0.01 && p.y > this.sceneElevation - 0.01);
+                const coveredPointsWallY = intersectionPointsWallY.filter(p => frustumScaled.containsPoint(p) && p.x > this.wallX.position.x - 0.01 && p.z > this.wallY.position.z - 0.01 && p.y > this.sceneElevation - 0.01);
 
 
-                //filter points above, they must be in the frustum at heightDetected but also on the floor
+                //filter points above (calculated heightDetected meters above floor), they must be in the frustum at heightDetected but also on the floor mostly for angled cameras
                 let coveredPointsAbove = intersectionPointsAbove.filter(p => frustumScaled.containsPoint(p));
                 coveredPointsAbove.forEach((p) => p.y -= this.heightDetected);
                 if(coveredPointsFloor.length > 2 && coveredPointsAbove.length > 2)
@@ -395,31 +572,34 @@ class SceneManager{
                     coveredPointsAbove = candidatesPoints.filter(p => {
                         const abovePoint = p.clone();
                         abovePoint.y += this.heightDetected;
-                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallXDepth - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallZDepth - 0.01;
+                        return frustumScaled.containsPoint(p) && frustumScaled.containsPoint(abovePoint) && p.x > this.wallX.position.x - 0.01 && p.y > this.sceneElevation - 0.01 && p.z > this.wallY.position.z - 0.01;
                     })
                 }
                 else{
                     coveredPointsAbove = [];
                 }
 
+                //only valid if all surfaces are convex
                 sortByAngle(coveredPointsFloor, floorNormal);
                 sortByAngle(coveredPointsAbove, floorNormal);
                 sortByAngle(coveredPointsWallX, wallXNormal);
-                sortByAngle(coveredPointsWallZ, wallZNormal);
+                sortByAngle(coveredPointsWallY, wallYNormal);
 
+                // stocked to calculate if augmenta scene is fully covered by cameras
                 node.coveredPointsAbove = coveredPointsAbove;
 
-                coveredPointsFloor.forEach((p) => p.y += 0.01*node.id / this.objects.getNbNodes());
-                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*node.id / this.objects.getNbNodes());
-                coveredPointsWallX.forEach((p) => p.x += 0.01*node.id / this.objects.getNbNodes());
-                coveredPointsWallZ.forEach((p) => p.z += 0.01*node.id / this.objects.getNbNodes());
+                // to avoid z-fighting
+                coveredPointsFloor.forEach((p) => p.y += 0.01*(node.id / this.objects.getNbNodes() + 1));
+                coveredPointsAbove.forEach((p) => p.y += 0.01 + 0.01*(node.id / this.objects.getNbNodes() + 1));
+                coveredPointsWallX.forEach((p) => p.x += 0.01*(node.id / this.objects.getNbNodes() + 1));
+                coveredPointsWallY.forEach((p) => p.z += 0.01*(node.id / this.objects.getNbNodes() + 1));
 
 
-                //display area value
+                //display area value 
                 const previousValue = node.areaValue;
                 node.areaValue = calculateArea(coveredPointsAbove, this.currentUnit.value);
 
-                //Place text
+                //Place text 
                 if(coveredPointsAbove.length > 2)
                 {
                     //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
@@ -444,18 +624,18 @@ class SceneManager{
                 node.areaCoveredAbove.material.dispose();
                 node.areaCoveredWallX.geometry.dispose();
                 node.areaCoveredWallX.material.dispose();
-                node.areaCoveredWallZ.geometry.dispose();
-                node.areaCoveredWallZ.material.dispose();
+                node.areaCoveredWallY.geometry.dispose();
+                node.areaCoveredWallY.material.dispose();
 
-                node.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0xff0f00);
+                node.areaCoveredFloor = drawAreaWithPoints(coveredPointsFloor, 0x7777777); //, 0xff0f00); //orange
                 node.areaCoveredAbove = drawAreaWithPoints(coveredPointsAbove);
                 node.areaCoveredWallX = drawAreaWithPoints(coveredPointsWallX);
-                node.areaCoveredWallZ = drawAreaWithPoints(coveredPointsWallZ);
+                node.areaCoveredWallY = drawAreaWithPoints(coveredPointsWallY);
 
                 this.scene.add(node.areaCoveredFloor);
                 this.scene.add(node.areaCoveredAbove);
                 this.scene.add(node.areaCoveredWallX);
-                this.scene.add(node.areaCoveredWallZ);
+                this.scene.add(node.areaCoveredWallY);
             }
 
             //DEBUG SPHERES
@@ -506,7 +686,7 @@ class SceneManager{
 
         /**
          * Get every intersection points of multiple rays
-         *
+         * 
          * @param {Array} raysCrossing an array filled with Ray objects
          * @returns {Array} an array of points which are all the intersection poins of the rays in raysCrossing array
          */
@@ -530,7 +710,7 @@ class SceneManager{
 
         /**
          * Sort the array of vertices passed as an argument so that they are ordered according to the convex shape they create
-         *
+         * 
          * @param {Array} coveredPoints array of vertices of a convex shape
          * @param {Vector3} planeNormal normal of the plane in which the shape is inscribed
          */
@@ -547,10 +727,10 @@ class SceneManager{
                 coveredPoints.sort((A,B) => {
                     const vectorA = new Vector3();
                     vectorA.subVectors(A, center);
-
+                
                     const vectorB = new Vector3();
                     vectorB.subVectors(B, center);
-
+                    
                     const dotProdA = Math.abs(vectorPerp.dot(vectorA)) > 0.001 ? vectorPerp.dot(vectorA) : 1;
                     const dotProdB = Math.abs(vectorPerp.dot(vectorB)) > 0.001 ? vectorPerp.dot(vectorB) : 1;
 
@@ -561,7 +741,7 @@ class SceneManager{
 
         /**
          * Calculate the area of a convex shape
-         *
+         * 
          * @param {Array} borderPoints array of Vector3 vertices of a convex shape. They must be ordered
          * @returns {float} value of area of the shape delimited by borderPoints
          */
@@ -569,15 +749,15 @@ class SceneManager{
         {
             let areaValue = 0;
             /** MATH PARAGRAPH
-             *
+             * 
              * If ABC is a triangle
              * vAB is the vector from A to B
              * vAC is the vector from A to C
              * A is the area value of the triangle
              *  A = (1/2) * || vAB ^ vAC ||
-             *
+             * 
              * In three js, a shape is drawn thanks to the triangles it is composed of
-             * The sum of the areas of those triangles gives the total area of the shape
+             * The sum of the areas of those triangles gives the total area of the shape 
              */
             for(let i = 1; i < borderPoints.length - 1; i++)
             {
@@ -603,11 +783,11 @@ class SceneManager{
             return barycentre;
         }
 
-        function drawAreaWithPoints(coveredPoints, color = 0x008888)
+        function drawAreaWithPoints(coveredPoints, color = 0x382961) //0x008888) //blue
         {
             const geometryArea = new BufferGeometry();
             const verticesArray = [];
-
+            
             for(let i = 1; i < coveredPoints.length - 1; i++)
             {
                 verticesArray.push(coveredPoints[i + 1].x);
@@ -627,7 +807,7 @@ class SceneManager{
 
             geometryArea.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
             const materialArea = new MeshBasicMaterial( {side: DoubleSide, color: color, transparent: true, opacity: 0.6, alphaTest: 0.5 } );
-
+            
             const areaCovered = new Mesh( geometryArea, materialArea );
             return(areaCovered);
         }
@@ -639,13 +819,11 @@ class SceneManager{
         }
 
         // initialize three js scene
-        this.initScene();
+        this.initScene(this.floor, this.wallX, this.wallY);
 
-        // DEBUG
+        // press P for DEBUG
         this.debug = function()
         {
-            console.log(document.getElementById("overlap-height-selection-inspector").value)
-            console.log(this.heightDetected);
             this.objects.debug();
         }
     }
@@ -655,9 +833,9 @@ export { SceneManager }
 
 /**
  * Returns the ray intersection of plane1 and plane2
- *
- * @param {Plane} plane1
- * @param {Plane} plane2
+ * 
+ * @param {Plane} plane1 
+ * @param {Plane} plane2 
  * @returns {Ray} the intersection of the planes or -1 if planes are coincident or parrallel
  */
 function getIntersectionOfPlanes(plane1, plane2)
@@ -685,53 +863,53 @@ function getIntersectionOfPlanes(plane1, plane2)
     }
 
     /** MATH PARAGRAPH
-     *
+     * 
      * Planes equations are
      *  a1 * x + b1 * y + c1 * z + d1 = 0
      *  a2 * x + b2 * y + c2 * z + d2 = 0
-     *
+     * 
      * We want to get the all (x,y,z) triplet respecting both the equation (will be a 3D line)
-     *
+     * 
      * if a1 != 0 :
      *      // in this case, a1 and a2 are 'main' arguments for calculatePointOnIntersectionRayCoordinates function
      *      // mode argument is 'abc'
-     *
+     * 
      *      if a1 * b2 - a2 * b1 != 0
      *          // in this case, b1 and b2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
-     *
+     * 
      *          |                  a1 * x   =   - b1 * y - c1 * t - d1                            // from first plane equation
      *          |                  b2 * y   =   - a2 * x - c2 * t - d2                            // from second plane equation
      *          |                       z   =   t                                                 // 2 equations, 3 variables: one variable is a parameter
-     *
+     * 
      *          <=>
-     *
+     * 
      *          |                       x   =   (1/a1) * (- b1 * y - c1 * t - d1)                 // second coordinate that can be deduct
      *          | (a1 * b2 - a2 * b1) * y   =   (a2 * c1 - a1 * c2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
-     *          |                       z   =   t                                                 // param Variable
-     *
+     *          |                       z   =   t                                                 // param Variable 
+     * 
      *          t = 0 gives the origin of the ray, and normal1 ^ normal2 gives its direction
-     *
-     *
+     * 
+     * 
      *      if a1 * c2 - a2 * c1 != 0
      *          // in this case, c1 and c2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
      *          // mode argument is 'acb'
-     *
+     * 
      *          |                  a1 * x   =   - b1 * t - c1 * z - d1                            // from first plane equation
      *          |                       y   =   t                                                 // 2 equations, 3 variables: one variable is a parameter
      *          |                  c2 * z   =   - a2 * x - b2 * t - d2                            // from second plane equation
-     *
+     * 
      *          <=>
-     *
+     * 
      *          |                       x   =   (1/a1) * (- b1 * t - c1 * z - d1)                 // second coordinate that can be deduct
      *          |                       y   =   t                                                 // param Variable
      *          | (a1 * c2 - a2 * c1) * z   =   (a2 * b1 - a1 * b2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
-     *
+     * 
      *          t = 0 gives the origin of the ray, and normal1 ^ normal2 gives its direction
-     *
-     *
+     * 
+     * 
      *      else means a1 * b2 - a2 * b1 = 0 AND a1 * c2 - a2 * c1 = 0 which means normals are colinear, and planes are parrallel or coincident.
      *      This case must have been avoided earlier
-     *
+     * 
      * Same for b1 != 0 and c1 != 0 (Normals of planes cannot be zero vectors. This case must have been avoided earlier)
      */
 
@@ -768,7 +946,7 @@ function getIntersectionOfPlanes(plane1, plane2)
             return -1;
         }
     }
-
+    
     else if(Math.abs(c1) > 0.001)
     {
         if(Math.abs(c1 * a2 - c2 * a1) > 0.001)
@@ -791,7 +969,7 @@ function getIntersectionOfPlanes(plane1, plane2)
         console.error("invalid parameters : one of the plane's normal is zero vector");
         return -1;
     }
-
+    
     /**
      * get a Ray object which represents the intersection of planes.
      * @param {string} mode Can be {'abc', 'acb', 'bca', 'bac', 'cab', 'cba'} depending on 'main', 'secondary' and third parameter. See math paragraph above.
@@ -856,15 +1034,15 @@ function getIntersectionOfPlanes(plane1, plane2)
         switch(mode){
             case 'abc':
                 return new Vector3(secondDeduct, firstDeduct, paramVar);
-            case 'acb':
+            case 'acb': 
                 return new Vector3(secondDeduct, paramVar, firstDeduct);
             case 'bca':
                 return new Vector3(paramVar, secondDeduct, firstDeduct);
-            case 'bac':
+            case 'bac': 
                 return new Vector3(firstDeduct, secondDeduct, paramVar);
             case 'cab':
                 return new Vector3(firstDeduct, paramVar, secondDeduct);
-            case 'cba':
+            case 'cba': 
                 return new Vector3(paramVar, firstDeduct, secondDeduct);
             default:
                 console.error("calculatePointsOnIntersectionRayCoordinates: the 'mode' argument is not valid");
@@ -872,12 +1050,12 @@ function getIntersectionOfPlanes(plane1, plane2)
         }
     }
 }
-
+ 
  /**
   * Returns the intersection point of ray1 and ray2
-  *
-  * @param {Ray} ray1
-  * @param {Ray} ray2
+  * 
+  * @param {Ray} ray1 
+  * @param {Ray} ray2 
   * @returns {Vector3} the intersection of the rays or -1 if rays do not cross or are coincident
   */
 function getIntersectionPointOfRays(ray1, ray2)
@@ -886,7 +1064,7 @@ function getIntersectionPointOfRays(ray1, ray2)
     const d1 = ray1.direction;
     const o2 = ray2.origin;
     const d2 = ray2.direction;
-
+    
     const normal = new Vector3().crossVectors(d1,d2);
 
     //no intersection points if rays are parrallel or coincident
@@ -897,35 +1075,35 @@ function getIntersectionPointOfRays(ray1, ray2)
     if(Math.abs(plane.distanceToPoint(o2)) > 0.001) return -1;
 
     /** MATH PARAGRAPH
-     *
+     * 
      * Every points of rays can be written as :
      *  o1 + d1 * t     for ray1
      *  o2 + d2 * t'    for ray2
-     *
-     * We want to get t as
+     * 
+     * We want to get t as 
      *  o1 + d1 * t = o2 + d2 * t'
-     * so we can calclate the intersection point of the rays: I = o1 + d1 * t
-     *
+     * so we can calclate the intersection point of the rays: I = o1 + d1 * t 
+     * 
      * We have those three equations:
      *  | o1.x + d1.x * t = o2.x + d2.x * t'
      *  | o1.x + d1.x * t = o2.x + d2.x * t'
      *  | o1.x + d1.x * t = o2.x + d2.x * t'
-     *
+     * 
      * if d2.x != 0:
-     *
+     * 
      *      t' = (1 / d2.x) * (d1.x * t + o1.x - o2.x)
-     *
+     *  
      *      if d2.x * d1.y - d2.y * d1.x != 0:
-     *
+     *          
      *          (d2.x * d1.y - d2.y * d1.x) * t = d2.y * (o1.x - o2.x) + d2.x * (o2.y - o1.y)
-     *
+     * 
      *      if d2.x * d1.z - d2.z * d1.x != 0:
-     *
+     *          
      *          (d2.x * d1.z - d2.z * d1.x) * t = d2.z * (o1.x - o2.x) + d2.x * (o2.z - o1.z)
-     *
+     * 
      *      else means d2.x * d1.y - d2.y * d1.x = 0 AND d2.x * d1.z - d2.z * d1.x = 0 which means rays are parrallel or coincident.
      *      This case must have been avoided earlier
-     *
+     * 
      * Same for d2.y != 0 and d2.z != 0 (Direction of lines cannot be zero vectors. This case must have been avoided earlier)
      */
 

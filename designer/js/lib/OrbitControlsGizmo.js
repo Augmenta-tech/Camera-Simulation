@@ -14,8 +14,9 @@
 
 /** Modifications: 
  * 
+ * pass viexportManager as argument
  * In createAxis() : inversion y and z
- * OnMouseclick() : different behaviour 
+ * onMouseClick() : different behaviour 
  */
 
 import {
@@ -235,7 +236,7 @@ class OrbitControlsGizmo {
       }
       
       loop();*/
-      viewportManager.setupCameraChangement(vec, !!camera.isPerspectiveCamera);
+      viewportManager.setupCameraChangement(!!camera.isPerspectiveCamera, vec);
       
       selectedAxis = null;
     }

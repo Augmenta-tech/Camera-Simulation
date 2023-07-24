@@ -2,16 +2,18 @@ import { FontLoader } from 'three-loaders/FontLoader.js';
 
 import * as POLYBOOL from 'polybool';
 
-import { NodeUI } from '/wp-content/themes/salient-child/builder-v2/designer/js/UI/NodeUI.js';
-import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js';
-import { Dummy } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/props/Dummy.js';
-import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js';
-
+import { NodeUI } from '../../UI/NodeUI.js';
+import { LidarUI } from '../../UI/LidarUI.js';
+import { SceneManager } from '../SceneManager.js';
+import { Dummy, loadModel } from './props/Dummy.js';
+import { Node } from './sensors/Node.js';
+import { Lidar } from './sensors/Lidar.js';
 
 class SceneObjects{
-    static loadFont(callback)
+    static loadFont(isBuilder, callback)
     {
-        new FontLoader().load( '/wp-content/themes/salient-child/builder-v2/designer/fonts/helvetiker_regular.typeface.json', function ( response ) {
+        const path = isBuilder ? './designer/' : './';
+        new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneObjects.font = response;
             callback();
             return;
@@ -19,147 +21,65 @@ class SceneObjects{
     }
     static font;
 
-    constructor(_transformControl, sceneManager)
+    constructor(sceneManager, isBuilder)
     {
-        const nodes = [];
-        const dummies = [];
+        let nodes = [];
+        let lidars = [];
+        let dummies = [];
         this.nodeMeshes = [];
+        this.lidarsMeshes = [];
         this.dummiesMeshes = [];
-
-        this.transformControl = _transformControl;
-
+        
         const givenAreaPolygonRegions = [[]];
 
-
-    /* SCENE INITIALISATION */
+        /* SCENE INITIALISATION */
 
         this.initObjects = function()
         {
-            sceneManager.scene.add(this.transformControl);
-            createSceneFromURL(this);
+            const url = new URL(document.location.href);
+            
+            const sceneInfoFromURL = url.searchParams.get("sceneData");
+
+            if(!sceneInfoFromURL) //scene from cookie case
+            {
+                //if local storage, uncomment this
+                //const sceneInfosStorage = sessionStorage.getItem('sceneInfos')
+                // and comment this
+                const sceneInfo = sessionStorage.getItem('sceneInfos')
+                console.log(JSON.parse(sceneInfo));
+                if(sceneInfo) {
+                    this.parseJson(sceneInfo);
+                    return;
+                }
+            }
+            else //scene from url case
+            {
+                this.parseJson(sceneInfoFromURL);
+                document.getElementById('popup').classList.remove('is-visible');
+                //if local storage, uncomment this
+                //sessionStorage.setItem('sceneInfos', sceneInfosStorage);
+                //and comment this
+                this.populateStorage();
+                return;
+            }
+
+            //Default case
+            if(!isBuilder) this.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, 2.5, Node.DEFAULT_NODE_HEIGHT);
+            sceneManager.updateFloorAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_LENGTH);
+            this.populateStorage();
         }
 
-        /**
-         * Initialize a scene according to the url
-         *
-         * @param {SceneObjects} sceneObjects this object
-         */
-        function createSceneFromURL(sceneObjects)
-        {
-            let url = document.location.href;
-            const index = url.indexOf('&');
-
-            if(index === -1)
-            {
-                sceneObjects.addNode(false, sceneManager.trackingMode, Node.DEFAULT_CAMERA_TYPE_ID, 2.5, Node.DEFAULT_NODE_HEIGHT, 2.5);
-                sceneManager.updateAugmentaSceneBorder(SceneManager.DEFAULT_WIDTH, SceneManager.DEFAULT_LENGTH);
-            }
-            else
-            {
-                url = url.substring(url.indexOf('?') + 1);
-                const cams = url.split('&');
-                const sceneInfo = cams.shift();
-                const infos = sceneInfo.split(',');
-                let mode, sceneWidth, sceneLength;
-                let unitLabelFromURL = "";
-                infos.forEach(info => {
-                    const keyVal = info.split('=');
-                    const key = keyVal[0];
-                    const val = keyVal[1];
-                    switch(key)
-                    {
-                        case "L":
-                            document.getElementById("input-scene-width-inspector").value = parseFloat(val);
-                            sceneWidth = val;
-                            break;
-                        case "l":
-                            document.getElementById("input-scene-length-inspector").value = parseFloat(val);
-                            sceneLength = val;
-                            break;
-                        case "m":
-                            document.getElementById("tracking-mode-selection-inspector").value = val;
-                            document.getElementById("tracking-mode-selection-inspector").dispatchEvent(new Event('change'));
-                            break;
-                        case "h":
-                            sceneManager.heightDetected = parseFloat(val);
-                            break;
-                        case "sh":
-                            document.getElementById("input-scene-sensor-height-inspector").value = parseFloat(val);
-                            sceneManager.sceneSensorHeight = parseFloat(val);
-                            break;
-                        case "u":
-                            unitLabelFromURL = val;
-                            break;
-                        default:
-                            break;
-                    }
-                });
-                sceneManager.updateAugmentaSceneBorder(sceneWidth, sceneLength);
-
-                cams.forEach(c => {
-                    const props = c.split(',');
-                    let id, typeID;
-                    let x, y, z, p, a, r;
-
-                    props.forEach(prop => {
-                        const keyVal = prop.split('=');
-                        const key = keyVal[0];
-                        const stringVal = keyVal[1];
-                        if(key && stringVal)
-                        {
-                            const val = parseFloat(stringVal);
-                            switch(key)
-                            {
-                                case "id":
-                                    id = val
-                                    break;
-                                case "typeID":
-                                    typeID = val;
-                                    break;
-                                case "x":
-                                    x = val;
-                                    break;
-                                case "y":
-                                    y = val;
-                                    break;
-                                case "z":
-                                    z = val;
-                                    break;
-                                case "p":
-                                    p = val;
-                                    break;
-                                case "a":
-                                    a = val;
-                                    break;
-                                case "r":
-                                    r = val;
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    });
-                    sceneObjects.addNode(true, sceneManager.trackingMode, typeID, x, y, z, p, a, r)
-                })
-
-                // change the unit according to the value in the URL
-                if(unitLabelFromURL != "" && sceneManager.currentUnit.label != unitLabelFromURL) sceneManager.toggleUnit();
-                console.assert(sceneManager.currentUnit.label == unitLabelFromURL);
-            }
-        }
-
-
-    /* SCENE SUBJECTS MANAGEMENT */
+        /* SCENE SUBJECTS MANAGEMENT */
 
         // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
         /**
          * Remove an object from the scene and free its memory
-         *
-         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method.
+         * 
+         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method. 
          */
         this.deleteObject = function(obj)
         {
-            if (this.transformControl.object === obj.mesh) this.transformControl.detach();
+            if (sceneManager.transformControl) if (sceneManager.transformControl.object === obj.mesh) sceneManager.transformControl.detach();
             obj.removeFromScene(sceneManager.scene);
             obj.dispose();
         }
@@ -169,9 +89,17 @@ class SceneObjects{
             if(!Dummy.maleModel || !Dummy.femaleModel)
             {
                 //TODO: Add UI to inform that button will work in few seconds
+                console.log("Add Dummy button will work in an instant");
                 return;
             }
             const newDummy = new Dummy(dummies.length);
+
+            //Rotation towards wall
+            if(sceneManager.trackingMode == "wall-tracking"){
+                newDummy.model.rotateY(180);
+                newDummy.mesh.position.set(0, 1, 1)
+                newDummy.updatePosition();
+            }
 
             //Offset
             for(let i = 0; i < dummies.length; i++)
@@ -190,6 +118,8 @@ class SceneObjects{
             //Management
             dummies.push(newDummy);
             this.dummiesMeshes.push(newDummy.mesh);
+
+            this.populateStorage();
         }
 
         this.removeDummies = function()
@@ -197,31 +127,34 @@ class SceneObjects{
             dummies.forEach(d => this.deleteObject(d));
             dummies.length = 0;
             this.dummiesMeshes.length = 0;
+
+            this.populateStorage();
         }
 
         /**
          * Add a node to the scene
-         *
+         * 
          * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
          * @param {string} mode 'human-tracking', 'hand-tracking', ...
          * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
-         * @param {float} x x position at creation. Default is 0.
-         * @param {float} y y position at creation. Default is defined in Node.js.
-         * @param {float} z z position at creation. Default is 0.
+         * @param {float} x x (horizontal) position at creation. Default is 0.
+         * @param {float} y y (-depth) position at creation. Default is defined in Node.js.
+         * @param {float} z z (up) position at creation. Default is 0.
          * @param {float} p pitch rotation at creation. Default is 0.
          * @param {float} a yaw rotation at creation. Default is 0.
          * @param {float} r roll rotation at creation. Default is 0.
          */
-        this.addNode = function(autoConstruct = false, mode = sceneManager.trackingMode, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = Node.DEFAULT_NODE_HEIGHT, z = 0, p = 0, a = 0, r = 0)
+        this.addNode = function(autoConstruct = false, mode = sceneManager.trackingMode, typeID = Node.DEFAULT_CAMERA_TYPE_ID, x = 0, y = 0, z = Node.DEFAULT_NODE_HEIGHT, p = 0, a = 0, r = 0)
         {
             if(!SceneObjects.font)
             {
                 //TODO: Add UI to inform that button will work in few seconds
+                console.log("Add Node button will work in an instant");
                 return;
             }
             const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
-            newCamera.uiElement = new NodeUI(newCamera, sceneManager);
-
+            if(!isBuilder) newCamera.uiElement = new NodeUI(newCamera, sceneManager);
+            
             //Offset
             if(!autoConstruct)
             {
@@ -240,6 +173,10 @@ class SceneObjects{
 
             nodes.push(newCamera);
             this.nodeMeshes.push(newCamera.mesh);
+
+            sceneManager.sceneSensorHeight = z;
+
+            this.populateStorage();
         }
 
         this.displayFrustums = function()
@@ -247,14 +184,14 @@ class SceneObjects{
             const visibles = nodes.filter(n => n.areaAppear);
             nodes.forEach(n => n.changeVisibility(visibles.length != nodes.length));
             const iconElem = document.getElementById('display-frustums-button-icon');
-            iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            if(iconElem) iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.updateFrustumIcon = function()
         {
             const visibles = nodes.filter(n => n.areaAppear);
             const iconElem = document.getElementById('display-frustums-button-icon');
-            iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            if(iconElem) iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
         }
 
         this.removeNodes = function()
@@ -262,6 +199,89 @@ class SceneObjects{
             nodes.forEach(n => this.deleteObject(n));
             nodes.length = 0;
             this.nodeMeshes.length = 0;
+
+            this.populateStorage();
+        }
+
+        this.removeNode = function(node)
+        {
+            this.deleteObject(node);
+            nodes = nodes.filter(n => n != node);
+            this.nodeMeshes = this.nodeMeshes.filter(nm => nm != node.mesh)
+
+            this.populateStorage();
+        }
+
+        this.addLidar = function(autoConstruct = false, typeID = Lidar.DEFAULT_LIDAR_TYPE_ID, x = 0, z = Lidar.DEFAULT_LIDAR_HEIGHT, r = 0)
+        {
+            if(!SceneObjects.font)
+            {
+                //TODO: Add UI to inform that button will work in few seconds
+                console.log("Add Lidar button will work in an instant");
+                return;
+            }
+            const newLidar = new Lidar(lidars.length, typeID, x, z, r);
+            if(!isBuilder) newLidar.uiElement = new LidarUI(newLidar, sceneManager);
+            
+            //Offset
+            if(!autoConstruct)
+            {
+                for(let i = 0; i < lidars.length; i++)
+                {
+                    if(newLidar.mesh.position.distanceTo(lidars[i].mesh.position) < 1)
+                    {
+                        newLidar.mesh.position.x += 1;
+                        i = 0;
+                    }
+                }
+            }
+            newLidar.updatePosition(sceneManager.currentUnit.value);
+
+            newLidar.addToScene(sceneManager.scene);
+
+            lidars.push(newLidar);
+            this.lidarsMeshes.push(newLidar.mesh);
+
+            this.populateStorage();
+        }
+
+        this.displayRays = function()
+        {
+            const visibles = lidars.filter(l => l.raysAppear);
+            lidars.forEach(l => l.changeVisibility(visibles.length != lidars.length));
+            const iconElem = document.getElementById('display-lidars-rays-button-icon');
+            if(iconElem) iconElem.dataset.icon = visibles.length != nodes.length ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+        }
+
+        this.updateRaysIcon = function()
+        {
+            const visibles = lidars.filter(l => l.raysAppear);
+            const iconElem = document.getElementById('display-lidars-rays-button-icon');
+            if(iconElem) iconElem.dataset.icon = visibles.length != 0 ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+        }
+
+        this.removeLidars = function()
+        {
+            lidars.forEach(l => this.deleteObject(l));
+            lidars.length = 0;
+            this.lidarsMeshes.length = 0;
+
+            this.populateStorage();
+        }
+        
+        this.removeLidar = function(lidar)
+        {
+            this.deleteObject(lidar);
+            lidars = lidars.filter(l => l != lidar)
+            this.lidarsMeshes = this.lidarsMeshes.filter(lm => lm != lidar.mesh)
+
+            this.populateStorage();
+        }
+
+        this.removeSensors = function()
+        {
+            this.removeNodes();
+            this.removeLidars();
         }
 
 
@@ -279,57 +299,208 @@ class SceneObjects{
         this.updateObjectsPosition = function()
         {
             nodes.forEach(n => n.updatePosition(sceneManager.currentUnit.value));
+            lidars.forEach(l => l.updatePosition(sceneManager.currentUnit.value));
             dummies.forEach(d => d.updatePosition());
         }
 
         /**
-         * Create an url containing all the informations of the scene
-         *
+         * Create an url containing all the informations of the scene from sessionStorage json
+         * 
          * @returns the url of this scene
          */
         this.generateLink = function()
         {
-            let url = document.location.href;
-            let index = url.indexOf('?');
-            if(index !== -1) url = url.substring(0, index);
-            if(url[url.length-1] != '/') url += '/';
-            url += '?';
-            url += "L=";
-            url += Math.floor(sceneManager.sceneWidth * 100)/100;
-            url += ",l=";
-            url += Math.floor(sceneManager.sceneLength * 100)/100;
-            url += ",m=";
-            url += sceneManager.trackingMode;
-            url += ",h=";
-            url += sceneManager.heightDetected;
-            url += ",sh=";
-            url += sceneManager.sceneSensorHeight;
-            url += ",u=";
-            url += sceneManager.currentUnit.label;
-            url += '&';
-            nodes.forEach(n => {
-                url += "id=";
-                url += n.id;
-                url += ",typeID=";
-                url += n.cameraType.id;
-                url += ",x=";
-                url += Math.round(n.xPos*100)/100.0;
-                url += ",y=";
-                url += Math.round(n.yPos*100)/100.0;
-                url += ",z=";
-                url += Math.round(n.zPos*100)/100.0;
-                url += ",p=";
-                url += Math.round(n.xRot*10000)/10000.0;
-                url += ",a=";
-                url += Math.round(n.yRot*10000)/10000.0;
-                url += ",r=";
-                url += Math.round(n.zRot*10000)/10000.0;
-                url += '&';
-            });
-            url = url.slice(0, -1);
+            //Get only the base url of the site
+            const url = new URL(document.location.href.split('?')[0]);
 
+            //Create an URL with a sceneData parameter with the string json of the scene
+            url.searchParams.append("sceneData", sessionStorage.getItem('sceneInfos'));
+        
             return url;
         }
+
+        this.parseJson = function(jsonDatas)
+        {
+            const datas = JSON.parse(jsonDatas);
+
+            // /!\ parsing order matters
+
+            //scene environment
+            if(datas.hasOwnProperty('sceneEnvironment'))
+            {
+                sceneManager.sceneEnvironment = datas.sceneEnvironment;
+            }
+
+            //scene size
+            let mode = 'human-tracking';
+            if(datas.hasOwnProperty('trackingMode'))
+            {
+                mode = datas.trackingMode;
+                sceneManager.trackingMode = mode;
+            }
+            
+            if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
+            {
+                const sceneWidth = datas.sceneSize[0];
+                const sceneLength = datas.sceneSize[1];
+
+                switch(mode)
+                {
+                    case 'wall-tracking':
+                    {
+                        const sceneWidthElement = document.getElementById("input-wall-y-scene-width-inspector");
+                        if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
+                        
+                        const sceneHeightElement = document.getElementById("input-wall-y-scene-height-inspector");
+                        if(sceneHeightElement) sceneHeightElement.value = sceneLength;
+                        sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneLength);
+                        break;
+                    }
+                    case 'hand-tracking':
+                    case 'human-tracking':
+                    {
+                        const sceneWidthElement = document.getElementById("input-scene-width-inspector");
+                        if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
+                        
+                        const sceneLengthElement = document.getElementById("input-scene-length-inspector");
+                        if(sceneLengthElement) sceneLengthElement.value = sceneLength;
+                        sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneLength);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            //unit
+            if(datas.hasOwnProperty('unit'))
+            {
+                sceneManager.toggleUnit(datas.unit);
+            }
+
+            //tracking mode
+            const trackingModeElement = document.getElementById("tracking-mode-selection-inspector");
+            if(trackingModeElement)
+            {
+                trackingModeElement.value = mode;
+                trackingModeElement.dispatchEvent(new Event('change'));
+            }
+
+            //height detected
+            if(datas.hasOwnProperty('heightDetected'))
+            {
+                const overlapElement = document.getElementById("overlap-height-selection-inspector");
+                if(overlapElement)
+                {
+                    overlapElement.value = datas.heightDetected;
+                    overlapElement.dispatchEvent(new Event('change'));
+                }
+                sceneManager.heightDetected = datas.heightDetected;
+            }
+
+            //scene sensor height
+            if(datas.hasOwnProperty('sceneSensorHeight'))
+            {
+                const sceneSensorHeightElement = document.getElementById("input-scene-sensor-height-inspector");
+                if(sceneSensorHeightElement)
+                {
+                    sceneSensorHeightElement.value = datas.sceneSensorHeight;
+                    sceneSensorHeightElement.dispatchEvent(new Event('change'));
+                }
+                sceneManager.sceneSensorHeight = datas.sceneSensorHeight;
+            }
+
+            //objects
+            if(datas.hasOwnProperty('objects'))
+            {
+                if(datas.objects.hasOwnProperty('nodes'))
+                {
+                    datas.objects.nodes.forEach(n => this.addNode(true, datas.trackingMode, n.cameraTypeId, n.p_x, n.p_y, n.p_z, n.r_x, n.r_y, n.r_z));
+                }
+                if(datas.objects.hasOwnProperty('lidars'))
+                {
+                    datas.objects.lidars.forEach(l => this.addLidar(true, l.lidarTypeId, l.p_x, l.p_z, l.r_y));
+                }
+                if(datas.objects.hasOwnProperty('dummies'))
+                {
+                    if(!Dummy.maleModel || !Dummy.femaleModel)
+                    {
+                        return;
+                    }
+                    datas.objects.dummies.forEach(d => {
+                        this.addDummy();
+                        const dummy = dummies[dummies.length - 1];
+                        dummy.mesh.translateX(d.p_x);
+                        dummy.mesh.translateZ(d.p_y);
+                        dummy.updatePosition();
+                    });
+                }
+            }
+        }
+        
+        /**
+         * Create a json format containing all the informations of the scene
+         * 
+         * @returns scene infos in json format
+         */
+        this.generateJson = function()
+        {
+            const datas = {
+                sceneEnvironment: sceneManager.sceneEnvironment,
+                sceneSize: [sceneManager.sceneWidth, sceneManager.sceneLength],
+                unit: sceneManager.currentUnit,
+                trackingMode: sceneManager.trackingMode,
+                heightDetected: sceneManager.heightDetected,
+                sceneSensorHeight: sceneManager.sceneSensorHeight,
+                objects: {
+                    nodes: [],
+                    lidars: [],
+                    dummies: []
+                }
+            };
+
+            nodes.forEach(n => {
+                const nodeData = {
+                    id: n.id,
+                    cameraTypeId: n.cameraType.id,
+                    p_x: n.xPos,
+                    p_y: n.yPos,
+                    p_z: n.zPos,
+                    r_x: n.xRot,
+                    r_y: n.yRot,
+                    r_z: n.zRot
+                };
+
+                datas.objects.nodes.push(nodeData);
+            });
+
+            lidars.forEach(l => {
+                const lidarData = {
+                    id: l.id,
+                    lidarTypeId: l.lidarType.id,
+                    p_x: l.xPos,
+                    p_z: l.zPos,
+                    r_y: l.yRot
+                };
+
+                datas.objects.lidars.push(lidarData);
+            });
+
+            dummies.forEach(d => {
+                const dummiesData = {
+                    id: d.id,
+                    p_x: d.xPos,
+                    p_y: d.yPos,
+                    p_z: d.zPos
+                };
+                
+                datas.objects.dummies.push(dummiesData);
+            });
+
+            return JSON.stringify(datas);
+        }
+
+        this.populateStorage = () => sessionStorage.setItem('sceneInfos', this.generateJson())
 
         this.changeSensorsTrackingMode = function(mode)
         {
@@ -341,11 +512,13 @@ class SceneObjects{
 
         /**
          * Calculate the area covered by node and compare it to the scene size
-         *
+         * 
          * @returns {boolean} whether the scene is fully tracked by nodes or not
          */
         this.doesCoverArea = function()
         {
+            // see https://github.com/velipso/polybooljs for more information
+
             const unionRegions = [...givenAreaPolygonRegions];
             let union = {
                 regions: unionRegions,
@@ -362,7 +535,7 @@ class SceneObjects{
                 });
 
                 //union = PolyBool.union(union, polyCam);
-
+                
                 const segmentsCam = PolyBool.segments(polyCam);
                 const segmentsUnion = PolyBool.segments(union);
                 const comb = PolyBool.combine(segmentsCam, segmentsUnion);
@@ -374,10 +547,14 @@ class SceneObjects{
 
         this.getNbNodes = () => nodes.length;
 
-        // DEBUG
+        this.getNbLidars = () => lidars.length;
+
+        this.getNbSensors = () => this.getNbNodes() + this.getNbLidars();
+
+        // press P for DEBUG
         this.debug = function()
         {
-
+            console.log(JSON.parse(sessionStorage.getItem('sceneInfos')));
         }
 
         this.update = function ()
@@ -387,7 +564,10 @@ class SceneObjects{
                 sceneManager.drawProjection(n);
             });
         }
-        SceneObjects.loadFont(() => SceneManager.loadFont(() => sceneManager.initAugmentaScene()));
+        SceneObjects.loadFont(isBuilder, () => SceneManager.loadFont(isBuilder, () => sceneManager.initAugmentaScene()));
+        
+        loadModel(isBuilder, 'male');
+        loadModel(isBuilder, 'female');
     }
 }
 

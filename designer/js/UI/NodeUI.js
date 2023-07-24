@@ -1,7 +1,7 @@
 import { Vector3 } from 'three'
 
-import { getCamerasTypes, units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js'
-import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js'
+import { getCamerasTypes, units } from '/js/data.js'
+import { Node } from '/js/scene/objects/sensors/Node.js'
 
 class NodeUI{
     constructor(node, sceneManager)
@@ -17,22 +17,23 @@ class NodeUI{
                 cameraTypesOptions += optionElement;
                 cameraTypesOptions += "</option>"
             });
-
+        
             const nodeUIdiv = document.createElement('div');
-            nodeUIdiv.classList.add("nodeUI");
-
+            nodeUIdiv.classList.add("sensorUI");
+            
             nodeUIdiv.id = 'node-' + (node.id) + '-UI';
             nodeUIdiv.innerHTML = `
                 <div id="node-` + (node.id) + `-UI-header" class="row center-x-spaced center-y">
                     <div class="row center-y">
-                        <div class="node-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
-                        <p class="main-text">Node + Sensor ` + (node.id + 1) + `</p>
+                        <div class="sensor-color" style="background-color: #`+ node.color.getHexString() + `;"></div>
+                        <p class="main-text">Sensor ` + (node.id + 1) + `</p>
                     </div>
                     <div class="row center-y">
                         <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
-                        <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div>
+                        <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                         <div id="node-` + (node.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
+                        <div id="node-` + (node.id) + `-delete"><span class="iconify" data-icon="fluent:delete-16-filled"></span></div>
                     </div>
                 </div>
                 <div id="node-infos-` + (node.id) + `-UI" class="column sections-container space-y">
@@ -41,28 +42,28 @@ class NodeUI{
                         ` + cameraTypesOptions + `
                         </select>
                     </div>
-                    <div class="row node-transformations">
+                    <div class="row sensor-transformations">
                         <p class="main-text">Position</p>
                         <div>
-                            <p id="x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.xPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
+                            <p id="node-x-pos-`+ node.id +`" class="draggable">X <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.xPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                         <div>
-                            <p id="y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(-node.zPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
+                            <p id="node-y-pos-`+ node.id +`" class="draggable">Y <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.yPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                         <div>
-                            <p id="z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.yPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
+                            <p id="node-z-pos-`+ node.id +`" class="draggable">Z <strong data-unit=` + sceneManager.currentUnit.value + `>` + Math.round(node.zPos * sceneManager.currentUnit.value * 100) /100.0 + `</strong><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span></p>
                         </div>
                     </div>
-                    <div class="row node-transformations">
+                    <div class="row sensor-transformations">
                         <p class="main-text">Rotation</p>
                         <div>
-                            <p id="x-rot-`+ node.id +`" class="draggable">X <strong>` + Math.round(node.xRot*180/Math.PI) + `</strong>°</p>
+                            <p id="node-x-rot-`+ node.id +`" class="draggable">X <strong>` + Math.round(node.xRot*180/Math.PI) + `</strong>°</p>
                         </div>
                         <div>
-                            <p id="y-rot-`+ node.id +`" class="draggable">Y <strong>` + Math.round(node.yRot*180/Math.PI) + `</strong>°</p>
+                            <p id="node-y-rot-`+ node.id +`" class="draggable">Y <strong>` + Math.round(node.yRot*180/Math.PI) + `</strong>°</p>
                         </div>
                         <div>
-                            <p id="z-rot-`+ node.id +`" class="draggable">Z <strong>` + Math.round(node.zRot*180/Math.PI) + `</strong>° </p>
+                            <p id="node-z-rot-`+ node.id +`" class="draggable">Z <strong>` + Math.round(node.zRot*180/Math.PI) + `</strong>° </p>
                         </div>
                     </div>
                     <div class="row cam-spec">
@@ -72,8 +73,8 @@ class NodeUI{
                     </div>
                     <div class="row cam-spec">
                         <p class="spec-title main-text">Distance</p>
-                        <p>Near</p><p><span id="near` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
-                        <p>Far</p><p><span id="far` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
+                        <p>Near</p><p><span id="node-near` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.near*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
+                        <p>Far</p><p><span id="node-far` + node.id + `" data-unit=` + sceneManager.currentUnit.value + `>` + (Math.round(node.cameraPerspective.far*sceneManager.currentUnit.value * 100) / 100.0) + `</span> <span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label + `</span></p>
                     </div>
                 </div>`;
 
@@ -87,18 +88,19 @@ class NodeUI{
 
         function bindEventListeners()
         {
-
-            makeElementDraggable(document.getElementById("x-pos-" + node.id));
-            makeElementDraggable(document.getElementById("y-pos-" + node.id));
-            makeElementDraggable(document.getElementById("z-pos-" + node.id));
-            makeElementDraggable(document.getElementById("x-rot-" + node.id));
-            makeElementDraggable(document.getElementById("y-rot-" + node.id));
-            makeElementDraggable(document.getElementById("z-rot-" + node.id));
-
-
+            
+            makeElementDraggable(document.getElementById("node-x-pos-" + node.id));
+            makeElementDraggable(document.getElementById("node-y-pos-" + node.id));
+            makeElementDraggable(document.getElementById("node-z-pos-" + node.id));
+            makeElementDraggable(document.getElementById("node-x-rot-" + node.id));
+            makeElementDraggable(document.getElementById("node-y-rot-" + node.id));
+            makeElementDraggable(document.getElementById("node-z-rot-" + node.id));
+        
+    
             document.getElementById('node-' + (node.id) + '-hide-UI').addEventListener('click', () => hideUICam());
-            document.getElementById('node-' + (node.id) + '-visible').addEventListener('click', () => changeVisibilityofCam());
-
+            document.getElementById('node-' + (node.id) + '-visible').addEventListener('click', () => node.changeVisibility());
+            document.getElementById('node-' + (node.id) + '-delete').addEventListener('click', () => sceneManager.objects.removeNode(node))
+        
             document.getElementById('cam-type-' + node.id).addEventListener('change', () => changeCameraType());
         }
 
@@ -109,8 +111,8 @@ class NodeUI{
             let diffX = 0;
             element.onmousedown = dragMouseDown;
             let dragged = false;
-
-
+        
+        
             function dragMouseDown(e) {
                 valueElement = element.getElementsByTagName('strong')[0];
                 value = parseFloat(valueElement.innerHTML);
@@ -123,7 +125,7 @@ class NodeUI{
                 document.onmouseup = closeDragElement;
                 document.onmousemove = elementDrag;
             }
-
+        
             function elementDrag(e) {
                 dragged = true;
                 e = e || window.event;
@@ -131,9 +133,9 @@ class NodeUI{
                 // calculate the new cursor position:
                 diffX = e.clientX - mousePosX;
                 mousePosX = e.clientX;
-
+        
                 let fac = 1;
-                switch(element.id.split('-')[1])
+                switch(element.id.split('-')[2])
                 {
                     case "pos" :
                         fac = 1 / 100.0;
@@ -145,22 +147,21 @@ class NodeUI{
                         fac = 1;
                         break;
                 }
-
+        
                 value += diffX * fac;
                 valueElement.innerHTML = Math.round(value*100)/100.0;
-
-                switch(element.id.split('-')[0])
+        
+                switch(element.id.split('-')[1])
                 {
                     case "x":
-                        switch(element.id.split('-')[1])
+                        switch(element.id.split('-')[2])
                         {
                             case "pos" :
                                 node.xPos = value / sceneManager.currentUnit.value;
                                 node.cameraPerspective.position.x = node.xPos;
-                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                node.mesh.position.set( node.xPos, node.zPos, node.yPos );
                                 break;
                             case "rot":
-                                /*node.cameraPerspective.rotateOnWorldAxis(node.xRotationAxis, value * (Math.PI / 180.0) - node.pitch);*/
                                 node.xRot = value * (Math.PI / 180.0);
                                 node.cameraPerspective.rotation.x = node.xRot + Node.DEFAULT_NODE_ROTATION_X;
                                 break;
@@ -169,43 +170,32 @@ class NodeUI{
                         }
                         break;
                     case "y":
-                        switch(element.id.split('-')[1])
+                        switch(element.id.split('-')[2])
                         {
                             case "pos" :
-                                node.zPos = value / sceneManager.currentUnit.value;
-                                node.cameraPerspective.position.z = node.zPos;
-                                node.mesh.position.set(node.xPos, node.yPos, node.zPos);
+                                node.yPos = value / sceneManager.currentUnit.value;
+                                node.cameraPerspective.position.z = node.yPos;
+                                node.mesh.position.set(node.xPos, node.zPos, node.yPos);
                                 break;
                             case "rot":
-                                /*node.cameraPerspective.rotateOnWorldAxis(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
-                                node.xRotationAxis.applyAxisAngle(new Vector3(0,1,0), value * (Math.PI / 180.0) - node.yaw);
-                                node.xRotationAxis.normalize();
-                                node.yaw = value * (Math.PI / 180.0);*/
-                                /*
-                                const rotateYAxis = new Vector3(0,1,0);
-                                rotateYAxis.applyAxisAngle(new Vector3(0,0,- 1), - node.zRot);
-                                node.cameraPerspective.rotateOnAxis(rotateYAxis, -(value * (Math.PI / 180.0) - node.yRot));*/
                                 node.yRot = value * (Math.PI / 180.0);
-                                node.cameraPerspective.rotation.y = - node.yRot;
+                                node.cameraPerspective.rotation.y = - node.yRot; // -90° applied on X axis by default. Locally, the coordinate system is z up and y toward depth. Our y is forward, so rotation.y = - ourRotY
                                 break;
                             default:
                                 break;
                         }
                         break;
                     case "z":
-                        switch(element.id.split('-')[1])
+                        switch(element.id.split('-')[2])
                         {
                             case "pos" :
-                                node.yPos = value / sceneManager.currentUnit.value;
-                                node.cameraPerspective.position.y = node.yPos;
-                                node.mesh.position.set( node.xPos, node.yPos, node.zPos );
+                                node.zPos = value / sceneManager.currentUnit.value;
+                                node.cameraPerspective.position.y = node.zPos;
+                                node.mesh.position.set( node.xPos, node.zPos, node.yPos );
                                 break;
                             case "rot":
-                                /*const rotateZAxis = new Vector3();
-                                node.cameraPerspective.getWorldDirection(rotateZAxis);
-                                node.cameraPerspective.rotateOnWorldAxis(rotateZAxis,-(value * (Math.PI / 180.0) - node.zRot));*/
                                 node.zRot = value * (Math.PI / 180.0);
-                                node.cameraPerspective.rotation.z = node.zRot;
+                                node.cameraPerspective.rotation.z = node.zRot; // -90° applied on X axis by default. Locally, the coordinate system is z up and y toward depth. So rotation.z = ourRotZ
                                 break;
                             default:
                                 break;
@@ -215,13 +205,15 @@ class NodeUI{
                         break;
                 }
             }
-
+        
             function closeDragElement() {
                 if(valueElement.classList.contains('underlined')) valueElement.classList.remove('underlined');
                 /* stop changing when mouse button is released:*/
                 document.onmouseup = null;
                 document.onmousemove = null;
 
+                sceneManager.objects.populateStorage();
+        
                 /*on clic, change the value with an input*/
                 /* WIP
                 if(!dragged)
@@ -250,12 +242,6 @@ class NodeUI{
             iconElem.dataset.icon = hidden ? "bx:minus" : "bx:plus";
         }
 
-        function changeVisibilityofCam()
-        {
-            node.changeVisibility();
-            sceneManager.objects.updateFrustumIcon();
-        }
-
         function changeCameraType()
         {
             node.cameraType = getCamerasTypes().find(type => type.niceName === document.getElementById('cam-type-' + node.id).value);
@@ -275,31 +261,36 @@ class NodeUI{
             }
             document.getElementById('hfov' + node.id).innerHTML = node.cameraType.HFov + '°';
             document.getElementById('vfov' + node.id).innerHTML = node.cameraType.VFov + '°';
-            document.getElementById('near' + node.id).innerHTML = (Math.round(node.cameraPerspective.near*document.getElementById('near' + node.id).dataset.unit * 100) / 100.0);
-            document.getElementById('far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('far' + node.id).dataset.unit * 100) / 100.0);
+            document.getElementById('node-near' + node.id).innerHTML = (Math.round(node.cameraPerspective.near*document.getElementById('node-near' + node.id).dataset.unit * 100) / 100.0);
+            document.getElementById('node-far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('node-far' + node.id).dataset.unit * 100) / 100.0);
+
+            sceneManager.objects.populateStorage();
         }
 
         this.changeFar = function()
         {
-            document.getElementById('far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('far' + node.id).dataset.unit * 100) / 100.0);
+            document.getElementById('node-far' + node.id).innerHTML = (Math.round(node.cameraPerspective.far*document.getElementById('node-far' + node.id).dataset.unit * 100) / 100.0);
         }
 
         this.changeVisibility = function(visible)
         {
             const iconElem = document.getElementById('node-' + (node.id) + '-visible').firstElementChild;
             iconElem.dataset.icon = visible ? "akar-icons:eye-open" : "akar-icons:eye-slashed";
+            sceneManager.objects.updateFrustumIcon();
         }
 
         this.updatePosition = function(x, y, z, currentUnitValue)
         {
-            document.getElementById('x-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(x * currentUnitValue * 100)/100.0;
-            document.getElementById('y-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(z * currentUnitValue * 100)/100.0;
-            document.getElementById('z-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(y * currentUnitValue * 100)/100.0;
+            document.getElementById('node-x-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(x * currentUnitValue * 100)/100.0;
+            document.getElementById('node-y-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(y * currentUnitValue * 100)/100.0;
+            document.getElementById('node-z-pos-'+ node.id).getElementsByTagName('strong')[0].innerHTML = Math.round(z * currentUnitValue * 100)/100.0;
         }
 
         this.dispose = function()
         {
-            document.getElementById('node-' + node.id + '-UI').remove();
+            let nodeUI = document.getElementById('node-' + node.id + '-UI');
+            //Check if wasn't removed singularly yet
+            if(nodeUI) nodeUI.remove();
         }
     }
 }

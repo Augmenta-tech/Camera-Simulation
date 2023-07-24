@@ -7,17 +7,18 @@ import {
     MeshBasicMaterial,
     MeshPhongMaterial,
     LineBasicMaterial,
-    Mesh
+    Mesh,
+    Vector3
 } from 'three';
 import { DoubleSide } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js'
-import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js'
+import { units } from '../data.js'
+import { SceneManager } from './SceneManager.js'
 
 class Checkerboard{
     static SIZE_TEXT_SCENE = 0.3;
-    constructor(unit = units.meters, sceneElevation = 0, width = SceneManager.DEFAULT_WIDTH, height = SceneManager.DEFAULT_LENGTH)
+    constructor(surface, unit = units.meters, sceneElevation = 0, width = SceneManager.DEFAULT_WIDTH, height = SceneManager.DEFAULT_LENGTH)
     {
         //const gridSize = size
         this.width = width;
@@ -28,15 +29,22 @@ class Checkerboard{
         const sceneBorder = new LineSegments(new EdgesGeometry(), new LineBasicMaterial( { color: 0x000000 }));
         const planes = new Group();
         const dimensionsText = buildTextMesh(this.width, this.height);
+        const tableLegs = new Group();
 
 
         function buildPlanes(width, height, elevation, unitValue)
         {
+            planes.children.forEach((plane) => {
+                plane.geometry.dispose();
+                plane.material.dispose();
+            });
+            planes.clear();
+
             const nbFullSquareWidth = Math.floor(width * unitValue);
             const nbFullSquareHeight = Math.floor(height * unitValue);
 
             const squareSize = 1 / unitValue; // 1 square / unitValue
-            const geometry = new PlaneGeometry( squareSize, squareSize );
+            const geometry = new PlaneGeometry( squareSize, squareSize ); 
             const material = new MeshBasicMaterial( {color: 0x111111, side: DoubleSide} );
             const plane = new Mesh( geometry, material );
 
@@ -44,13 +52,14 @@ class Checkerboard{
             const endLineGeometry = new PlaneGeometry(endLineGeometryWidth, squareSize);
             const endColumnGeometryHeight = height - nbFullSquareHeight * squareSize;
             const endColumnGeometry = new PlaneGeometry(squareSize, endColumnGeometryHeight);
+            const lastPlaneGeometry = new PlaneGeometry(endLineGeometryWidth, endColumnGeometryHeight);
 
             // Floor under checkerboard
             const materialFloor = new MeshBasicMaterial( {side:DoubleSide, color: 0x2e2e2e});
             const geometryFloor = new PlaneGeometry( width + 0.02, height + 0.02 );
+            geometryFloor.translate(- width / 2.0, height / 2.0, 0);
             const floor = new Mesh(geometryFloor, materialFloor);
-            floor.position.set( width / 2.0 + 0.01, elevation - 0.02, height / 2.0 + 0.01 ); //to avoid z-fight with area covered by cam (y = elevation for area covered)
-            floor.rotation.x = - Math.PI / 2.0;
+            floor.position.set(width / 2.0 + 0.01, -height / 2.0 + 0.01, - 0.01 );
             planes.add(floor);
 
             for(let i = 0; i < nbFullSquareHeight; i++)
@@ -59,17 +68,17 @@ class Checkerboard{
                 {
                     if((i+j)%2 === 0)
                     {
-                        const newPlane = plane.clone();
-                        newPlane.rotation.x = Math.PI / 2.0;
-                        newPlane.position.set((j + 0.5) * squareSize, elevation - 0.005, (i + 0.5) * squareSize);
+                        const newGeometry = geometry.clone();
+                        newGeometry.translate(-width / 2.0 + (j + 0.5) * squareSize, height / 2.0 - (i + 0.5) * squareSize,  0);
+                        const newPlane = new Mesh( newGeometry, material );
                         planes.add(newPlane);
                     }
                 }
                 if((i + nbFullSquareWidth)%2 === 0)
                 {
-                    const newPlane = new Mesh( endLineGeometry, material );
-                    newPlane.rotation.x = Math.PI / 2.0;
-                    newPlane.position.set(nbFullSquareWidth * squareSize + endLineGeometryWidth / 2.0, elevation - 0.005, (i + 0.5) * squareSize);
+                    const newGeometry = endLineGeometry.clone();
+                    newGeometry.translate(-width / 2.0 + nbFullSquareWidth * squareSize + endLineGeometryWidth / 2.0, height / 2.0 - (i + 0.5) * squareSize, 0);
+                    const newPlane = new Mesh( newGeometry, material );
                     planes.add(newPlane);
                 }
             }
@@ -77,56 +86,95 @@ class Checkerboard{
             {
                 if((nbFullSquareHeight + j)%2 === 0)
                 {
-                    const newPlane = new Mesh( endColumnGeometry, material );
-                    newPlane.rotation.x = Math.PI / 2.0;
-                    newPlane.position.set((j + 0.5) * squareSize, elevation - 0.005, nbFullSquareHeight * squareSize + endColumnGeometryHeight / 2.0);
+                    const newGeometry = endColumnGeometry.clone();
+                    newGeometry.translate(-width / 2.0 + (j + 0.5) * squareSize, height / 2.0 - nbFullSquareHeight * squareSize - endColumnGeometryHeight / 2.0, 0);
+                    const newPlane = new Mesh( newGeometry, material );
                     planes.add(newPlane);
                 }
             }
             if((nbFullSquareWidth + nbFullSquareHeight)%2 === 0)
             {
-                const lastPlaneGeometry = new PlaneGeometry(endLineGeometryWidth, endColumnGeometryHeight);
-                const lastPlane = new Mesh( lastPlaneGeometry, material );
-                lastPlane.rotation.x = Math.PI / 2.0;
-                lastPlane.position.set(nbFullSquareWidth * squareSize + endLineGeometryWidth / 2.0, elevation - 0.005, nbFullSquareHeight * squareSize + endColumnGeometryHeight / 2.0);
-                planes.add(lastPlane);
+                const newGeometry = lastPlaneGeometry.clone();
+                newGeometry.translate(-width / 2.0 + nbFullSquareWidth * squareSize + endLineGeometryWidth / 2.0, height / 2.0 - nbFullSquareHeight * squareSize - endColumnGeometryHeight / 2.0, 0);
+                const newPlane = new Mesh( newGeometry, material );
+                planes.add(newPlane);
             }
+
+            applyTransforms(planes, width, height, elevation)
         }
 
         function buildTextMesh(width, height)
         {
             const textGeometry = new TextGeometry("", { font: SceneManager.font, size: Checkerboard.SIZE_TEXT_SCENE, height: 0.01 } );
-            const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ))
-            textMesh.position.set(width, 0.01, height);
-            textMesh.rotation.x = -Math.PI / 2.0;
-
+            const textMesh = new Mesh(textGeometry, new MeshPhongMaterial( { color: 0xffffff } ));
             return textMesh;
         }
 
-        function createText(width, height, elevation, unit)
+        function updateText(width, height, elevation, unit)
         {
             dimensionsText.geometry.dispose();
             const dimensionsString = Math.round((width * unit.value)*100)/100 + unit.label + ' x ' + Math.round((height * unit.value)*100)/100 + unit.label;
             dimensionsText.geometry = new TextGeometry(dimensionsString, { font: SceneManager.font, size: Checkerboard.SIZE_TEXT_SCENE * 2/3.0, height: 0.01 } );
+            applyTransforms(dimensionsText, width, height, elevation);
+            
             const offsetX = 0.14 * dimensionsString.length;
-            dimensionsText.position.set(width - 0.2 - offsetX, elevation + 0.01, height - 0.2);
+            dimensionsText.translateX(width/ 2.0 - 0.2 - offsetX);
+            dimensionsText.translateY(- (height / 2.0 - 0.2));
+            //dimensionsText.position.set(width - 0.2 - offsetX, elevation + 0.01, height - 0.2);
         }
-
+        
         function createCheckerboard(width, height, elevation, unit)
         {
             sceneBorder.geometry.dispose();
-            const geometry = new BoxGeometry(Math.round(width * 100) / 100.0 + 0.02, 0, Math.round(height * 100) / 100.0 + 0.02);
+            const geometry = new BoxGeometry(Math.round(width * 100) / 100.0 + 0.02, Math.round(height * 100) / 100.0 + 0.02, 0);
             sceneBorder.geometry = new EdgesGeometry(geometry);
-            sceneBorder.position.set(width / 2.0, elevation + 0.01, height / 2.0);
+
+            applyTransforms(sceneBorder, width, height, elevation);
+
             buildPlanes(width, height, elevation, unit.value);
-            createText(width, height, elevation, unit);
+            updateText(width, height, elevation, unit);
+            createTableLegs(width, height, elevation, unit);
         }
 
-        this.addPlanesToScene = function (scene)
+        function createTableLegs(width, height, elevation, unit){
+            tableLegs.clear();
+            const tableLegsGeometry = new BoxGeometry( 1/15, elevation, 1/15 );
+            const material = new MeshBasicMaterial( {color: 0x111111, side: DoubleSide} );
+            let leg1 = new Mesh( tableLegsGeometry, material );
+            leg1.position.set(width, elevation/2, height);
+            tableLegs.add(leg1);
+            let leg2 = new Mesh( tableLegsGeometry, material );
+            leg2.position.set(0, elevation/2, height);
+            tableLegs.add(leg2);
+            let leg3 = new Mesh( tableLegsGeometry, material );
+            leg3.position.set(0, elevation/2, 0);
+            tableLegs.add(leg3);
+            let leg4 = new Mesh( tableLegsGeometry, material );
+            leg4.position.set(width, elevation/2, 0);
+            tableLegs.add(leg4);
+        }
+
+        function applyTransforms(object, width, height, elevation)
+        {
+            const sceneAxis = new Vector3(1, 1, 0);
+            const lambda = new Vector3(width / 2.0, height / 2.0, 0);
+            object.position.set(0, 0, 0);
+
+            sceneAxis.applyEuler(surface.rotation);
+            lambda.applyEuler(surface.rotation);
+
+            object.position.set(sceneAxis.x * Math.abs(lambda.x), sceneAxis.y * Math.abs(lambda.y), - sceneAxis.z * Math.abs(lambda.z));
+            object.translateZ(elevation + 0.005); // avoid z-fighting
+
+            object.setRotationFromEuler(surface.rotation);
+        }
+
+        this.addToScene = function (scene)
         {
             scene.add(sceneBorder);
             scene.add(planes);
             scene.add(dimensionsText);
+            scene.add(tableLegs);
         }
 
         this.toggleUnit = function(unit)
@@ -153,7 +201,10 @@ class Checkerboard{
 
         this.removeFromScene = function (scene)
         {
+            scene.remove(sceneBorder);
             scene.remove(planes);
+            scene.remove(dimensionsText);
+            scene.remove(tableLegs);
         }
 
         this.dispose = function()
@@ -163,6 +214,9 @@ class Checkerboard{
                 plane.material.dispose();
             });
             planes.clear();
+
+            sceneBorder.geometry.dispose();
+            sceneBorder.material.dispose();
 
             dimensionsText.geometry.dispose();
             dimensionsText.material.dispose();

@@ -10,10 +10,10 @@ import { OBJLoader } from 'three-loaders/OBJLoader.js';
 
 
 class Dummy {
-    static DEFAULT_DUMMIES_HEIGHT = document.getElementById('dummy-height-reference').value;
+    static DEFAULT_DUMMIES_HEIGHT = document.getElementById('dummy-height-reference') ? document.getElementById('dummy-height-reference').value : 2;
     static maleModel;
     static femaleModel;
-
+    
     constructor(id)
     {
         this.id = id;
@@ -22,13 +22,13 @@ class Dummy {
         this.yPos = 0;
         this.zPos = 0;
 
-        this.mesh = buildMesh(this.xPos, this.zPos)
-
+        this.mesh = buildMesh(this.xPos, this.yPos)
+        
         //this.model = new Object3D();
 
         this.model = buildModel();
 
-        function buildMesh(initialPosX, initialPosZ)
+        function buildMesh(initialPosX, initialPosY)
         {
             const geometry = new BoxGeometry( 0.7, Dummy.DEFAULT_DUMMIES_HEIGHT* 4/5.0, 0.8 );
             const material = new MeshPhongMaterial( { color: 0x000000 } );
@@ -36,7 +36,7 @@ class Dummy {
             material.opacity = 0;
             material.alphaTest = 0.5;
             const dummyMesh = new Mesh( geometry, material );
-            dummyMesh.position.set(initialPosX, Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0, initialPosZ);
+            dummyMesh.position.set(initialPosX, Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0, initialPosY);
             dummyMesh.name = 'Dummy';
 
             return dummyMesh;
@@ -45,9 +45,9 @@ class Dummy {
         function buildModel()
         {
             const model = new Object3D().copy((Math.random() < 0.5) ? Dummy.maleModel : Dummy.femaleModel);
-            const scaling = Dummy.DEFAULT_DUMMIES_HEIGHT / 180.0;
+            const scaling = Dummy.DEFAULT_DUMMIES_HEIGHT / 180.0; 
             model.scale.set(scaling, scaling, scaling);
-            //model.position.set(dummy.xPos, dummy.yPos, dummy.zPos);
+            //model.position.set(dummy.xPos, dummy.zPos, dummy.yPos);
 
             return model;
         }
@@ -69,9 +69,9 @@ class Dummy {
         this.updatePosition = function()
         {
             this.xPos = this.mesh.position.x;
-            this.yPos = this.mesh.position.y - Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0;
-            this.zPos = this.mesh.position.z;
-            this.model.position.set(this.xPos, this.yPos, this.zPos);
+            this.yPos = this.mesh.position.z;
+            this.zPos = this.mesh.position.y - Dummy.DEFAULT_DUMMIES_HEIGHT / 2.0;
+            this.model.position.set(this.xPos, this.zPos, this.yPos);
         }
 
         this.dispose = function()
@@ -91,10 +91,7 @@ class Dummy {
     }
 }
 
-loadModel('male');
-loadModel('female');
-
-function loadModel(genre)
+function loadModel(isBuilder, genre)
 {
     const onProgress = function ( xhr ) {
 
@@ -107,8 +104,10 @@ function loadModel(genre)
 
     };
 
+    const path = isBuilder ? './designer/' : './';
+
     new MTLLoader()
-    .setPath( '../wp-content/themes/salient-child/builder-v2/designer/models/'+ genre +'02/' )
+    .setPath( path + 'models/'+ genre +'02/' )
     .setRequestHeader({ "Content-Type" : "model/mtl"})
     .load( genre +'02.mtl', function ( materials ) {
 
@@ -116,7 +115,7 @@ function loadModel(genre)
 
         new OBJLoader()
             .setMaterials( materials )
-            .setPath( '../wp-content/themes/salient-child/builder-v2/designer/models/'+ genre +'02/' )
+            .setPath( path + 'models/'+ genre +'02/' )
             .setRequestHeader({ "Content-Type" : "model/obj"})
             .load( genre +'02.obj', function ( object ) {
 
@@ -128,3 +127,4 @@ function loadModel(genre)
 }
 
 export { Dummy }
+export { loadModel }
