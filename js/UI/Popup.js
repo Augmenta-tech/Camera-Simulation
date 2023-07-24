@@ -537,9 +537,9 @@ class Popup{
                 } else{
                     sceneEnvironment = 'indoor'
                 }
+                disableSensorsConsideringEnvironment(sceneEnvironment);
             }
             
-            disableSensorsConsideringEnvironment(sceneEnvironment);
 
             //Old system
             // const switchElement = document.getElementById('hardware-switch-indoor-outdoor');
