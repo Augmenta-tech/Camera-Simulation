@@ -21,14 +21,14 @@ export function getCamerasTypes()
     if(window.camerasTypes === null)
     {
         let result;
-        readJSONFile("/js/camera-data/camera-data.json", function(text){
+        readJSONFile("/wp-content/themes/salient-child/builder-v2/designer/js/camera-data/camera-data.json", function(text){
             const sensorsData = JSON.parse(text);
             result = sensorsData.sensors.cameras;
-        
+
             let i = 0;
             result.forEach(type => type.id = i++);
             result.forEach(type => type.aspectRatio = Math.abs(Math.tan((type.HFov/2.0) * Math.PI / 180.0)/Math.tan((type.VFov/2.0) * Math.PI / 180.0)));
-    
+
             window.camerasTypes = result;
         });
     }
@@ -40,7 +40,7 @@ export function getLidarsTypes()
     if(window.lidarsTypes === null)
     {
         let result;
-        readJSONFile("/js/camera-data/camera-data.json", function(text){
+        readJSONFile("/wp-content/themes/salient-child/builder-v2/designer/js/camera-data/camera-data.json", function(text){
             const sensorsData = JSON.parse(text);
             result = sensorsData.sensors.lidars;
 

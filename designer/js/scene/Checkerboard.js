@@ -13,8 +13,8 @@ import {
 import { DoubleSide } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { units } from '../data.js'
-import { SceneManager } from './SceneManager.js'
+import { units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js'
+import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js'
 
 class Checkerboard{
     static SIZE_TEXT_SCENE = 0.3;
@@ -44,7 +44,7 @@ class Checkerboard{
             const nbFullSquareHeight = Math.floor(height * unitValue);
 
             const squareSize = 1 / unitValue; // 1 square / unitValue
-            const geometry = new PlaneGeometry( squareSize, squareSize ); 
+            const geometry = new PlaneGeometry( squareSize, squareSize );
             const material = new MeshBasicMaterial( {color: 0x111111, side: DoubleSide} );
             const plane = new Mesh( geometry, material );
 
@@ -116,13 +116,13 @@ class Checkerboard{
             const dimensionsString = Math.round((width * unit.value)*100)/100 + unit.label + ' x ' + Math.round((height * unit.value)*100)/100 + unit.label;
             dimensionsText.geometry = new TextGeometry(dimensionsString, { font: SceneManager.font, size: Checkerboard.SIZE_TEXT_SCENE * 2/3.0, height: 0.01 } );
             applyTransforms(dimensionsText, width, height, elevation);
-            
+
             const offsetX = 0.14 * dimensionsString.length;
             dimensionsText.translateX(width/ 2.0 - 0.2 - offsetX);
             dimensionsText.translateY(- (height / 2.0 - 0.2));
             //dimensionsText.position.set(width - 0.2 - offsetX, elevation + 0.01, height - 0.2);
         }
-        
+
         function createCheckerboard(width, height, elevation, unit)
         {
             sceneBorder.geometry.dispose();

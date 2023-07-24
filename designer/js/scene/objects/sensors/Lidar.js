@@ -10,7 +10,7 @@ import {
     Group
 } from 'three';
 
-import { getLidarsTypes, units } from '/js/data.js'
+import { getLidarsTypes, units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js'
 
 
 class Lidar{
@@ -19,7 +19,7 @@ class Lidar{
     static DEFAULT_LIDAR_SIZE = 0.1;
     static DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION = Math.PI/180 * 60;
     static DEFAULT_RATIO_FAR_MINDIST = 2;
-    
+
     constructor(id, lidarTypeID = Lidar.DEFAULT_LIDAR_TYPE_ID, p_x = 0, p_z = Lidar.DEFAULT_LIDAR_HOOK_HEIGHT, r_y = 0)
     {
         this.id = id;
@@ -31,7 +31,7 @@ class Lidar{
         this.xRot = 0;
         this.yRot = r_y;
         this.zRot = 0;
-    
+
         this.color = new Color(0.5*Math.random(), 0.5*Math.random(), 0.5*Math.random());
 
         this.mesh = buildMesh(this.color, this.xPos, Lidar.DEFAULT_LIDAR_SIZE, this.zPos);
@@ -72,9 +72,9 @@ class Lidar{
                 verticesArray.push(0);
 
                 const vertices = new Float32Array( verticesArray );
-    
+
                 geometry.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
-                
+
                 const ray = new LineSegments( geometry, material );
 
                 this.rays.add(ray);
@@ -118,7 +118,7 @@ class Lidar{
 
         this.update = function()
         {
-            
+
         }
 
         this.dispose = function()

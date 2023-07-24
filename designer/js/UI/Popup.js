@@ -1,6 +1,6 @@
-import { getCamerasTypes, getLidarsTypes } from '../data.js';
-import { main } from '../main.js';
-import { SceneManager } from '../scene/SceneManager.js';
+import { getCamerasTypes, getLidarsTypes } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js';
+import { main } from '/wp-content/themes/salient-child/builder-v2/designer/js/main.js';
+import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js';
 import { calculateCameraConfig, calculateLidarConfig, checkCameraCoherence, checkLidarCoherence, createSceneFromCameraConfig, createSceneFromLidarConfig, getMinNearFromSensors, getMaxFarFromSensors } from '../UI/Wizard.js';
 
 class Popup{
@@ -49,14 +49,14 @@ class Popup{
                 {
                     initDimensionsSection();
                 }
-                if(builderStep <= 1) 
+                if(builderStep <= 1)
                 {
                     document.getElementById('setup-content').classList.add('hidden');
                     document.getElementById('dimensions-content').classList.remove('hidden');
                     document.getElementById('dimensions-tab').classList.add('passed-tab');
                     return;
                 }
-                else 
+                else
                 {
                     getDimensions();
                     initHardwareSection();
@@ -141,12 +141,12 @@ class Popup{
                 trackingModeRadios[i].checked = (trackingModeRadios[i].value === (trackingMode ? trackingMode : "human-tracking"));
             }
         }
-                
+
         //EVENT LISTENERS
         const trackingModeRadios = document.getElementsByName("tracking-mode-selection-builder");
         for(let i = 0; i < trackingModeRadios.length; i++)
         {
-            trackingModeRadios[i].addEventListener('click', () => 
+            trackingModeRadios[i].addEventListener('click', () =>
             {
                 //Current selected value
                 let trackingMode = trackingModeRadios[i].value;
@@ -176,7 +176,7 @@ class Popup{
             sceneManager.heightDetectedObservable.set(parseFloat(document.getElementById("overlap-height-selection-popup").value));
         });
 
-        document.getElementById('next-button-setup').addEventListener('click', () => 
+        document.getElementById('next-button-setup').addEventListener('click', () =>
         {
             const trackingModeRadios = document.getElementsByName("tracking-mode-selection-builder");
             for(let i = 0; i < trackingModeRadios.length; i++)
@@ -234,7 +234,7 @@ class Popup{
         document.getElementById('dimensions-length-input').addEventListener('change', onChangeDimensionsInput);
         document.getElementById('dimensions-distance-input').addEventListener('change', onChangeDimensionsInput);
 
-        document.getElementById('sensor-height-infos').addEventListener('mouseover', (e) => 
+        document.getElementById('sensor-height-infos').addEventListener('mouseover', (e) =>
         {
             const infosText = document.getElementById('sensor-height-infos-text');
             infosText.style.left = (e.clientX - 180).toString() + "px";
@@ -252,7 +252,7 @@ class Popup{
             const givenSceneWidth = Math.floor(parseFloat(inputSceneWidth) / sceneManager.currentUnit.value * 100) / 100;
             const givenSceneLength = Math.floor(parseFloat(inputSceneLength) / sceneManager.currentUnit.value * 100) / 100;
             const givenSceneHeight = Math.floor(parseFloat(inputSceneHeight) / sceneManager.currentUnit.value * 100) / 100;
-            
+
             //CHECK INPUT COHERENCE
             if(trackingMode === "wall-tracking" && inputSceneWidth && inputSceneHeight)
             {
@@ -306,7 +306,7 @@ class Popup{
                     const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     const maxFar = getMaxFarFromSensors(camerasTypesRecommended, trackingMode);
                     const minNear = getMinNearFromSensors(camerasTypesRecommended);
-                    
+
                     if(checkCameraCoherence(givenSceneHeight, overlapHeightDetection, maxFar, minNear))
                     {
                         const warningElem = document.getElementById('warning-hook-height');
@@ -335,7 +335,7 @@ class Popup{
                     }
                 }
             }
-            
+
             return false;
         }
 
@@ -361,7 +361,7 @@ class Popup{
                 document.getElementById('dimensions-distance-text-wall-tracking').classList.remove('hidden');
                 document.getElementById('dimensions-distance-input').placeholder = `Height`;
             }
-            
+
             if(trackingMode)
             {
                 const sceneInfos = sessionStorage.getItem('sceneInfos');
@@ -397,7 +397,7 @@ class Popup{
             givenHeight = Math.floor(parseFloat(document.getElementById('dimensions-distance-input').value) / sceneManager.currentUnit.value * 100) / 100;
         }
 
-        document.getElementById('next-button-dimensions').addEventListener('click', () => 
+        document.getElementById('next-button-dimensions').addEventListener('click', () =>
         {
             resetWarnings();
             document.getElementById('dimensions-no-value-warning').classList.remove('hidden');
@@ -405,12 +405,12 @@ class Popup{
 
             getDimensions()
 
-            if((trackingMode !== 'wall-tracking' && ( !givenWidth || !givenLength || !givenHeight)) || 
+            if((trackingMode !== 'wall-tracking' && ( !givenWidth || !givenLength || !givenHeight)) ||
                 (trackingMode === 'wall-tracking' && (!givenWidth || !givenHeight))) {
                     return;
                 }
 
-            if((trackingMode !== 'wall-tracking' && (givenWidth <= 0 || givenLength <= 0 || givenHeight <= 0)) || 
+            if((trackingMode !== 'wall-tracking' && (givenWidth <= 0 || givenLength <= 0 || givenHeight <= 0)) ||
                 (trackingMode === 'wall-tracking' && (givenWidth <= 0 || givenHeight <= 0))) return;
 
             resetWarnings();
@@ -425,7 +425,7 @@ class Popup{
             sessionStorage.setItem('builderStep', 2);
         });
 
-        document.getElementById('previous-button-dimensions').addEventListener('click', () => 
+        document.getElementById('previous-button-dimensions').addEventListener('click', () =>
         {
             resetDimensionsSection();
 
@@ -516,15 +516,15 @@ class Popup{
                 sensorChoice.value = s.textId;
                 //sensorChoice.id = "hardware-input-" + s.textId;
                 //sensorChoice.classList.add("row", "center-x", "hardware-sensors-type", "hardware-radio-label");
-                
+
                 const near = Math.floor(s.rangeNear * sceneManager.currentUnit.value * 100) / 100;
                 const far = Math.floor((trackingMode === 'hand-tracking' ? s.handFar : s.rangeFar) * sceneManager.currentUnit.value * 100) / 100;
                 sensorChoice.innerHTML = `<p>` + s.niceName + ` (<span data-unit=` + sceneManager.currentUnit.value + `>` + near + `</span> - <span data-unit=` + sceneManager.currentUnit.value + `>` + far + `</span><span data-unittext=` + sceneManager.currentUnit.value + `>` + sceneManager.currentUnit.label +`</span>)</p>`;
                 sensorsDiv.appendChild(sensorChoice);
             });
-        
+
             bindHardwareEventListeners(sensorsDiv.children);
-        
+
             const sceneInfos = sessionStorage.getItem('sceneInfos');
             let sceneEnvironment = undefined;
             if(sceneInfos) {
@@ -539,7 +539,7 @@ class Popup{
                 }
                 disableSensorsConsideringEnvironment(sceneEnvironment);
             }
-            
+
 
             //Old system
             // const switchElement = document.getElementById('hardware-switch-indoor-outdoor');
@@ -577,7 +577,7 @@ class Popup{
             // {
             //     switchInputs[i].addEventListener('click', () => {
             //         disableSensorsConsideringEnvironment(switchInputs[i].value);
-            //         sceneManager.changeEnvironment(switchInputs[i].value); 
+            //         sceneManager.changeEnvironment(switchInputs[i].value);
             //     });
             // }
 
@@ -751,9 +751,9 @@ class Popup{
                         default:
                             break;
                     }
-            
+
                     const sensorsLabels = document.getElementById('hardware-sensors-selection').children;
-            
+
                     for(let i = 0; i < sensorsLabels.length; i++)
                     {
                         if(!sensorsLabels[i].classList.contains('unselectable') && sensorsLabels[i].querySelector('input').value === sensorTextId)
@@ -777,12 +777,12 @@ class Popup{
             }
         }
 
-        document.getElementById('next-button-hardware').addEventListener('click', () => 
+        document.getElementById('next-button-hardware').addEventListener('click', () =>
         {
             document.getElementById('popup').classList.remove('is-visible');
 
             // getHardware();
-            
+
             // if(!usedSensor) return;
 
             // // fill "My system" section
@@ -796,7 +796,7 @@ class Popup{
             // sessionStorage.setItem('builderStep', 3);
         });
 
-        document.getElementById('previous-button-hardware').addEventListener('click', () => 
+        document.getElementById('previous-button-hardware').addEventListener('click', () =>
         {
             sceneManager.objects.removeSensors();
             resetHardwareSection();
@@ -820,14 +820,14 @@ class Popup{
 
         function initMySystemSection()
         {
-            // Tracking Mode 
+            // Tracking Mode
             const mySystemTrackingMode = document.getElementById("tracking-mode-" + trackingMode + "-input").cloneNode(true);
             mySystemTrackingMode.id += '-copy';
             mySystemTrackingMode.children[0].checked = false;
             mySystemTrackingMode.children[0].disabled = true;
             document.getElementById('my-system-tracking-mode').appendChild(mySystemTrackingMode);
 
-            // Dimensions 
+            // Dimensions
             const mySystemDimensions = document.getElementById('dimensions-inputs').cloneNode(true);
             mySystemDimensions.id += 'copy';
             mySystemDimensions.classList.remove('row');
@@ -838,8 +838,8 @@ class Popup{
                 dimensionsInputs[i].readOnly = true;
             }
             document.getElementById('my-system-dimensions').appendChild(mySystemDimensions);
-            
-            // Recap 
+
+            // Recap
             const recapDiv = document.getElementById('my-system-recap');
 
             let nbSensors;
@@ -876,7 +876,7 @@ class Popup{
             });
         }
 
-        document.getElementById('previous-button-my-system').addEventListener('click', () => 
+        document.getElementById('previous-button-my-system').addEventListener('click', () =>
         {
             resetMySystemSection();
 
@@ -888,7 +888,7 @@ class Popup{
             sessionStorage.setItem('builderStep', 2);
         });
 
-        document.getElementById('finish-button-my-system').addEventListener('click', () => 
+        document.getElementById('finish-button-my-system').addEventListener('click', () =>
         {
             document.getElementById('popup').classList.remove('is-visible');
         });
@@ -906,7 +906,7 @@ export {Popup}
 /** HANDY FUNCTIONS */
 function deleteAllChildren(element)
 {
-    while (element.firstChild) 
+    while (element.firstChild)
     {
         element.removeChild(element.firstChild);
     }

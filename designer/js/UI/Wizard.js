@@ -1,15 +1,15 @@
 import { Vector2 } from 'three'
-import { getCamerasTypes, getLidarsTypes, units } from '/js/data.js';
+import { getCamerasTypes, getLidarsTypes, units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js';
 
-import { SceneManager } from '/js/scene/SceneManager.js'
-import { Node } from '/js/scene/objects/sensors/Node.js';
-import { Lidar } from '/js/scene/objects/sensors/Lidar.js'
+import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js'
+import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js';
+import { Lidar } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Lidar.js'
 
 class Wizard{
     constructor()
     {
         addSensorsTypesToForm();
-        
+
         this.bindEventListeners = function(viewportManager, uiManager)
         {
             //TODO remove old modal stuff
@@ -32,8 +32,8 @@ class Wizard{
                 //if(event.target === formModal) formModal.classList.add('hidden');
                 if(event.target === popup) popup.classList.remove('is-visible');
             });
-            
-            
+
+
             //CHANGE TRACKING MODE
             document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => changeTrackingMode(sceneManager, document.getElementById('tracking-mode-selection-wizard').value));
 
@@ -44,7 +44,7 @@ class Wizard{
                 camCheckboxes[i].addEventListener('change', () => checkFormCoherence(sceneManager));
             }
             document.getElementById('input-hook-height-wizard').addEventListener('change', () => checkFormCoherence(sceneManager));
-            
+
             //CHECKS COHERENCE BETWEEN LIDARS SPECS AND USER INPUTS
             const lidarCheckboxes = document.getElementsByClassName('checkbox-lidar-type');
             for(let i = 0; i < lidarCheckboxes.length; i++)
@@ -56,7 +56,7 @@ class Wizard{
 
             //CHECKS COHERENCE WHEN MODIFYING ANY FIELD
             document.getElementById('tracking-mode-selection-wizard').addEventListener('change', () => checkFormCoherence(sceneManager));
-            
+
             function checkFormCoherence(sceneManager)
             {
                 const trackingMode = document.getElementById('tracking-mode-selection-wizard').value;
@@ -122,7 +122,7 @@ class Wizard{
                     }
                 }
             }
-            
+
 
             //GENERATE SCENE BUTTON
             document.getElementById('generate-scene-wizard-button').addEventListener('click', () => {
@@ -205,7 +205,7 @@ class Wizard{
             changeTrackingMode(sceneManager, sceneManager.trackingMode);
             if(sceneManager.trackingMode === 'human-tracking') document.getElementById('overlap-height-selection-wizard').value = sceneManager.heightDetected;
         }
-    
+
         function addSensorsTypesToForm(){
             const sensorTypesForm = document.getElementById('cam-types-checkboxes-wizard');
             /*while (sensorTypesForm.firstChild) {
@@ -214,7 +214,7 @@ class Wizard{
             let title = document.createElement("h3");
             title.innerHTML = "Choose the type.s of camera.s you want to use";
             sensorTypesForm.appendChild(title);*/
-            
+
             const camTypesForm = document.createElement("div");
             camTypesForm.id = "cam-types-selection";
             getCamerasTypes().filter(c => c.recommended).forEach(c => {
@@ -240,7 +240,7 @@ class Wizard{
                     camTypesForm.appendChild(camTypeChoice);
                 //}
             });
-            
+
             const lidarTypesForm = document.createElement("div");
             lidarTypesForm.id = "lidar-types-selection";
             getLidarsTypes().filter(t => t.recommended).forEach(l => {
@@ -343,7 +343,7 @@ class Wizard{
                     const givenWidth = Math.ceil(inputWidth / sceneManager.currentUnit.value * 100) / 100;
                     const givenHeight = Math.ceil(inputHeight / sceneManager.currentUnit.value * 100) / 100;
 
-                    let configs = []; 
+                    let configs = [];
 
                     lidarsTypes.filter(l => l.recommended).filter(l => document.getElementById('check-lidar-' + l.id).checked).forEach(l => {
                         const config = calculateLidarConfig(l, givenWidth, givenHeight);
@@ -381,7 +381,7 @@ class Wizard{
                     const inputLength = parseFloat(document.getElementById('input-scene-length-wizard').value);
                     //const camsHeight = Math.round(parseFloat(document.getElementById('input-hook-height-wizard').value) / sceneManager.currentUnit.value * 100) / 100;
                     const inputCamsHeight = parseFloat(document.getElementById('input-hook-height-wizard').value);
-                    
+
                     let sceneElevation, overlapHeightDetection;
                     switch(trackingMode)
                     {
@@ -439,9 +439,9 @@ class Wizard{
                         document.getElementById('input-scene-width-inspector').value = inputWidth;
                         document.getElementById('input-scene-length-inspector').value = inputLength;
                         document.getElementById('input-scene-sensor-height-inspector').value = inputCamsHeight;
-                        sceneManager.sceneSensorHeight = camsHeight; // ?? coming from master branch ! 
+                        sceneManager.sceneSensorHeight = camsHeight; // ?? coming from master branch !
 
-            
+
                         // // SWTICH BLOCK comming from master branch, should we keep it ? -> looks like it is already done in uiManager.changeTrackingMode()
                         // switch(trackingMode)
                         // {
@@ -463,7 +463,7 @@ class Wizard{
                             let overlapHeightElem = document.getElementById('overlap-height-selection-inspector');
                             overlapHeightElem.value = overlapHeightDetection;
                             overlapHeightElem.dispatchEvent(new Event('change'));
-                        } 
+                        }
                     }
                     break;
                 }
@@ -483,12 +483,12 @@ class Wizard{
 
 function checkCameraCoherence(givenHookHeight, overlapHeightDetection, maxFar, minNear)
 {
-    return givenHookHeight <= maxFar && givenHookHeight >= overlapHeightDetection + minNear;            
+    return givenHookHeight <= maxFar && givenHookHeight >= overlapHeightDetection + minNear;
 }
 
 function checkLidarCoherence(givenSceneWidth, givenSceneHeight, maxFar)
 {
-    /** 
+    /**
      * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
      * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
      * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
@@ -498,7 +498,7 @@ function checkLidarCoherence(givenSceneWidth, givenSceneHeight, maxFar)
     const sqRatio = Lidar.DEFAULT_RATIO_FAR_MINDIST * Lidar.DEFAULT_RATIO_FAR_MINDIST;
     return (givenSceneHeight <= Math.sqrt(1 - 1 / (4 * sqRatio)) * maxFar /* above */ ||
             givenSceneWidth <= 2 * maxFar * Math.abs(Math.sin(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION) /* on sides */ ))
-            
+
 }
 
 function getMaxFarFromSensors(sensors, trackingMode)
@@ -532,7 +532,7 @@ function getMinNearFromSensors(sensors)
 }
 
 function calculateLidarConfig(lidarType, givenWidth, givenHeight){
-    /** 
+    /**
      * Min dist between lidar  = rangeFar / RATIO (arbitrary, RATIO = rangeFar / minDist : minDist = rangeFar / RATIO) //Modify arbitrary RATIO in Lidar class
      * lidarMaxHeight = sqrt(rangeFar * rangeFar - (minDist/2) * (minDist/2))
      * lidarMaxHeight = sqrt(rangeFar * rangeFar - (rangeFar/(2*RATIO)) * (rangeFar/(2*RATIO)))
@@ -566,13 +566,13 @@ function calculateLidarConfig(lidarType, givenWidth, givenHeight){
         {
             // Highest possible
             // const height = Math.sqrt(l.rangeFar * l.rangeFar - (givenWidth/2) * (givenWidth/2));
-            
+
             // Bottommost possible
             // const height = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
             //                 givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
             //                 0;
 
-            //Average between two 
+            //Average between two
             const heighest = Math.sqrt(lidarType.rangeFar * lidarType.rangeFar - (givenWidth/2) * (givenWidth/2));
             const bottommost = Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION % Math.PI / 2.0 !== 0 ?
                             givenWidth / (2 * Math.tan(Lidar.DEFAULT_MIN_ANGLE_TO_AVOID_OBSTRUCTION)) :
@@ -630,7 +630,7 @@ function createSceneFromCameraConfig(config, trackingMode, givenWidth, givenLeng
     {
         for(let j = 0; j < config.nbH; j++)
         {
-            config.rot 
+            config.rot
                 ?
                 sceneManager.objects.addNode(true, trackingMode, config.typeID, offsetX + i*(config.w - oX), offsetY + j*(config.h - oY), camsZPosition, 0, 0, Math.PI/2.0)
                 :

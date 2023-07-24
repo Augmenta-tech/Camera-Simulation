@@ -19,13 +19,13 @@ import {
 } from 'three';
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
-import { units } from '/js/data.js';
-import { Checkerboard } from '/js/scene/Checkerboard.js';
-import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
-import { Node } from '/js/scene/objects/sensors/Node.js';
-import { Observable } from '/js/scene/Observable.js';
-import { TransformControls } from '/js/lib/TransformControls.js';
-import { ViewportManager } from '/js/ViewportManager.js';
+import { units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js';
+import { Checkerboard } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/Checkerboard.js';
+import { SceneObjects } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/SceneObjects.js';
+import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js';
+import { Observable } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/Observable.js';
+import { TransformControls } from '/wp-content/themes/salient-child/builder-v2/designer/js/lib/TransformControls.js';
+import { ViewportManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/ViewportManager.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
@@ -71,7 +71,7 @@ class SceneManager{
     {
         const viewportElement = document.getElementById('viewport');
 
-        /* initialize viewport, scene and objects */ 
+        /* initialize viewport, scene and objects */
         this.viewportManager = new ViewportManager(viewportElement, this);
 
         const viewportManager = this.viewportManager;
@@ -145,7 +145,7 @@ class SceneManager{
             // WallX
             //const wallX = buildWallXMesh(this.size, this.wallXDepth, this.wallYDepth);
             this.scene.add(wallX);
-        
+
             // wallY
             //const wallY = buildWallYMesh(this.size, this.wallYDepth, this.wallXDepth);
             this.scene.add(wallY);
@@ -218,7 +218,7 @@ class SceneManager{
         function buildFloorMesh(size, wallXDepth, wallYDepth)
         {
             const materialFloor = new MeshPhongMaterial( {side:DoubleSide, color: 0x555555});
-            
+
             const geometryFloor = new PlaneGeometry( size + 0.02, size + 0.02 );
 
             const floor = new Mesh(geometryFloor, materialFloor);
@@ -231,9 +231,9 @@ class SceneManager{
         function buildWallXMesh(size, wallXDepth, wallYDepth)
         {
             const materialWallX = new MeshPhongMaterial( {color: 0xCCCCCC});//{ color: 0x522B47, dithering: true } ); // violet
-        
+
             const geometryWallX = new PlaneGeometry( size + 0.02, size + 0.02 );
-        
+
             const wallX = new Mesh(geometryWallX, materialWallX);
             wallX.position.set(wallXDepth, size / 2.0, size / 2.0 + wallYDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
             wallX.rotation.y = Math.PI / 2.0;
@@ -244,12 +244,12 @@ class SceneManager{
         function buildWallYMesh(size, wallYDepth, wallXDepth)
         {
             const materialWallY = new MeshPhongMaterial( {color: 0xAAAAAA});//{ color: 0x7B0828, dithering: true } ); // magenta
-        
+
             const geometryWallY = new PlaneGeometry( size + 0.02, size + 0.02 );
-        
+
             const wallY = new Mesh(geometryWallY, materialWallY);
             wallY.position.set(size / 2.0 + wallXDepth, size/2.0, wallYDepth); //to avoid z-fight with area covered by cam (y = 0 for area covered)
-            
+
             return wallY;
         }
 
@@ -288,7 +288,7 @@ class SceneManager{
         /* TODO: Maybe move it to UIManager /!\ Is used by builder which does'nt have access to uiManager */
         this.toggleUnit = function(unit = this.currentUnit.value === units.meters.value ? units.feets : units.meters)
         {
-            if(this.augmentaSceneLoaded) 
+            if(this.augmentaSceneLoaded)
             {
                 this.checkerboardFloor.toggleUnit(unit);
                 this.checkerboardWallY.toggleUnit(unit);
@@ -311,7 +311,7 @@ class SceneManager{
             const toggleUnitButtonUnit = document.getElementById('toggle-unit-button-' + unit.label)
             if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.remove("normal-font");
             if(toggleUnitButtonUnit) toggleUnitButtonUnit.classList.add("bold-font");
-            
+
             this.currentUnit = unit;
 
             this.objects.populateStorage();
@@ -319,7 +319,7 @@ class SceneManager{
 
         /**
          * Define the border of the scene to track
-         * 
+         *
          * @param {*} givenWidthValue horizontal length value entered input in the current unit.
          * @param {*} givenLengthValue vertical length value entered input in the current unit.
          */
@@ -369,17 +369,17 @@ class SceneManager{
             {
                 case 'hand-tracking':
                     this.sceneElevation = SceneManager.TABLE_ELEVATION;
-                    
+
                     if(this.augmentaSceneLoaded) {
                         this.sceneWidth = this.checkerboardFloor.width;
                         this.sceneLength = this.checkerboardFloor.height;
                         changeSurface(this.scene, [this.checkerboardWallY], [this.checkerboardFloor], [this.sceneElevation]);
                     }
-                    this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values 
+                    this.wallY.position.z = -10; // if you want to get the wall on checkerboard border, change this AND initialization values
                     break;
                 case 'wall-tracking':
                     this.sceneElevation = 0;
-                    
+
                     if(this.augmentaSceneLoaded) {
                         this.sceneWidth = this.checkerboardWallY.width;
                         this.sceneLength = this.checkerboardWallY.height;
@@ -390,7 +390,7 @@ class SceneManager{
                 case 'human-tracking':
                     default:
                     this.sceneElevation = 0;
-                    
+
                     if(this.augmentaSceneLoaded) {
                         this.sceneWidth = this.checkerboardFloor.width;
                         this.sceneLength = this.checkerboardFloor.height;
@@ -408,7 +408,7 @@ class SceneManager{
              * @param {Scene} scene threejs scene
              * @param {Array<Checkerboard>} toRemove array of checkerboards that you don't want in your scene
              * @param {Array<Checkerboard>} toAdd array of checkerboards you want in your scene
-             * @param {Array<float>} sceneElevation offsets between the toAdd checkerboards and their suface. 
+             * @param {Array<float>} sceneElevation offsets between the toAdd checkerboards and their suface.
              */
             function changeSurface(scene, toRemove, toAdd, sceneElevations)
             {
@@ -439,19 +439,19 @@ class SceneManager{
 
         /* SCENE UPDATE */
 
-        /* NODES PROJECTION */ 
+        /* NODES PROJECTION */
 
         /**
          * Calculate area covered by the node to draw it and display it
-         * 
-         * @param {Node} node the node to draw the projection 
+         *
+         * @param {Node} node the node to draw the projection
          */
         this.drawProjection = function(node)
         {
             //TODO: Comment ++
 
             /** GLOBAL OPERATING PHILOSPHY
-             * 
+             *
              * 1/ remove all drawn projections
              * 2/ for each plane of the scene (floor, walls ...), calculates the intersection rays with frustum
              * 3/ for each plane of the scene, calculates the intersection points of those rays
@@ -459,7 +459,7 @@ class SceneManager{
              * 5/ calculate area value covered by the camera and display it
              * 6/ draw surfaces covered using its vertices (points previously calculated)
              */
-            
+
             this.scene.remove(node.areaCoveredFloor);
             this.scene.remove(node.areaCoveredAbove);
             this.scene.remove(node.areaCoveredWallX);
@@ -480,7 +480,7 @@ class SceneManager{
                 const frustum = new Frustum();
                 frustum.setFromProjectionMatrix(node.cameraPerspective.projectionMatrix);
                 //calculate the rays representing the intersection between frustum's planes and the floor or the walls
-                for(let i = 0; i < 6; i++) 
+                for(let i = 0; i < 6; i++)
                 {
                     const plane = frustum.planes[i].applyMatrix4(node.cameraPerspective.matrixWorld);
 
@@ -506,7 +506,7 @@ class SceneManager{
                 const wallXWallYRay = getIntersectionOfPlanes(wallXPlane, wallYPlane);
                 const floorWallYRay = getIntersectionOfPlanes(floorPlane, wallYPlane);
 
-                if(floorWallXRay !== -1) 
+                if(floorWallXRay !== -1)
                 {
                     floorRays.push(floorWallXRay);
                     wallXRays.push(floorWallXRay);
@@ -521,8 +521,8 @@ class SceneManager{
                     floorRays.push(floorWallYRay);
                     wallYRays.push(floorWallYRay);
                 }
-                
-                
+
+
                 //get intersection points
                 const intersectionPointsFloor = getIntersectionPoints(floorRays);
                 const intersectionPointsAbove = getIntersectionPoints(aboveRays);
@@ -534,7 +534,7 @@ class SceneManager{
                 const frustumScaled = new Frustum();
                 frustumScaled.setFromProjectionMatrix(node.cameraPerspective.projectionMatrix);
 
-                for(let i = 0; i < 6; i++) 
+                for(let i = 0; i < 6; i++)
                 {
                     frustumScaled.planes[i].applyMatrix4(node.cameraPerspective.matrixWorld);
                     frustumScaled.planes[i].constant += 0.01;
@@ -595,11 +595,11 @@ class SceneManager{
                 coveredPointsWallY.forEach((p) => p.z += 0.01*(node.id / this.objects.getNbNodes() + 1));
 
 
-                //display area value 
+                //display area value
                 const previousValue = node.areaValue;
                 node.areaValue = calculateArea(coveredPointsAbove, this.currentUnit.value);
 
-                //Place text 
+                //Place text
                 if(coveredPointsAbove.length > 2)
                 {
                     //cam.nameText.geometry = new TextGeometry( "Cam " + (cam.id+1), { font: font, size: cam.areaValue / 40.0, height: 0.01 } );
@@ -686,7 +686,7 @@ class SceneManager{
 
         /**
          * Get every intersection points of multiple rays
-         * 
+         *
          * @param {Array} raysCrossing an array filled with Ray objects
          * @returns {Array} an array of points which are all the intersection poins of the rays in raysCrossing array
          */
@@ -710,7 +710,7 @@ class SceneManager{
 
         /**
          * Sort the array of vertices passed as an argument so that they are ordered according to the convex shape they create
-         * 
+         *
          * @param {Array} coveredPoints array of vertices of a convex shape
          * @param {Vector3} planeNormal normal of the plane in which the shape is inscribed
          */
@@ -727,10 +727,10 @@ class SceneManager{
                 coveredPoints.sort((A,B) => {
                     const vectorA = new Vector3();
                     vectorA.subVectors(A, center);
-                
+
                     const vectorB = new Vector3();
                     vectorB.subVectors(B, center);
-                    
+
                     const dotProdA = Math.abs(vectorPerp.dot(vectorA)) > 0.001 ? vectorPerp.dot(vectorA) : 1;
                     const dotProdB = Math.abs(vectorPerp.dot(vectorB)) > 0.001 ? vectorPerp.dot(vectorB) : 1;
 
@@ -741,7 +741,7 @@ class SceneManager{
 
         /**
          * Calculate the area of a convex shape
-         * 
+         *
          * @param {Array} borderPoints array of Vector3 vertices of a convex shape. They must be ordered
          * @returns {float} value of area of the shape delimited by borderPoints
          */
@@ -749,15 +749,15 @@ class SceneManager{
         {
             let areaValue = 0;
             /** MATH PARAGRAPH
-             * 
+             *
              * If ABC is a triangle
              * vAB is the vector from A to B
              * vAC is the vector from A to C
              * A is the area value of the triangle
              *  A = (1/2) * || vAB ^ vAC ||
-             * 
+             *
              * In three js, a shape is drawn thanks to the triangles it is composed of
-             * The sum of the areas of those triangles gives the total area of the shape 
+             * The sum of the areas of those triangles gives the total area of the shape
              */
             for(let i = 1; i < borderPoints.length - 1; i++)
             {
@@ -787,7 +787,7 @@ class SceneManager{
         {
             const geometryArea = new BufferGeometry();
             const verticesArray = [];
-            
+
             for(let i = 1; i < coveredPoints.length - 1; i++)
             {
                 verticesArray.push(coveredPoints[i + 1].x);
@@ -807,7 +807,7 @@ class SceneManager{
 
             geometryArea.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
             const materialArea = new MeshBasicMaterial( {side: DoubleSide, color: color, transparent: true, opacity: 0.6, alphaTest: 0.5 } );
-            
+
             const areaCovered = new Mesh( geometryArea, materialArea );
             return(areaCovered);
         }
@@ -833,9 +833,9 @@ export { SceneManager }
 
 /**
  * Returns the ray intersection of plane1 and plane2
- * 
- * @param {Plane} plane1 
- * @param {Plane} plane2 
+ *
+ * @param {Plane} plane1
+ * @param {Plane} plane2
  * @returns {Ray} the intersection of the planes or -1 if planes are coincident or parrallel
  */
 function getIntersectionOfPlanes(plane1, plane2)
@@ -863,53 +863,53 @@ function getIntersectionOfPlanes(plane1, plane2)
     }
 
     /** MATH PARAGRAPH
-     * 
+     *
      * Planes equations are
      *  a1 * x + b1 * y + c1 * z + d1 = 0
      *  a2 * x + b2 * y + c2 * z + d2 = 0
-     * 
+     *
      * We want to get the all (x,y,z) triplet respecting both the equation (will be a 3D line)
-     * 
+     *
      * if a1 != 0 :
      *      // in this case, a1 and a2 are 'main' arguments for calculatePointOnIntersectionRayCoordinates function
      *      // mode argument is 'abc'
-     * 
+     *
      *      if a1 * b2 - a2 * b1 != 0
      *          // in this case, b1 and b2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
-     * 
+     *
      *          |                  a1 * x   =   - b1 * y - c1 * t - d1                            // from first plane equation
      *          |                  b2 * y   =   - a2 * x - c2 * t - d2                            // from second plane equation
      *          |                       z   =   t                                                 // 2 equations, 3 variables: one variable is a parameter
-     * 
+     *
      *          <=>
-     * 
+     *
      *          |                       x   =   (1/a1) * (- b1 * y - c1 * t - d1)                 // second coordinate that can be deduct
      *          | (a1 * b2 - a2 * b1) * y   =   (a2 * c1 - a1 * c2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
-     *          |                       z   =   t                                                 // param Variable 
-     * 
+     *          |                       z   =   t                                                 // param Variable
+     *
      *          t = 0 gives the origin of the ray, and normal1 ^ normal2 gives its direction
-     * 
-     * 
+     *
+     *
      *      if a1 * c2 - a2 * c1 != 0
      *          // in this case, c1 and c2 are 'secondary' arguments for calculatePointOnIntersectionRayCoordinates function
      *          // mode argument is 'acb'
-     * 
+     *
      *          |                  a1 * x   =   - b1 * t - c1 * z - d1                            // from first plane equation
      *          |                       y   =   t                                                 // 2 equations, 3 variables: one variable is a parameter
      *          |                  c2 * z   =   - a2 * x - b2 * t - d2                            // from second plane equation
-     * 
+     *
      *          <=>
-     * 
+     *
      *          |                       x   =   (1/a1) * (- b1 * t - c1 * z - d1)                 // second coordinate that can be deduct
      *          |                       y   =   t                                                 // param Variable
      *          | (a1 * c2 - a2 * c1) * z   =   (a2 * b1 - a1 * b2) * t + (a2 * d1 - a1 * d2)     // first coordinate that can be deduct
-     * 
+     *
      *          t = 0 gives the origin of the ray, and normal1 ^ normal2 gives its direction
-     * 
-     * 
+     *
+     *
      *      else means a1 * b2 - a2 * b1 = 0 AND a1 * c2 - a2 * c1 = 0 which means normals are colinear, and planes are parrallel or coincident.
      *      This case must have been avoided earlier
-     * 
+     *
      * Same for b1 != 0 and c1 != 0 (Normals of planes cannot be zero vectors. This case must have been avoided earlier)
      */
 
@@ -946,7 +946,7 @@ function getIntersectionOfPlanes(plane1, plane2)
             return -1;
         }
     }
-    
+
     else if(Math.abs(c1) > 0.001)
     {
         if(Math.abs(c1 * a2 - c2 * a1) > 0.001)
@@ -969,7 +969,7 @@ function getIntersectionOfPlanes(plane1, plane2)
         console.error("invalid parameters : one of the plane's normal is zero vector");
         return -1;
     }
-    
+
     /**
      * get a Ray object which represents the intersection of planes.
      * @param {string} mode Can be {'abc', 'acb', 'bca', 'bac', 'cab', 'cba'} depending on 'main', 'secondary' and third parameter. See math paragraph above.
@@ -1034,15 +1034,15 @@ function getIntersectionOfPlanes(plane1, plane2)
         switch(mode){
             case 'abc':
                 return new Vector3(secondDeduct, firstDeduct, paramVar);
-            case 'acb': 
+            case 'acb':
                 return new Vector3(secondDeduct, paramVar, firstDeduct);
             case 'bca':
                 return new Vector3(paramVar, secondDeduct, firstDeduct);
-            case 'bac': 
+            case 'bac':
                 return new Vector3(firstDeduct, secondDeduct, paramVar);
             case 'cab':
                 return new Vector3(firstDeduct, paramVar, secondDeduct);
-            case 'cba': 
+            case 'cba':
                 return new Vector3(paramVar, firstDeduct, secondDeduct);
             default:
                 console.error("calculatePointsOnIntersectionRayCoordinates: the 'mode' argument is not valid");
@@ -1050,12 +1050,12 @@ function getIntersectionOfPlanes(plane1, plane2)
         }
     }
 }
- 
+
  /**
   * Returns the intersection point of ray1 and ray2
-  * 
-  * @param {Ray} ray1 
-  * @param {Ray} ray2 
+  *
+  * @param {Ray} ray1
+  * @param {Ray} ray2
   * @returns {Vector3} the intersection of the rays or -1 if rays do not cross or are coincident
   */
 function getIntersectionPointOfRays(ray1, ray2)
@@ -1064,7 +1064,7 @@ function getIntersectionPointOfRays(ray1, ray2)
     const d1 = ray1.direction;
     const o2 = ray2.origin;
     const d2 = ray2.direction;
-    
+
     const normal = new Vector3().crossVectors(d1,d2);
 
     //no intersection points if rays are parrallel or coincident
@@ -1075,35 +1075,35 @@ function getIntersectionPointOfRays(ray1, ray2)
     if(Math.abs(plane.distanceToPoint(o2)) > 0.001) return -1;
 
     /** MATH PARAGRAPH
-     * 
+     *
      * Every points of rays can be written as :
      *  o1 + d1 * t     for ray1
      *  o2 + d2 * t'    for ray2
-     * 
-     * We want to get t as 
+     *
+     * We want to get t as
      *  o1 + d1 * t = o2 + d2 * t'
-     * so we can calclate the intersection point of the rays: I = o1 + d1 * t 
-     * 
+     * so we can calclate the intersection point of the rays: I = o1 + d1 * t
+     *
      * We have those three equations:
      *  | o1.x + d1.x * t = o2.x + d2.x * t'
      *  | o1.x + d1.x * t = o2.x + d2.x * t'
      *  | o1.x + d1.x * t = o2.x + d2.x * t'
-     * 
+     *
      * if d2.x != 0:
-     * 
+     *
      *      t' = (1 / d2.x) * (d1.x * t + o1.x - o2.x)
-     *  
+     *
      *      if d2.x * d1.y - d2.y * d1.x != 0:
-     *          
+     *
      *          (d2.x * d1.y - d2.y * d1.x) * t = d2.y * (o1.x - o2.x) + d2.x * (o2.y - o1.y)
-     * 
+     *
      *      if d2.x * d1.z - d2.z * d1.x != 0:
-     *          
+     *
      *          (d2.x * d1.z - d2.z * d1.x) * t = d2.z * (o1.x - o2.x) + d2.x * (o2.z - o1.z)
-     * 
+     *
      *      else means d2.x * d1.y - d2.y * d1.x = 0 AND d2.x * d1.z - d2.z * d1.x = 0 which means rays are parrallel or coincident.
      *      This case must have been avoided earlier
-     * 
+     *
      * Same for d2.y != 0 and d2.z != 0 (Direction of lines cannot be zero vectors. This case must have been avoided earlier)
      */
 
