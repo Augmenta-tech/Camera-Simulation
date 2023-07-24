@@ -1,4 +1,9 @@
 import { splitVendorChunkPlugin, defineConfig } from 'vite'
+import { threeMinifier } from "@yushijinhun/three-minifier-rollup"
+
 export default defineConfig({
-  plugins: [splitVendorChunkPlugin()],
+    plugins: [
+        { ...threeMinifier(), enforce: "pre" },
+        splitVendorChunkPlugin()
+    ],
 })
