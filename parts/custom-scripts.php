@@ -12,7 +12,6 @@ $theme_url  = trailingslashit( get_stylesheet_directory_uri() );
  *  - Remove this when import maps will be widely supported
  */
 ?>
-<script src="https://code.iconify.design/2/2.1.0/iconify.min.js"></script>
 <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>
 <script type="importmap">
 {
