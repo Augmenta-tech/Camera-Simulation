@@ -133,11 +133,40 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
                 );
                 wp_enqueue_script( 'aug-form' );
 
-                // Remove bloat CSS
-                wp_deregister_style( 'skin-material' );
-                wp_deregister_style( 'main-styles' );
-                wp_deregister_style( 'dynamic-css' );
-                wp_deregister_style( 'redux-google-fonts-salient_redux' );
+                // Remove bloat CSS / JS from WP env to keep it as minimal / clean as possible
+
+                $unregister_list = array(
+                    '/wp-includes/css/dist',
+                    '/themes/salient/',
+                    '/uploads/',
+                    // '/wp-content/plugins/',
+                );
+
+                // Remove bloat CSS from WP env to keep it as minimal / clean as possible
+                global $wp_styles;
+                foreach( $wp_styles->queue as $style ) {
+                    $style_src = $wp_styles->registered[$style]->src ?? '';
+                    $style_handle = $wp_styles->registered[$style]->handle ?? '';
+                    if ( !$style_src ) continue;
+
+                    foreach ( $unregister_list as $unregister ) {
+                        if ( strpos( $style_src, $unregister ) !== false )
+                            wp_deregister_style( $style_handle );
+                    }
+                }
+
+                // Remove bloat JS from WP env to keep it as minimal / clean as possible
+                global $wp_scripts;
+                foreach( $wp_scripts->queue as $script ) {
+                    $script_src = $wp_scripts->registered[$script]->src ?? '';
+                    $script_handle = $wp_scripts->registered[$script]->handle ?? '';
+                    if ( !$script_src ) continue;
+
+                    foreach ($unregister_list as $unregister) {
+                        if ( strpos( $script_src, $unregister ) !== false )
+                            wp_deregister_script( $script_handle );
+                    }
+                }
 
             }
         }
@@ -157,9 +186,8 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
         public function ajax_submit_builder() {
 
             // Make sure we are getting a valid AJAX request
-            //! FIXME: Nonce are session based so you can't use it to check if you were a guest when page loaded then a logged-in user afterwards
-            // $nonce_data = wp_unslash( sanitize_text_field( acf_maybe_get_POST( 'nonce' ) ) );
-            // check_ajax_referer( $nonce_data, self::NONCE );
+            $nonce_data = wp_unslash( sanitize_text_field( acf_maybe_get_POST( 'nonce' ) ) );
+            if ( !$nonce_data || !wp_verify_nonce( $nonce_data, self::NONCE ) ) wp_send_json_error();
 
             // User data
             $lang  = wp_unslash( sanitize_text_field( acf_maybe_get_POST( 'lang' ) ) );

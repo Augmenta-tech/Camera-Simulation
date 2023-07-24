@@ -1,5 +1,4 @@
 <?php
-
 defined( 'ABSPATH' ) || exit;
 
 // Theme path / url
@@ -11,6 +10,8 @@ $theme_url  = trailingslashit( get_stylesheet_directory_uri() );
  *  - Import maps polyfill
  *  - Remove this when import maps will be widely supported
  */
+
+ // This code is mostly the equivalent of <body> inside "designer/index.html" file
 ?>
 <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>
 <script type="importmap">

@@ -1,10 +1,10 @@
 <?php
-
 defined( 'ABSPATH' ) || exit;
 
 $theme_url  = trailingslashit( get_stylesheet_directory_uri() );
 $theme_path = trailingslashit( get_stylesheet_directory() );
 
+// This code is mostly the equivalent of <body> inside "designer/index.html" file
 ?>
 <div class="row full-height">
 
