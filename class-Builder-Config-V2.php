@@ -133,8 +133,6 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
                 );
                 wp_enqueue_script( 'aug-form' );
 
-                // Remove bloat CSS / JS from WP env to keep it as minimal / clean as possible
-
                 $unregister_list = array(
                     '/wp-includes/css/dist',
                     '/themes/salient/',
