@@ -24,5 +24,7 @@ $theme_url  = trailingslashit( get_stylesheet_directory_uri() );
     }
 }
 </script>
-<script async type="module" src="<?php echo $theme_url; ?>builder-v2/designer/js/main.js"></script>
+<script type="module" crossorigin src="<?php echo $theme_url; ?>builder-v2/js/index-5ce38bd0.js"></script>
+<link rel="modulepreload" crossorigin href="<?php echo $theme_url; ?>builder-v2/js/vendor-7668f242.js">
+<!-- <script async type="module" src="<?php echo $theme_url; ?>builder-v2/designer/js/main.js"></script> -->
 <?php
