@@ -483,7 +483,7 @@ class Popup{
             else
             {
                 getCamerasTypes().filter(c => c.recommended).forEach(c => {
-                    const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                    const overlapHeightDetection = trackingMode === 'human-tracking' ? heightDetected : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                     if(checkCameraCoherence(givenHeight, overlapHeightDetection, trackingMode === 'hand-tracking' ? c.handFar : c.rangeFar, c.rangeNear))
                         { sensorsCompatible.push(c) }
                 })
@@ -657,7 +657,7 @@ class Popup{
                         case 'hand-tracking':
                         {
                             const sensor = getCamerasTypes().find(sensorType => sensorType.textId === sensorTextId);
-                            const overlapHeightDetection = trackingMode === 'human-tracking' ? SceneManager.DEFAULT_DETECTION_HEIGHT : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
+                            const overlapHeightDetection = trackingMode === 'human-tracking' ? heightDetected : SceneManager.HAND_TRACKING_OVERLAP_HEIGHT;
                             const config = calculateCameraConfig(trackingMode, sensor, givenWidth, givenLength, givenHeight, overlapHeightDetection);
                             if(!config){
                                 console.error('no config found with this setup');
@@ -712,7 +712,7 @@ class Popup{
         function selectFirstSensorAvailable()
         {
             const sensorsDiv = document.getElementById('multi-select-sensors');
-            if(!sensorsDiv) return;
+            if(!sensorsDiv.children[0]) return;
             sensorsDiv.value = sensorsDiv.children[0].value;
             createSceneFromSelectedSensor();
             //Old way
