@@ -1,9 +1,9 @@
 import { Vector2 } from 'three'
-import { getCamerasTypes, getLidarsTypes, units } from '/js/data.js';
+import { getCamerasTypes, getLidarsTypes, units } from '../data.js';
 
-import { SceneManager } from '/js/scene/SceneManager.js'
-import { Node } from '/js/scene/objects/sensors/Node.js';
-import { Lidar } from '/js/scene/objects/sensors/Lidar.js'
+import { SceneManager } from '../scene/SceneManager.js'
+import { Node } from '../scene/objects/sensors/Node.js';
+import { Lidar } from '../scene/objects/sensors/Lidar.js'
 
 class Wizard{
     constructor()

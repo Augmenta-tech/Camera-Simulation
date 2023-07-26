@@ -1,4 +1,4 @@
-import { getLidarsTypes, units } from '/js/data.js'
+import { getLidarsTypes, units } from '../data.js'
 
 class LidarUI{
     constructor(lidar, sceneManager)

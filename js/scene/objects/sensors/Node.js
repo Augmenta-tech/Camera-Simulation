@@ -9,7 +9,7 @@ import {
 } from 'three';
 import { TextGeometry } from 'three-text-geometry';
 
-import { getCamerasTypes } from '/js/data.js';
+import { getCamerasTypes } from '../../../data.js';
 
 import { SceneObjects } from '../SceneObjects.js';
 

@@ -19,13 +19,13 @@ import {
 } from 'three';
 import { DoubleSide } from 'three';
 import { FontLoader } from 'three-loaders/FontLoader.js';
-import { units } from '/js/data.js';
-import { Checkerboard } from '/js/scene/Checkerboard.js';
-import { SceneObjects } from '/js/scene/objects/SceneObjects.js';
-import { Node } from '/js/scene/objects/sensors/Node.js';
-import { Observable } from '/js/scene/Observable.js';
-import { TransformControls } from '/js/lib/TransformControls.js';
-import { ViewportManager } from '/js/ViewportManager.js';
+import { units } from '../data.js';
+import { Checkerboard } from './Checkerboard.js';
+import { SceneObjects } from './objects/SceneObjects.js';
+import { Node } from './objects/sensors/Node.js';
+import { Observable } from './Observable.js';
+import { TransformControls } from '../lib/TransformControls.js';
+import { ViewportManager } from '../ViewportManager.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';

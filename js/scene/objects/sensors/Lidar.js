@@ -10,7 +10,7 @@ import {
     Group
 } from 'three';
 
-import { getLidarsTypes, units } from '/js/data.js'
+import { getLidarsTypes, units } from '../../../data.js'
 
 
 class Lidar{
