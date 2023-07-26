@@ -1,6 +1,7 @@
 // set global variable
 window.camerasTypes = null;
 window.lidarsTypes = null;
+const path = window?.designerPath || './';
 
 function readJSONFile(file, callback) {
     var rawFile = new XMLHttpRequest();
@@ -21,7 +22,7 @@ export function getCamerasTypes()
     if(window.camerasTypes === null)
     {
         let result;
-        readJSONFile("/js/camera-data/camera-data.json", function(text){
+        readJSONFile(path + "js/camera-data/camera-data.json", function(text){
             const sensorsData = JSON.parse(text);
             result = sensorsData.sensors.cameras;
         
@@ -40,7 +41,7 @@ export function getLidarsTypes()
     if(window.lidarsTypes === null)
     {
         let result;
-        readJSONFile("/js/camera-data/camera-data.json", function(text){
+        readJSONFile(path + "js/camera-data/camera-data.json", function(text){
             const sensorsData = JSON.parse(text);
             result = sensorsData.sensors.lidars;
 

@@ -104,10 +104,10 @@ function loadModel(isBuilder, genre)
 
     };
 
-    const path = isBuilder ? './designer/' : './';
+    const path = './';
 
     new MTLLoader()
-    .setPath( path + 'models/'+ genre +'02/' )
+    .setPath( 'models/'+ genre +'02/' )
     .setRequestHeader({ "Content-Type" : "model/mtl"})
     .load( genre +'02.mtl', function ( materials ) {
 

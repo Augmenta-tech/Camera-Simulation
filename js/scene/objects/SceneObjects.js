@@ -12,7 +12,7 @@ import { Lidar } from './sensors/Lidar.js';
 class SceneObjects{
     static loadFont(isBuilder, callback)
     {
-        const path = isBuilder ? './designer/' : './';
+        const path = './';
         new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneObjects.font = response;
             callback();

@@ -1,5 +1,5 @@
-import { SceneManager } from '/js/scene/SceneManager.js';
-import { Node } from '/js/scene/objects/sensors/Node.js';
+import { SceneManager } from '../scene/SceneManager.js';
+import { Node } from '../scene/objects/sensors/Node.js';
 import { Wizard } from './Wizard.js';
 import { Popup } from './Popup.js';
 
