@@ -7,7 +7,7 @@ import {
     Color,
     Vector3
 } from 'three';
-import { TextGeometry } from 'three-text-geometry';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 import { getCamerasTypes } from '../../../data.js';
 
@@ -33,7 +33,7 @@ class Node{
 
         this.cameraPerspective = buildCamera(this.cameraType, mode, this.xPos, this.yPos, this.zPos, this.xRot, this.yRot, this.zRot);
         this.cameraPerspectiveHelper = new CameraHelper( this.cameraPerspective );
-    
+
         this.color = new Color(Math.random(), Math.random(), Math.random());
         this.mesh = buildMesh(this.color, this.xPos, this.yPos, this.zPos);
 
@@ -147,7 +147,7 @@ class Node{
             this.areaValueText.geometry.dispose();
             this.areaValueText.geometry = new TextGeometry( Math.round(this.areaValue*100)/100 + currentUnit.squaredLabel, { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * 2/3.0 * Math.sqrt(this.areaValue) / 3 / currentUnit.value, height: 0.01 } );
             //this.areaDisplay.geometry = new TextGeometry( "X: " + Math.round(this.XPos*currentUnit.value*100)/100 + currentUnit.label + ", Y: " + Math.round(this.ZPos*currentUnit.value*100)/100 + currentUnit.label, { font: Camera.font, size: Camera.SIZE_TEXT_CAMERA * 2/3.0, height: 0.01 } );
-        
+
             this.nameText.geometry.dispose();
             this.nameText.geometry = new TextGeometry("Node " + (this.id+1), { font: SceneObjects.font, size: Node.SIZE_TEXT_NODE * Math.sqrt(this.areaValue) / 3 / currentUnit.value, height: 0.01 } );
         }
