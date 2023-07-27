@@ -114,15 +114,18 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
                 $theme_path = trailingslashit( get_stylesheet_directory() );
                 $theme_url  = trailingslashit( get_stylesheet_directory_uri() );
 
+                $designer_path = $theme_path . 'builder-v2/designer/';
+                $designer_url  = $theme_url . 'builder-v2/designer/';
+
                 // CSS
-                wp_enqueue_style( 'aug-designer', "{$theme_url}builder-v2/designer/css/main.css", array(), filemtime( "{$theme_path}builder-v2/designer/css/main.css" ) );
                 wp_enqueue_style( 'aug-build-my-system', "{$theme_url}builder-v2/css/main.css", array(), filemtime( "{$theme_path}builder-v2/css/main.css" ) );
+                wp_enqueue_style( 'aug-designer', "{$designer_url}dist/index.css", array(), filemtime( "{$designer_path}dist/index.css" ) );
 
                 // JS
                 wp_enqueue_script( 'iconify', 'https://code.iconify.design/2/2.1.0/iconify.min.js', array(), '2.1.0', true );
                 wp_enqueue_script( 'es-module-shims', 'https://ga.jspm.io/npm:es-module-shims@1.5.9/dist/es-module-shims.js', array(), '1.5.9', true );
                 wp_enqueue_script( 'filesaver', 'https://cdn.rawgit.com/eligrey/FileSaver.js/5ed507ef8aa53d8ecfea96d96bc7214cd2476fd2/FileSaver.min.js', array(), '1.0.0', true );
-                wp_register_script( 'aug-form', "{$theme_url}builder-v2/js/form.js", array(), filemtime( "{$theme_path}builder-v2/js/form.js" ), true );
+                wp_register_script( 'aug-form', "{$designer_url}js/form.js", array(), filemtime( "{$designer_path}js/form.js" ), true );
                 wp_localize_script(
                     'aug-form',
                     'builder',
@@ -143,30 +146,35 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
 
                 // Remove bloat CSS from WP env to keep it as minimal / clean as possible
                 global $wp_styles;
-                foreach( $wp_styles->queue as $style ) {
-                    $style_src = $wp_styles->registered[$style]->src ?? '';
-                    $style_handle = $wp_styles->registered[$style]->handle ?? '';
-                    if ( !$style_src ) continue;
+                foreach ( $wp_styles->queue as $style ) {
+                    $style_src    = $wp_styles->registered[ $style ]->src ?? '';
+                    $style_handle = $wp_styles->registered[ $style ]->handle ?? '';
+                    if ( !$style_src ) {
+                        continue;
+                    }
 
                     foreach ( $unregister_list as $unregister ) {
-                        if ( strpos( $style_src, $unregister ) !== false )
+                        if ( strpos( $style_src, $unregister ) !== false ) {
                             wp_deregister_style( $style_handle );
+                        }
                     }
                 }
 
                 // Remove bloat JS from WP env to keep it as minimal / clean as possible
                 global $wp_scripts;
-                foreach( $wp_scripts->queue as $script ) {
-                    $script_src = $wp_scripts->registered[$script]->src ?? '';
-                    $script_handle = $wp_scripts->registered[$script]->handle ?? '';
-                    if ( !$script_src ) continue;
+                foreach ( $wp_scripts->queue as $script ) {
+                    $script_src    = $wp_scripts->registered[ $script ]->src ?? '';
+                    $script_handle = $wp_scripts->registered[ $script ]->handle ?? '';
+                    if ( !$script_src ) {
+                        continue;
+                    }
 
-                    foreach ($unregister_list as $unregister) {
-                        if ( strpos( $script_src, $unregister ) !== false )
+                    foreach ( $unregister_list as $unregister ) {
+                        if ( strpos( $script_src, $unregister ) !== false ) {
                             wp_deregister_script( $script_handle );
+                        }
                     }
                 }
-
             }
         }
 
@@ -186,7 +194,9 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
 
             // Make sure we are getting a valid AJAX request
             $nonce_data = wp_unslash( sanitize_text_field( acf_maybe_get_POST( 'nonce' ) ) );
-            if ( !$nonce_data || !wp_verify_nonce( $nonce_data, self::NONCE ) ) wp_send_json_error();
+            if ( !$nonce_data || !wp_verify_nonce( $nonce_data, self::NONCE ) ) {
+                wp_send_json_error();
+            }
 
             // User data
             $lang  = wp_unslash( sanitize_text_field( acf_maybe_get_POST( 'lang' ) ) );
@@ -465,7 +475,6 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
                 //                 [sceneName] => My super scene name
                 //                 [sceneDesc] => Custom message description
                 //             )
-
 
                 //     )
 

@@ -4,14 +4,27 @@
     <meta charset="UTF-8">
     <meta http-equiv="cache-control" content="no-store">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./css/main.css">
+    
     <link rel="shortcut icon" href="#">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <title>Augmenta designer (beta)</title>
-    <link rel="icon" href="img/augmenta-logo.png" type="image/png">
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAqCAYAAADBNhlmAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAKySURBVHgBzZg9aBRREMfnjI2RaCR+RURPRaOFQgiiCCciYmfE0lSiBkVELBQCQcRAqlhFK4sU0UIjWlirh4KVNn4VBvzAEz9AjUpEsXDyH/YCx5Gdee/tbvZ+8OeOu5n/m519vLdviVKCmRdAndBcaiRQ0GLoFvSHIyrQGWoUUMw9npljlDcoYi/H8wFqojxBATdZ5xDlBQYvsc1XqIUSMIfCOeUQ0wb10myDrqxhdz5CCymQ0A4OesS2Q6dptkA3iuzPROhcDOlgP/nTCp2lrKl27zeHIV1cRJ74drAPaqYwpIsnKSvk6qFfSod+QiPQfyXmL7SEsgDGV1jncjXO2l0GKG1gugz6ogwqnS1WY2WeTiqxMhdXuY7tOgf3Q0uV/0cLhcI7+VL9vKrEylxMb13k6EH0B+sU63I2GvHy7NhGaQCjXmOw0Zi8ASNviJICk2borTHQ2pjcdtbXzH/QOkoCDI4axY0Z+SNG/jAlAQavFXNZ77Yb+a2sr53S4c0UAhJ7WOeao8+g4XObQkDiuGG8y9FHTn3fFR/ZXVaTD0joNop76Ol33vC74eMnhg8Mw62efjIXJwzPbU5mlUplPesb/gsKAHnnjAKvuxp1GAX2UADIm290UcYsuRg1cfwtfkIJQP4F1rnvatTF0Zm2Frn6TkoA8udx9O5GY4ermRwtL0F3oGFoA6UAfPqNAsuUJyigxaGLJcoTFHDEKPARVKhP2gQdhHZzxm+lOHpK+mQUuac2Yajuz1fsu/34F3ncKLA8HXgxJuA5ZQzGeKrXyAck6I0S0EUZAv/DrHNXDk0rFI90zg3xyAOvdqc6pMBnSsA4ZQhOgJOkv+t5L23eyTPvvckPNQ5gnAL0OOYWd08H7YPK0DfoJdTH9etQtkWuhMZqGvUZOkGNBopaDm2p/W0Kr4exOjx5pAUAAAAASUVORK5CYII=" type="image/png">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./js/lib/three-js/build/three.module.js",
+        "three-loaders/": "./js/lib/three-js/examples/jsm/loaders/",
+        "three-text-geometry": "./js/lib/three-js/examples/jsm/geometries/TextGeometry.js",
+        "polybool": "./js/lib/polybooljs/dist/polybool.min.js"
+      }
+    }
+  </script>
+    <script type="module" crossorigin src="/index.js"></script>
+    <link rel="modulepreload" crossorigin href="/vendor.js">
+    <link rel="stylesheet" href="/index.css">
   </head>
 
   <body>
@@ -36,22 +49,22 @@
               <div class="tab-line"></div>
             </div>
           </div>
-
+  
           <!-- SETUP CONTENT -->
           <div id="setup-content" class="column builder-section">
             <!-- TRACKING MODE SELECTION -->
             <div id="tracking-mode-selection-builder" class="row wrap center-x center-y builder-section-content">
               <label id="tracking-mode-human-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="human-tracking" checked>
-                <img id="human-tracking-img" src="img/human-tracking.png" alt="Human tracking">
+                <img id="human-tracking-img" src="/human-tracking.png" alt="Human tracking">
               </label>
               <label id="tracking-mode-hand-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="hand-tracking">
-                <img id="hand-tracking-img" src="img/hand-tracking.png" alt="Hand tracking">
+                <img id="hand-tracking-img" src="/hand-tracking.png" alt="Hand tracking">
               </label>
               <label id="tracking-mode-wall-tracking-input" class="tracking-mode-choice">
                 <input type="radio" name="tracking-mode-selection-builder" value="wall-tracking">
-                <img id="wall-tracking-img" src="img/wall-tracking.png" alt="Wall tracking">
+                <img id="wall-tracking-img" src="/wall-tracking.png" alt="Wall tracking">
               </label>
               <!-- ADVANCED TRACKING MODE BUTTONS
               <label id="tracking-mode-advanced" class="tracking-mode-choice">
@@ -98,7 +111,7 @@
             <div id="setup-warning-message" class="row center-x hidden">
               <p id="setup-warning-text" class="warning-text">Please choose a surface to track</p>
             </div>
-
+  
             <!-- SETUP BUTTONS-->
             <div class="column center-x center-y builder-section-buttons">
               <div class="row center-x center-y nav-buttons">
@@ -110,13 +123,13 @@
               </div>
             </div>
           </div>
-
+  
           <!-- DIMENSIONS CONTENT -->
           <div id="dimensions-content" class="column builder-section hidden">
             <!-- DIMENSIONS INPUTS -->
             <div id="dimensions-section-builder" class="column center-y builder-section-content">
               <div id="gizmo-helper-image" class="row center-x center-y">
-                <img src="img/gizmo-helper.png" alt="Gizmo helper">
+                <img src="/gizmo-helper.png" alt="Gizmo helper">
               </div>
               <div id="dimensions-inputs" class="row wrap center-x center-y dimensions-inputs">
                 <div id="dimensions-width" class="column">
@@ -181,7 +194,7 @@
               </div>
             </div>
           </div>
-
+  
           <!-- HARDWARES CONTENT -->
           <div id="hardware-content" class="column builder-section hidden">
             <!-- HARDWARES SELECTION -->
@@ -248,7 +261,7 @@
               </div>
             </div>
           </div>
-
+  
           <!-- MY SYSTEM CONTENT -->
           <div id="my-system-content" class="column builder-section hidden">
             <!-- RECAP -->
@@ -280,7 +293,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> 
         <a id="close-popup" href="#0" class="cd-popup-close img-replace">Close</a>
       </div>
     </div>
@@ -295,7 +308,7 @@
           <!-- LOGO -->
           <div id="augmenta-link-logo">
             <a href="https://www.augmenta.tech">
-              <img id="augmenta-link-logo-img" src="img/augmenta-logo.png" alt="Augmenta">
+              <img id="augmenta-link-logo-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAqCAYAAADBNhlmAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAKySURBVHgBzZg9aBRREMfnjI2RaCR+RURPRaOFQgiiCCciYmfE0lSiBkVELBQCQcRAqlhFK4sU0UIjWlirh4KVNn4VBvzAEz9AjUpEsXDyH/YCx5Gdee/tbvZ+8OeOu5n/m519vLdviVKCmRdAndBcaiRQ0GLoFvSHIyrQGWoUUMw9npljlDcoYi/H8wFqojxBATdZ5xDlBQYvsc1XqIUSMIfCOeUQ0wb10myDrqxhdz5CCymQ0A4OesS2Q6dptkA3iuzPROhcDOlgP/nTCp2lrKl27zeHIV1cRJ74drAPaqYwpIsnKSvk6qFfSod+QiPQfyXmL7SEsgDGV1jncjXO2l0GKG1gugz6ogwqnS1WY2WeTiqxMhdXuY7tOgf3Q0uV/0cLhcI7+VL9vKrEylxMb13k6EH0B+sU63I2GvHy7NhGaQCjXmOw0Zi8ASNviJICk2borTHQ2pjcdtbXzH/QOkoCDI4axY0Z+SNG/jAlAQavFXNZ77Yb+a2sr53S4c0UAhJ7WOeao8+g4XObQkDiuGG8y9FHTn3fFR/ZXVaTD0joNop76Ol33vC74eMnhg8Mw62efjIXJwzPbU5mlUplPesb/gsKAHnnjAKvuxp1GAX2UADIm290UcYsuRg1cfwtfkIJQP4F1rnvatTF0Zm2Frn6TkoA8udx9O5GY4ermRwtL0F3oGFoA6UAfPqNAsuUJyigxaGLJcoTFHDEKPARVKhP2gQdhHZzxm+lOHpK+mQUuac2Yajuz1fsu/34F3ncKLA8HXgxJuA5ZQzGeKrXyAck6I0S0EUZAv/DrHNXDk0rFI90zg3xyAOvdqc6pMBnSsA4ZQhOgJOkv+t5L23eyTPvvckPNQ5gnAL0OOYWd08H7YPK0DfoJdTH9etQtkWuhMZqGvUZOkGNBopaDm2p/W0Kr4exOjx5pAUAAAAASUVORK5CYII=" alt="Augmenta">
             </a>
           </div>
 
@@ -306,7 +319,7 @@
 
           <!-- SHARE SECTION -->
           <!-- <div class="row center-x center-y"> -->
-
+          
           <!-- SHARE, CONTACT, HELP... BUTTONS -->
           <div id="header-buttons">
             <!-- LOAD FILE BUTTON -->
@@ -327,7 +340,7 @@
               <div id="share-modal-content" class="column center-x center-y modal-content">
                 <span id="close-share-modal" class="close">&times;</span>
                 <p id="copy-feedback-text" class="main-text">An URL of your scene has been copied to clipboard.</p>
-                <div class="center-x space-y">
+                <div class="center-x space-y">  
                   <div id="copy-scene-link" class="button main-button">
                     <span class="iconify main-icon" data-icon="ph:copy"></span>
                     <p> Copy to clipboard </p>
@@ -347,7 +360,7 @@
               </div>
             </div>
             <!-- END SHARE MODAL -->
-
+          
             <!-- CONTACT BUTTON -->
             <a id="contact-button" class="button main-button" href="https://augmenta.tech/contact/" target="_blank">
               <span class="iconify main-icon" data-icon="ci:mail"></span>
@@ -363,7 +376,7 @@
         <!-- VIEWPORT -->
         <div id="viewport">
           <pre id="file-content"></pre>
-          <!-- ADD TOOLS
+          <!-- ADD TOOLS 
           <div id="toolbar" class="row">
             <div data-tool="1" class="active">
               <span class="iconify" data-icon="fluent:cursor-20-filled"></span>
@@ -472,7 +485,7 @@
                   </div>
 
                   <!-- SCENE SECTION IN WIZARD -->
-
+                  
                   <!-- FLOOR SCENE -->
                   <div id="floor-scene-size-wizard">
                     <h3 id="floor-scene-size-title-wizard">Floor scene size</h3>
@@ -499,13 +512,13 @@
                   <!-- WALL Y SCENE -->
                   <div id="wall-y-scene-size-wizard" class="hidden">
                     <h3>Front wall scene size</h3>
-
+      
                     <!-- WIDTH INPUT -->
                     <div>
                       <p>Width (<span data-unittext="1">m</span>)</p>
                       <input id="input-wall-y-scene-width-wizard" type="number" placeholder="w" min="0" max="100" step = "0.1">
                     </div>
-
+      
                     <!-- HEIGHT INPUT -->
                     <div>
                       <p>Height (<span data-unittext="1">m</span>)</p>
@@ -534,7 +547,7 @@
             </div>
             <!-- END WIZARD MODAL -->
 
-            <img id="tracking-img" src="img/human-tracking.png" alt="Tracking image" class="tracking-img">
+            <img id="tracking-img" src="/human-tracking.png" alt="Tracking image" class="tracking-img">
             <h3 id="height-detection-text">Target overlap height detection: Hips</h3>
 
             <!-- TRACKING SECTION IN INSPECTOR -->
@@ -598,17 +611,17 @@
             <div id="info-table-height-inspector"></div>
 
               <div class="hidden">
-
+                
                 <!-- WALL Y SCENE -->
                 <div id="wall-y-scene-size-inspector">
                   <h3>Front wall scene size</h3>
-
+                  
                 <!-- WIDTH INPUT -->
                 <div>
                   <p>Width (<span data-unittext="1">m</span>)</p>
                   <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
                 </div>
-
+                
                 <!-- HEIGHT INPUT -->
                 <div>
                   <p>Height (<span data-unittext="1">m</span>)</p>
@@ -677,7 +690,7 @@
           // SHARE MODAL
           document.getElementById('share-modal-content').classList.add('dark-mode');
           document.getElementById('copy-feedback-text').classList.add('dark-mode');
-
+        
           // INSPECTOR
           const inspectorChilds = document.getElementById('inspector').getElementsByTagName("*");
           for(let i = 0; i < inspectorChilds.length; i++)
@@ -697,17 +710,8 @@
   <script type="esms-options">{ "polyfillEnable": ["json-modules"] }</script>
   <script async src="https://ga.jspm.io/npm:es-module-shims@1.5.9/dist/es-module-shims.js"></script>
   <script xmlns="http://www.w3.org/1999/xhtml" async="" src="https://cdn.rawgit.com/eligrey/FileSaver.js/5ed507ef8aa53d8ecfea96d96bc7214cd2476fd2/FileSaver.min.js"></script>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "./js/lib/three-js/build/three.module.js",
-        "three-loaders/": "./js/lib/three-js/examples/jsm/loaders/",
-        "three-text-geometry": "./js/lib/three-js/examples/jsm/geometries/TextGeometry.js",
-        "polybool": "./js/lib/polybooljs/dist/polybool.min.js"
-      }
-    }
-  </script>
+ 
 
-  <script type="module" src="js/main.js"></script>
-  <script type="module" src="js/UI/Popup.js"></script>
+  
+  
 </html>
