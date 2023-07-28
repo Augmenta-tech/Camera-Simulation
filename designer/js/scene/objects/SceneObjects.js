@@ -1,6 +1,6 @@
-import { FontLoader } from 'three-loaders/FontLoader.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
-import * as POLYBOOL from 'polybool';
+import * as POLYBOOL from 'polybooljs';
 
 import { NodeUI } from '../../UI/NodeUI.js';
 import { LidarUI } from '../../UI/LidarUI.js';
@@ -8,11 +8,13 @@ import { SceneManager } from '../SceneManager.js';
 import { Dummy, loadModel } from './props/Dummy.js';
 import { Node } from './sensors/Node.js';
 import { Lidar } from './sensors/Lidar.js';
+import {Cylinder} from './props/Cylinder.js';
+import {CylinderUI} from '../../UI/CylinderUI.js'
 
 class SceneObjects{
     static loadFont(isBuilder, callback)
     {
-        const path = isBuilder ? './designer/' : './';
+        const path = window?.designerPath || './';
         new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneObjects.font = response;
             callback();
@@ -29,7 +31,7 @@ class SceneObjects{
         this.nodeMeshes = [];
         this.lidarsMeshes = [];
         this.dummiesMeshes = [];
-        
+
         const givenAreaPolygonRegions = [[]];
 
         /* SCENE INITIALISATION */
@@ -37,7 +39,7 @@ class SceneObjects{
         this.initObjects = function()
         {
             const url = new URL(document.location.href);
-            
+
             const sceneInfoFromURL = url.searchParams.get("sceneData");
 
             if(!sceneInfoFromURL) //scene from cookie case
@@ -74,8 +76,8 @@ class SceneObjects{
         // TODO: dans deleteObject, vérifier la présence de l'objet mesh, et des méthodes et renvoyer un message clair "il faut les définir"
         /**
          * Remove an object from the scene and free its memory
-         * 
-         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method. 
+         *
+         * @param {Object} obj object to delete. Must have a "removeFromScene" and "dispose" method.
          */
         this.deleteObject = function(obj)
         {
@@ -133,7 +135,7 @@ class SceneObjects{
 
         /**
          * Add a node to the scene
-         * 
+         *
          * @param {boolean} autoConstruct Is this node added automatically or manually. Default is false (manually).
          * @param {string} mode 'human-tracking', 'hand-tracking', ...
          * @param {int} typeID Camera Type ID. See cameras.js. Default is defined in Node.js.
@@ -154,7 +156,7 @@ class SceneObjects{
             }
             const newCamera = new Node(nodes.length, mode, typeID, x, y, z, p, a, r)
             if(!isBuilder) newCamera.uiElement = new NodeUI(newCamera, sceneManager);
-            
+
             //Offset
             if(!autoConstruct)
             {
@@ -178,6 +180,14 @@ class SceneObjects{
 
             this.populateStorage();
         }
+        
+        this.addCylinder = function(){
+            //Add a cylinder to the scene
+            const newCylinder = new Cylinder(0, sceneManager.sceneWidth/2, sceneManager.sceneLength/2, 4, 2, sceneManager.sceneElevation, sceneManager.currentUnit.value);
+            newCylinder.addToScene(sceneManager.scene);
+            newCylinder.uiElement = new CylinderUI(newCylinder, sceneManager);
+        }
+        this.addCylinder();
 
         this.displayFrustums = function()
         {
@@ -221,8 +231,8 @@ class SceneObjects{
                 return;
             }
             const newLidar = new Lidar(lidars.length, typeID, x, z, r);
-            if(!isBuilder) newLidar.uiElement = new LidarUI(newLidar, sceneManager);
-            
+            newLidar.uiElement = new LidarUI(newLidar, sceneManager);
+
             //Offset
             if(!autoConstruct)
             {
@@ -268,7 +278,7 @@ class SceneObjects{
 
             this.populateStorage();
         }
-        
+
         this.removeLidar = function(lidar)
         {
             this.deleteObject(lidar);
@@ -276,6 +286,12 @@ class SceneObjects{
             this.lidarsMeshes = this.lidarsMeshes.filter(lm => lm != lidar.mesh)
 
             this.populateStorage();
+        }
+
+        this.removeCylinder = function(cylinder)
+        {
+            this.deleteObject(cylinder);
+            //this.populateStorage();
         }
 
         this.removeSensors = function()
@@ -305,7 +321,7 @@ class SceneObjects{
 
         /**
          * Create an url containing all the informations of the scene from sessionStorage json
-         * 
+         *
          * @returns the url of this scene
          */
         this.generateLink = function()
@@ -315,7 +331,7 @@ class SceneObjects{
 
             //Create an URL with a sceneData parameter with the string json of the scene
             url.searchParams.append("sceneData", sessionStorage.getItem('sceneInfos'));
-        
+
             return url;
         }
 
@@ -338,7 +354,7 @@ class SceneObjects{
                 mode = datas.trackingMode;
                 sceneManager.trackingMode = mode;
             }
-            
+
             if(datas.hasOwnProperty('sceneSize') && datas.sceneSize.length === 2)
             {
                 const sceneWidth = datas.sceneSize[0];
@@ -350,7 +366,7 @@ class SceneObjects{
                     {
                         const sceneWidthElement = document.getElementById("input-wall-y-scene-width-inspector");
                         if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
-                        
+
                         const sceneHeightElement = document.getElementById("input-wall-y-scene-height-inspector");
                         if(sceneHeightElement) sceneHeightElement.value = sceneLength;
                         sceneManager.updateWallYAugmentaSceneBorder(sceneWidth, sceneLength);
@@ -361,7 +377,7 @@ class SceneObjects{
                     {
                         const sceneWidthElement = document.getElementById("input-scene-width-inspector");
                         if(sceneWidthElement) sceneWidthElement.value = sceneWidth;
-                        
+
                         const sceneLengthElement = document.getElementById("input-scene-length-inspector");
                         if(sceneLengthElement) sceneLengthElement.value = sceneLength;
                         sceneManager.updateFloorAugmentaSceneBorder(sceneWidth, sceneLength);
@@ -437,10 +453,10 @@ class SceneObjects{
                 }
             }
         }
-        
+
         /**
          * Create a json format containing all the informations of the scene
-         * 
+         *
          * @returns scene infos in json format
          */
         this.generateJson = function()
@@ -493,7 +509,7 @@ class SceneObjects{
                     p_y: d.yPos,
                     p_z: d.zPos
                 };
-                
+
                 datas.objects.dummies.push(dummiesData);
             });
 
@@ -512,7 +528,7 @@ class SceneObjects{
 
         /**
          * Calculate the area covered by node and compare it to the scene size
-         * 
+         *
          * @returns {boolean} whether the scene is fully tracked by nodes or not
          */
         this.doesCoverArea = function()
@@ -535,7 +551,7 @@ class SceneObjects{
                 });
 
                 //union = PolyBool.union(union, polyCam);
-                
+
                 const segmentsCam = PolyBool.segments(polyCam);
                 const segmentsUnion = PolyBool.segments(union);
                 const comb = PolyBool.combine(segmentsCam, segmentsUnion);
@@ -565,7 +581,7 @@ class SceneObjects{
             });
         }
         SceneObjects.loadFont(isBuilder, () => SceneManager.loadFont(isBuilder, () => sceneManager.initAugmentaScene()));
-        
+
         loadModel(isBuilder, 'male');
         loadModel(isBuilder, 'female');
     }

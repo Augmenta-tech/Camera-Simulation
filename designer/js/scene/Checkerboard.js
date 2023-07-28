@@ -11,10 +11,10 @@ import {
     Vector3
 } from 'three';
 import { DoubleSide } from 'three';
-import { TextGeometry } from 'three-text-geometry';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
-import { units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js'
-import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js'
+import { units } from '../data.js'
+import { SceneManager } from './SceneManager.js'
 
 class Checkerboard{
     static SIZE_TEXT_SCENE = 0.3;

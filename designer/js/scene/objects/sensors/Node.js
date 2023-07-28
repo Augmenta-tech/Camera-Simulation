@@ -7,11 +7,11 @@ import {
     Color,
     Vector3
 } from 'three';
-import { TextGeometry } from 'three-text-geometry';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
-import { getCamerasTypes } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js';
+import { getCamerasTypes } from '../../../data.js';
 
-import { SceneObjects } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/SceneObjects.js';
+import { SceneObjects } from '../SceneObjects.js';
 
 class Node{
     static DEFAULT_CAMERA_TYPE_ID = 0;

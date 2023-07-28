@@ -125,7 +125,7 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
                 wp_enqueue_script( 'iconify', 'https://code.iconify.design/2/2.1.0/iconify.min.js', array(), '2.1.0', true );
                 wp_enqueue_script( 'es-module-shims', 'https://ga.jspm.io/npm:es-module-shims@1.5.9/dist/es-module-shims.js', array(), '1.5.9', true );
                 wp_enqueue_script( 'filesaver', 'https://cdn.rawgit.com/eligrey/FileSaver.js/5ed507ef8aa53d8ecfea96d96bc7214cd2476fd2/FileSaver.min.js', array(), '1.0.0', true );
-                wp_register_script( 'aug-form', "{$designer_url}js/form.js", array(), filemtime( "{$designer_path}js/form.js" ), true );
+                wp_register_script( 'aug-form', "{$theme_url}builder-v2/js/form.js", array(), filemtime( "{$theme_path}builder-v2/js/form.js" ), true );
                 wp_localize_script(
                     'aug-form',
                     'builder',

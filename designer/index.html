@@ -8,7 +8,7 @@
     <link rel="shortcut icon" href="#">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
     <title>Augmenta designer (beta)</title>
     <link rel="icon" href="img/augmenta-logo.png" type="image/png">
@@ -36,7 +36,7 @@
               <div class="tab-line"></div>
             </div>
           </div>
-
+  
           <!-- SETUP CONTENT -->
           <div id="setup-content" class="column builder-section">
             <!-- TRACKING MODE SELECTION -->
@@ -98,7 +98,7 @@
             <div id="setup-warning-message" class="row center-x hidden">
               <p id="setup-warning-text" class="warning-text">Please choose a surface to track</p>
             </div>
-
+  
             <!-- SETUP BUTTONS-->
             <div class="column center-x center-y builder-section-buttons">
               <div class="row center-x center-y nav-buttons">
@@ -110,7 +110,7 @@
               </div>
             </div>
           </div>
-
+  
           <!-- DIMENSIONS CONTENT -->
           <div id="dimensions-content" class="column builder-section hidden">
             <!-- DIMENSIONS INPUTS -->
@@ -181,7 +181,7 @@
               </div>
             </div>
           </div>
-
+  
           <!-- HARDWARES CONTENT -->
           <div id="hardware-content" class="column builder-section hidden">
             <!-- HARDWARES SELECTION -->
@@ -248,7 +248,7 @@
               </div>
             </div>
           </div>
-
+  
           <!-- MY SYSTEM CONTENT -->
           <div id="my-system-content" class="column builder-section hidden">
             <!-- RECAP -->
@@ -280,7 +280,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> 
         <a id="close-popup" href="#0" class="cd-popup-close img-replace">Close</a>
       </div>
     </div>
@@ -306,7 +306,7 @@
 
           <!-- SHARE SECTION -->
           <!-- <div class="row center-x center-y"> -->
-
+          
           <!-- SHARE, CONTACT, HELP... BUTTONS -->
           <div id="header-buttons">
             <!-- LOAD FILE BUTTON -->
@@ -327,7 +327,7 @@
               <div id="share-modal-content" class="column center-x center-y modal-content">
                 <span id="close-share-modal" class="close">&times;</span>
                 <p id="copy-feedback-text" class="main-text">An URL of your scene has been copied to clipboard.</p>
-                <div class="center-x space-y">
+                <div class="center-x space-y">  
                   <div id="copy-scene-link" class="button main-button">
                     <span class="iconify main-icon" data-icon="ph:copy"></span>
                     <p> Copy to clipboard </p>
@@ -347,7 +347,7 @@
               </div>
             </div>
             <!-- END SHARE MODAL -->
-
+          
             <!-- CONTACT BUTTON -->
             <a id="contact-button" class="button main-button" href="https://augmenta.tech/contact/" target="_blank">
               <span class="iconify main-icon" data-icon="ci:mail"></span>
@@ -363,7 +363,7 @@
         <!-- VIEWPORT -->
         <div id="viewport">
           <pre id="file-content"></pre>
-          <!-- ADD TOOLS
+          <!-- ADD TOOLS 
           <div id="toolbar" class="row">
             <div data-tool="1" class="active">
               <span class="iconify" data-icon="fluent:cursor-20-filled"></span>
@@ -472,7 +472,7 @@
                   </div>
 
                   <!-- SCENE SECTION IN WIZARD -->
-
+                  
                   <!-- FLOOR SCENE -->
                   <div id="floor-scene-size-wizard">
                     <h3 id="floor-scene-size-title-wizard">Floor scene size</h3>
@@ -499,13 +499,13 @@
                   <!-- WALL Y SCENE -->
                   <div id="wall-y-scene-size-wizard" class="hidden">
                     <h3>Front wall scene size</h3>
-
+      
                     <!-- WIDTH INPUT -->
                     <div>
                       <p>Width (<span data-unittext="1">m</span>)</p>
                       <input id="input-wall-y-scene-width-wizard" type="number" placeholder="w" min="0" max="100" step = "0.1">
                     </div>
-
+      
                     <!-- HEIGHT INPUT -->
                     <div>
                       <p>Height (<span data-unittext="1">m</span>)</p>
@@ -598,17 +598,17 @@
             <div id="info-table-height-inspector"></div>
 
               <div class="hidden">
-
+                
                 <!-- WALL Y SCENE -->
                 <div id="wall-y-scene-size-inspector">
                   <h3>Front wall scene size</h3>
-
+                  
                 <!-- WIDTH INPUT -->
                 <div>
                   <p>Width (<span data-unittext="1">m</span>)</p>
                   <input id="input-wall-y-scene-width-inspector" type="number" placeholder="w" min="0" max="100" step = "0.1" disabled>
                 </div>
-
+                
                 <!-- HEIGHT INPUT -->
                 <div>
                   <p>Height (<span data-unittext="1">m</span>)</p>
@@ -625,6 +625,10 @@
             <div class="row" id="coverage-section">
               <p class="scene-fully-covered-text">Scene fully covered: </p>
               <span id="scene-fully-covered-icon" class="iconify-inline" data-icon="ion:checkmark-circle-sharp"></span>
+            </div>
+
+            <div id="cylinder-section">
+              <!-- Injected from CylinderUI.js -->
             </div>
 
             <!-- NUMBER OF NODES FEEDBACK -->
@@ -677,7 +681,7 @@
           // SHARE MODAL
           document.getElementById('share-modal-content').classList.add('dark-mode');
           document.getElementById('copy-feedback-text').classList.add('dark-mode');
-
+        
           // INSPECTOR
           const inspectorChilds = document.getElementById('inspector').getElementsByTagName("*");
           for(let i = 0; i < inspectorChilds.length; i++)
@@ -706,7 +710,7 @@
         "polybool": "./js/lib/polybooljs/dist/polybool.min.js"
       }
     }
-  </script>
+  </script> 
 
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/UI/Popup.js"></script>

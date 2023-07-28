@@ -18,14 +18,14 @@ import {
     ObjectSpaceNormalMap
 } from 'three';
 import { DoubleSide } from 'three';
-import { FontLoader } from 'three-loaders/FontLoader.js';
-import { units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js';
-import { Checkerboard } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/Checkerboard.js';
-import { SceneObjects } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/SceneObjects.js';
-import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js';
-import { Observable } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/Observable.js';
-import { TransformControls } from '/wp-content/themes/salient-child/builder-v2/designer/js/lib/TransformControls.js';
-import { ViewportManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/ViewportManager.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { units } from '../data.js';
+import { Checkerboard } from './Checkerboard.js';
+import { SceneObjects } from './objects/SceneObjects.js';
+import { Node } from './objects/sensors/Node.js';
+import { Observable } from './Observable.js';
+import { TransformControls } from '../lib/TransformControls.js';
+import { ViewportManager } from '../ViewportManager.js';
 
 //DEBUG
 import { SphereGeometry } from 'three';
@@ -49,7 +49,7 @@ class ObservableParameter extends Observable {
 class SceneManager{
     static loadFont(isBuilder, callback)
     {
-        const path = './';
+        const path = window?.designerPath || './';
         new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneManager.font = response;
             callback();

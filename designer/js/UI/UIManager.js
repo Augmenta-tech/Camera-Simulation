@@ -1,7 +1,7 @@
-import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js';
-import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js';
-import { Wizard } from '/wp-content/themes/salient-child/builder-v2/designer/js/UI/Wizard.js';
-import { Popup } from '/wp-content/themes/salient-child/builder-v2/designer/js/UI/Popup.js';
+import { SceneManager } from '../scene/SceneManager.js';
+import { Node } from '../scene/objects/sensors/Node.js';
+import { Wizard } from './Wizard.js';
+import { Popup } from './Popup.js';
 
 class UIManager{
     constructor()
@@ -20,7 +20,7 @@ class UIManager{
             /* HANDLE BUTTONS */
             const toggleUnitButton = document.getElementById('toggle-unit-button');
             if(toggleUnitButton) toggleUnitButton.addEventListener('click', () => viewportManager.sceneManager.toggleUnit());
-
+            
             const frustumButton = document.getElementById('display-frustums-button');
             if(frustumButton) frustumButton.addEventListener('click', () => viewportManager.sceneManager.objects.displayFrustums());
             const lidarRaysButton = document.getElementById('display-lidars-rays-button');
@@ -79,11 +79,11 @@ class UIManager{
             //     sceneManager.trackingModeObservable.set(mode);
             //     scope.displayWarning(sceneManager);
             // });
-
+            
             // document.getElementById("overlap-height-selection-inspector").addEventListener('change', () => {
             //     sceneManager.heightDetectedObservable.set(parseFloat(document.getElementById("overlap-height-selection-inspector").value));
             // });
-
+            
             //this.wizard.bindEventListeners(viewportManager, this);
         }
 
@@ -97,7 +97,7 @@ class UIManager{
             //     { inputs[i].dataset.unit = SceneManager.DEFAULT_UNIT.value; }
 
             document.getElementById('scene-file-name-input').value = '';
-
+            
             //INSPECTOR INPUTS
             //document.getElementById("tracking-mode-selection-inspector").value = SceneManager.DEFAULT_TRACKING_MODE;
             document.getElementById('overlap-height-selection-inspector').value = SceneManager.DEFAULT_DETECTION_HEIGHT;
@@ -137,7 +137,7 @@ class UIManager{
                 console.log("file name ok");
                 const illegalSymbols = ['*', '.', '"', '/', '\\', '[', ']', ':', ';', '|', ',', '?', '<', '>'];
                 const fileName = fileNameInput.value.toString();
-
+                
                 for(let i = 0; i < illegalSymbols.length; i++)
                 {
                     const s = illegalSymbols[i];
@@ -183,9 +183,9 @@ class UIManager{
             //console.log('Setting tracking mode UI to ', trackingMode);
             //Displayed image
             document.getElementById("tracking-img").src = "img/" + String(trackingMode) + ".png";
-
+            
             switch (trackingMode) {
-                case 'hand-tracking':
+                case 'hand-tracking': 
                     document.getElementById("coverage-section").classList.remove("hidden");
                     document.getElementById("height-detection-text").classList.add("hidden");
                     document.getElementById('scene-size-text-div').innerHTML= '<h3 id="scene-size-text">Scene size: <span data-unit=1>' + sceneManager.sceneWidth +'</span>x<span data-unit=1>'+ sceneManager.sceneWidth +'</span><span data-unittext="1">m</span> with a sensor height of <span data-unit="1">' + sceneManager.sceneSensorHeight + '</span><span data-unittext="1">m</span></h3>';
@@ -223,7 +223,7 @@ class UIManager{
                     const infoTableElemInspector = document.getElementById('info-table-height-inspector');
 
                     infoTableElemInspector.innerHTML = `<h3>The table is <span data-unit=1>` + SceneManager.TABLE_ELEVATION +`</span><span data-unittext=1>m</span> high</h3>`;
-
+                    
                     infoTableElemInspector.classList.remove("hidden");
                     break;
                 case 'wall-tracking':
@@ -266,7 +266,7 @@ class UIManager{
                     break;
                 case 1.6:
                     text = "Target overlap height detection: Shoulders"
-                    break;
+                    break; 
                 case 2:
                     text = "Target overlap height detection: Entire body"
                     break;
@@ -287,7 +287,7 @@ class UIManager{
             coversUI.dataset.icon = coversArea ? "ion:checkmark-circle-sharp" : "ion:close-circle";
             coversUI.style = coversArea ? "color: #2b2;" : "color: #b22;";
         }
-
+        
         function changeNumberOfNodes(sceneManager)
         {
             document.getElementById('number-nodes-value').innerHTML = sceneManager.objects.getNbSensors();

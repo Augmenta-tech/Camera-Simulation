@@ -12,8 +12,8 @@ import {
     sRGBEncoding
 } from 'three';
 
-import { OrbitControls } from '/wp-content/themes/salient-child/builder-v2/designer/js/lib/OrbitControls.js';
-import { OrbitControlsGizmo } from '/wp-content/themes/salient-child/builder-v2/designer/js/lib/OrbitControlsGizmo.js';
+import { OrbitControls } from './lib/OrbitControls.js';
+import { OrbitControlsGizmo } from './lib/OrbitControlsGizmo.js';
 
 class ViewportManager{
     static DEFAULT_CAM_POSITION = new Vector3(12,8,12);
@@ -23,7 +23,7 @@ class ViewportManager{
 
         let viewportWidth = viewportElement.offsetWidth;
         let viewportHeight = viewportElement.offsetHeight;
-
+        
         const renderer = buildRenderer();
         this.renderer = renderer;
 
@@ -97,10 +97,10 @@ class ViewportManager{
                     (event.clientX / viewportElement.offsetWidth) * 2 - 1,
                     - ((event.clientY - document.getElementById('header').offsetHeight) / viewportElement.offsetHeight) * 2 + 1
                 );
-
+                
                 const raycaster = new Raycaster()
                 raycaster.setFromCamera( pointer, scope.activeCamera );
-
+                
                 const meshes = scope.sceneManager.objects.nodeMeshes.concat(scope.sceneManager.objects.dummiesMeshes).concat(scope.sceneManager.objects.lidarsMeshes);
 
                 const intersect = raycaster.intersectObjects( meshes, false );
@@ -152,12 +152,12 @@ class ViewportManager{
             renderer.setPixelRatio( window.devicePixelRatio );
             renderer.setSize( viewportWidth, viewportHeight );
             containerElement.appendChild( renderer.domElement );
-
+        
             renderer.shadowMap.enabled = true;
-
+        
             renderer.shadowMap.type = PCFSoftShadowMap;
             renderer.outputEncoding = sRGBEncoding;
-
+        
             renderer.autoClear = false;
 
             return renderer;
@@ -171,14 +171,14 @@ class ViewportManager{
             perspectiveCamera.position.copy(ViewportManager.DEFAULT_CAM_POSITION);
             return perspectiveCamera;
         }
-
+    
         function buildOrthoCamera(frustumSize, aspect)
         {
             const orthographicCamera = new OrthographicCamera( -frustumSize, frustumSize, frustumSize / aspect, -frustumSize / aspect, 0.2, 10000);
             orthographicCamera.position.set(0,0,10);
             return orthographicCamera;
         }
-
+    
 
         /* CONTROLS */
         function buildOrbitControls()
@@ -202,8 +202,8 @@ class ViewportManager{
 
         /**
          * Change the position of the active camera
-         *
-         * @param {Vector3} newPos
+         * 
+         * @param {Vector3} newPos 
          */
         this.placeCamera = function(newPos = ViewportManager.DEFAULT_CAM_POSITION)
         {
@@ -214,9 +214,9 @@ class ViewportManager{
 
         /**
          * Change the postion of the camera and allow to switch from perspective to orthogaphic.
-         *
-         * @param {Vector3} newPos
-         * @param {boolean} changeCameraType
+         * 
+         * @param {Vector3} newPos 
+         * @param {boolean} changeCameraType 
          */
         this.setupCameraChangement = function (changeCameraType = true, newPos = ViewportManager.DEFAULT_CAM_POSITION)
         {
@@ -246,19 +246,19 @@ class ViewportManager{
             viewportWidth = viewportElement.offsetWidth;
             viewportHeight = viewportElement.offsetHeight;
             aspect = viewportWidth / viewportHeight;
-
+        
             renderer.setSize( viewportWidth, viewportHeight );
-
+        
             perspCam.aspect = aspect;
             perspCam.updateProjectionMatrix();
-
+        
             orthoCam.left = - frustumSize/ 2.0;
             orthoCam.right = frustumSize / 2.0;
             orthoCam.top = frustumSize / (2.0 * aspect);
             orthoCam.bottom = - frustumSize / (2.0 * aspect);
             orthoCam.updateProjectionMatrix();
         }
-
+        
     /* RENDER */
         this.render = function()
         {

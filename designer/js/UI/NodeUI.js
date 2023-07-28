@@ -1,7 +1,7 @@
 import { Vector3 } from 'three'
 
-import { getCamerasTypes, units } from '/wp-content/themes/salient-child/builder-v2/designer/js/data.js'
-import { Node } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/objects/sensors/Node.js'
+import { getCamerasTypes, units } from '../data.js'
+import { Node } from '../scene/objects/sensors/Node.js'
 
 class NodeUI{
     constructor(node, sceneManager)
@@ -17,10 +17,10 @@ class NodeUI{
                 cameraTypesOptions += optionElement;
                 cameraTypesOptions += "</option>"
             });
-
+        
             const nodeUIdiv = document.createElement('div');
             nodeUIdiv.classList.add("sensorUI");
-
+            
             nodeUIdiv.id = 'node-' + (node.id) + '-UI';
             nodeUIdiv.innerHTML = `
                 <div id="node-` + (node.id) + `-UI-header" class="row center-x-spaced center-y">
@@ -30,7 +30,7 @@ class NodeUI{
                     </div>
                     <div class="row center-y">
                         <!-- <div id="node-` + (node.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
-                        <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div>
+                        <div id="node-` + (node.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                         <div id="node-` + (node.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
                         <div id="node-` + (node.id) + `-delete"><span class="iconify" data-icon="fluent:delete-16-filled"></span></div>
@@ -88,19 +88,19 @@ class NodeUI{
 
         function bindEventListeners()
         {
-
+            
             makeElementDraggable(document.getElementById("node-x-pos-" + node.id));
             makeElementDraggable(document.getElementById("node-y-pos-" + node.id));
             makeElementDraggable(document.getElementById("node-z-pos-" + node.id));
             makeElementDraggable(document.getElementById("node-x-rot-" + node.id));
             makeElementDraggable(document.getElementById("node-y-rot-" + node.id));
             makeElementDraggable(document.getElementById("node-z-rot-" + node.id));
-
-
+        
+    
             document.getElementById('node-' + (node.id) + '-hide-UI').addEventListener('click', () => hideUICam());
             document.getElementById('node-' + (node.id) + '-visible').addEventListener('click', () => node.changeVisibility());
             document.getElementById('node-' + (node.id) + '-delete').addEventListener('click', () => sceneManager.objects.removeNode(node))
-
+        
             document.getElementById('cam-type-' + node.id).addEventListener('change', () => changeCameraType());
         }
 
@@ -111,8 +111,8 @@ class NodeUI{
             let diffX = 0;
             element.onmousedown = dragMouseDown;
             let dragged = false;
-
-
+        
+        
             function dragMouseDown(e) {
                 valueElement = element.getElementsByTagName('strong')[0];
                 value = parseFloat(valueElement.innerHTML);
@@ -125,7 +125,7 @@ class NodeUI{
                 document.onmouseup = closeDragElement;
                 document.onmousemove = elementDrag;
             }
-
+        
             function elementDrag(e) {
                 dragged = true;
                 e = e || window.event;
@@ -133,7 +133,7 @@ class NodeUI{
                 // calculate the new cursor position:
                 diffX = e.clientX - mousePosX;
                 mousePosX = e.clientX;
-
+        
                 let fac = 1;
                 switch(element.id.split('-')[2])
                 {
@@ -147,10 +147,10 @@ class NodeUI{
                         fac = 1;
                         break;
                 }
-
+        
                 value += diffX * fac;
                 valueElement.innerHTML = Math.round(value*100)/100.0;
-
+        
                 switch(element.id.split('-')[1])
                 {
                     case "x":
@@ -205,7 +205,7 @@ class NodeUI{
                         break;
                 }
             }
-
+        
             function closeDragElement() {
                 if(valueElement.classList.contains('underlined')) valueElement.classList.remove('underlined');
                 /* stop changing when mouse button is released:*/
@@ -213,7 +213,7 @@ class NodeUI{
                 document.onmousemove = null;
 
                 sceneManager.objects.populateStorage();
-
+        
                 /*on clic, change the value with an input*/
                 /* WIP
                 if(!dragged)

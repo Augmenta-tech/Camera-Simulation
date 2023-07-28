@@ -1,4 +1,7 @@
-import { Engine } from '/wp-content/themes/salient-child/builder-v2/designer/js/Engine.js';
+import { Engine } from './Engine.js';
+
+//Modify this to set up your base url for assets
+//window.designerPath = "./Camera-Simulation/"
 
 const main = new Engine();
 

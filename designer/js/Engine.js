@@ -1,10 +1,10 @@
-import { UIManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/UI/UIManager.js';
-import { SceneManager } from '/wp-content/themes/salient-child/builder-v2/designer/js/scene/SceneManager.js';
+import { UIManager } from './UI/UIManager.js';
+import { SceneManager } from './scene/SceneManager.js';
 
 class Engine{
     constructor(isBuilder = false)
     {
-        /* initialize ui */
+        /* initialize ui */ 
         this.uiManager = isBuilder ? undefined : new UIManager();
         const uiManager = this.uiManager;
 

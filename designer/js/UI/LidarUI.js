@@ -14,10 +14,10 @@ class LidarUI{
                 lidarTypesOptions += optionElement;
                 lidarTypesOptions += "</option>"
             });
-
+        
             const lidarUIdiv = document.createElement('div');
             lidarUIdiv.classList.add("sensorUI");
-
+            
             lidarUIdiv.id = 'lidar-' + (lidar.id) + '-UI';
             lidarUIdiv.innerHTML = `
                 <div id="lidar-` + (lidar.id) + `-UI-header" class="row center-x-spaced center-y">
@@ -27,7 +27,7 @@ class LidarUI{
                     </div>
                     <div class="row center-y">
                         <!-- <div id="lidar-` + (lidar.id) + `-solo-button"><span class="iconify" data-icon="bx:search-alt-2"></span></div> -->
-                        <div id="lidar-` + (lidar.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div>
+                        <div id="lidar-` + (lidar.id) + `-hide-UI"><span class="iconify" data-icon="bx:minus"></span></div> 
                         <div id="lidar-` + (lidar.id) + `-visible"><span class="iconify" data-icon="akar-icons:eye-open"></span></div>
                         <!-- <div><span class="iconify" data-icon="fluent:lock-open-16-regular"></span></div> -->
                         <div id="lidar-` + (lidar.id) + `-delete"><span class="iconify" data-icon="fluent:delete-16-filled"></span></div>
@@ -76,12 +76,12 @@ class LidarUI{
             makeElementDraggable(document.getElementById("lidar-x-pos-" + lidar.id));
             makeElementDraggable(document.getElementById("lidar-z-pos-" + lidar.id));
             makeElementDraggable(document.getElementById("lidar-y-rot-" + lidar.id));
-
-
+        
+    
             document.getElementById('lidar-' + (lidar.id) + '-hide-UI').addEventListener('click', () => hideUILidar());
             document.getElementById('lidar-' + (lidar.id) + '-visible').addEventListener('click', () => lidar.changeVisibility());
             document.getElementById('lidar-' + (lidar.id) + '-delete').addEventListener('click', () => sceneManager.objects.removeLidar(lidar));
-
+        
             document.getElementById('lidar-type-' + lidar.id).addEventListener('change', () => changeLidarType());
         }
 
@@ -92,8 +92,8 @@ class LidarUI{
             let diffX = 0;
             element.onmousedown = dragMouseDown;
             let dragged = false;
-
-
+        
+        
             function dragMouseDown(e) {
                 valueElement = element.getElementsByTagName('strong')[0];
                 value = parseFloat(valueElement.innerHTML);
@@ -106,7 +106,7 @@ class LidarUI{
                 document.onmouseup = closeDragElement;
                 document.onmousemove = elementDrag;
             }
-
+        
             function elementDrag(e) {
                 dragged = true;
                 e = e || window.event;
@@ -114,7 +114,7 @@ class LidarUI{
                 // calculate the new cursor position:
                 diffX = e.clientX - mousePosX;
                 mousePosX = e.clientX;
-
+        
                 let fac = 1;
                 switch(element.id.split('-')[2])
                 {
@@ -128,10 +128,10 @@ class LidarUI{
                         fac = 1;
                         break;
                 }
-
+        
                 value += diffX * fac;
                 valueElement.innerHTML = Math.round(value*100)/100.0;
-
+        
                 switch(element.id.split('-')[1])
                 {
                     case "x":
@@ -173,7 +173,7 @@ class LidarUI{
                         break;
                 }
             }
-
+        
             function closeDragElement() {
                 if(valueElement.classList.contains('underlined')) valueElement.classList.remove('underlined');
                 /* stop changing when mouse button is released:*/
@@ -181,7 +181,7 @@ class LidarUI{
                 document.onmousemove = null;
 
                 sceneManager.objects.populateStorage();
-
+        
                 /*on clic, change the value with an input*/
                 /* WIP
                 if(!dragged)
