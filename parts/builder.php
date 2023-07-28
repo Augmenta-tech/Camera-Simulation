@@ -1,6 +1,10 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+if ( !defined( 'DONOTCACHEPAGE' ) ) {
+    define( 'DONOTCACHEPAGE', true );
+}
+
 $theme_url  = trailingslashit( get_stylesheet_directory_uri() );
 $theme_path = trailingslashit( get_stylesheet_directory() );
 
@@ -24,8 +28,29 @@ foreach ( $imgs as $image ) {
     $img_src = "$designer_url$img_src";
     $image->setAttribute( 'src', $img_src );
 }
+
 $html->save();
 
 // Output <body> content of designer html
 $element = $html->findOne( 'body' )->innerHtml();
+
+// Turn contact into request a quote
+$element = str_replace( 'Contact us', 'Request a quote', $element );
+
+// Designer HTML
 echo $element;
+
+// Request a quote modal
+get_template_part( 'builder-v2/parts/request-quote-modal' );
+
+// Custom scripts
+get_template_part( 'builder-v2/parts/custom-scripts' );
+
+// Loader
+get_template_part( 'builder-v2/parts/loader' );
+
+// Error modal
+get_template_part( 'builder-v2/parts/error-modal' );
+
+// Success modal
+get_template_part( 'builder-v2/parts/success-modal' );
