@@ -223,7 +223,7 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
             }
 
             // Check if there is data
-            $json_scene_infos = wp_unslash( sanitize_text_field( acf_maybe_get_POST( 'scene_infos' ) ) );
+            $json_scene_infos = wp_unslash( acf_maybe_get_POST( 'scene_infos' ) );
             if ( !$json_scene_infos ) {
                 wp_send_json_error( $json_scene_infos );
             }
@@ -240,11 +240,11 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
 
             // Send mail to owner, confirmation mail to user & send Sellsy API data
             $this->send_builder_data_to_admin_mail( $builder_data );
-            // $this->send_builder_data_to_customer_mail( $json_scene_infos );
-            // $this->send_builder_data_to_sellsy( $builder_data, $lang );
+            $this->send_builder_data_to_customer_mail( $json_scene_infos );
+            $this->send_builder_data_to_sellsy( $builder_data, $lang );
 
             // Success
-            wp_send_json_success( $scene_infos );
+            wp_send_json_success( $builder_data );
 
         }
 
@@ -255,234 +255,10 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
 
         private function send_builder_data_to_admin_mail( $builder_data ) {
 
-            // $builder_data Array
-                //     (
-                //         [scene_infos] => Array
-                //             (
-                //                 [sceneEnvironment] => indoor
-                //                 [sceneSize] => Array
-                //                     (
-                //                         [0] => 10
-                //                         [1] => 5
-                //                     )
-
-                //                 [unit] => Array
-                //                     (
-                //                         [value] => 1
-                //                         [label] => m
-                //                         [squaredLabel] => m²
-                //                     )
-
-                //                 [trackingMode] => human-tracking
-                //                 [heightDetected] => 1.2
-                //                 [objects] => Array
-                //                     (
-                //                         [nodes] => Array
-                //                             (
-                //                                 [0] => Array
-                //                                     (
-                //                                         [id] => 0
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 1.2371057254829
-                //                                         [p_y] => 0.85855595885669
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [1] => Array
-                //                                     (
-                //                                         [id] => 1
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 1.2371057254829
-                //                                         [p_y] => 2.5
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [2] => Array
-                //                                     (
-                //                                         [id] => 2
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 1.2371057254829
-                //                                         [p_y] => 4.1414440411433
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [3] => Array
-                //                                     (
-                //                                         [id] => 3
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 3.1185528627415
-                //                                         [p_y] => 0.85855595885669
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [4] => Array
-                //                                     (
-                //                                         [id] => 4
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 3.1185528627415
-                //                                         [p_y] => 2.5
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [5] => Array
-                //                                     (
-                //                                         [id] => 5
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 3.1185528627415
-                //                                         [p_y] => 4.1414440411433
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [6] => Array
-                //                                     (
-                //                                         [id] => 6
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 5
-                //                                         [p_y] => 0.85855595885669
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [7] => Array
-                //                                     (
-                //                                         [id] => 7
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 5
-                //                                         [p_y] => 2.5
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [8] => Array
-                //                                     (
-                //                                         [id] => 8
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 5
-                //                                         [p_y] => 4.1414440411433
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [9] => Array
-                //                                     (
-                //                                         [id] => 9
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 6.8814471372585
-                //                                         [p_y] => 0.85855595885669
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [10] => Array
-                //                                     (
-                //                                         [id] => 10
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 6.8814471372585
-                //                                         [p_y] => 2.5
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [11] => Array
-                //                                     (
-                //                                         [id] => 11
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 6.8814471372585
-                //                                         [p_y] => 4.1414440411433
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [12] => Array
-                //                                     (
-                //                                         [id] => 12
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 8.7628942745171
-                //                                         [p_y] => 0.85855595885669
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [13] => Array
-                //                                     (
-                //                                         [id] => 13
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 8.7628942745171
-                //                                         [p_y] => 2.5
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                                 [14] => Array
-                //                                     (
-                //                                         [id] => 14
-                //                                         [cameraTypeId] => 6
-                //                                         [p_x] => 8.7628942745171
-                //                                         [p_y] => 4.1414440411433
-                //                                         [p_z] => 3
-                //                                         [r_x] => 0
-                //                                         [r_y] => 0
-                //                                         [r_z] => 0
-                //                                     )
-
-                //                             )
-
-                //                         [lidars] => Array
-                //                             (
-                //                             )
-
-                //                         [dummies] => Array
-                //                             (
-                //                             )
-
-                //                     )
-
-                //                 [sceneUrl] => https://www.beta.designer.augmenta.tech?L=10,l=5,m=human-tracking,h=1.2&amp;sensor=node,id=0,typeID=6,px=1.24,py=0.86,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=1,typeID=6,px=1.24,py=2.5,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=2,typeID=6,px=1.24,py=4.14,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=3,typeID=6,px=3.12,py=0.86,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=4,typeID=6,px=3.12,py=2.5,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=5,typeID=6,px=3.12,py=4.14,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=6,typeID=6,px=5,py=0.86,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=7,typeID=6,px=5,py=2.5,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=8,typeID=6,px=5,py=4.14,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=9,typeID=6,px=6.88,py=0.86,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=10,typeID=6,px=6.88,py=2.5,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=11,typeID=6,px=6.88,py=4.14,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=12,typeID=6,px=8.76,py=0.86,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=13,typeID=6,px=8.76,py=2.5,pz=3,rx=0,ry=0,rz=0&amp;sensor=node,id=14,typeID=6,px=8.76,py=4.14,pz=3,rx=0,ry=0,rz=0
-                //                 [sceneName] => My super scene name
-                //                 [sceneDesc] => Custom message description
-                //             )
-
-                //     )
-
             $scene_infos = acf_maybe_get( $builder_data, 'scene_infos' );
             $scene_url   = acf_maybe_get( $scene_infos, 'sceneUrl' );
             $scene_name  = acf_maybe_get( $scene_infos, 'sceneName' );
             $scene_desc  = acf_maybe_get( $scene_infos, 'sceneDesc' );
-            // $json_scene_infos = wp_json_encode( $scene_infos );
 
             // User data
             $current_user_data = acf_maybe_get( $builder_data, 'current_user' );
@@ -537,7 +313,6 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
             $scene_url   = acf_maybe_get( $scene_infos, 'sceneUrl' );
             $scene_name  = acf_maybe_get( $scene_infos, 'sceneName' );
             $scene_desc  = acf_maybe_get( $scene_infos, 'sceneDesc' );
-            // $json_scene_infos = wp_json_encode( $scene_infos );
 
             $current_user_data  = acf_maybe_get( $builder_data, 'current_user' );
             $user_email         = acf_maybe_get( $current_user_data, 'user_email' );

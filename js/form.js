@@ -1,124 +1,62 @@
 (function() {
 
-    // Check if modal & builder are present
-    const register_login_modal = document.querySelector('#form-modal');
-    const augBuilderEl = document.querySelector('#augmenta-builder');
-    if ( !register_login_modal || !augBuilderEl ) {
-        return;
-    }
-
-    let user_logged = false;
-
     // Handle click event on builder submit button
-    const augSubmitEl = augBuilderEl.querySelector('#request-quote-button-my-system');
-    augSubmitEl.addEventListener( 'click', submit_builder_data );
+    const quoteBtnEl = document.querySelector('#contact-button');
+    if ( !quoteBtnEl ) return;
+
+    // Get user data in DOM
+    let user_data = window?.user_data || [];
+    user_data = JSON.parse(user_data);
+
+    let form_locked = false;
+
+    // Send data
+    quoteBtnEl.addEventListener( 'click', submit_builder_data );
     function submit_builder_data(ev) {
 
+        ev.preventDefault();
+
+        if ( form_locked ) return;
+
+        form_locked = true;
+
         // Get builder data
-        const sceneInfos = localStorage.getItem('sceneInfos');
-        if ( !sceneInfos ) {
+        let sceneInfos = sessionStorage.getItem('sceneInfos');
+        if ( !sceneInfos || sceneInfos == 'null' ) {
             alert('No builder data found in storage. Please restart the setup.')
         }
 
-        toggle_loader();
+        submit_form();
 
-        if ( !user_logged ) {
-
-            // Check if user is logged-in
-            let formData = new FormData();
-            formData.append('action', 'aug_is_user_logged_in');
-            formData.append('nonce', window.builder.nonce);
-
-            fetch(window.builder.ajax, {
-               method: 'POST', // or 'PUT'
-               headers: {
-                //    'Content-Type': 'application/json',
-               },
-               body: formData,
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                toggle_loader();
-                data?.success ? submit_form() : toggle_register_login_modal();
-            })
-            .catch((error) => {
-                toggle_loader();
-                console.error('Error: ', error);
-                console.log('Error: ', error);
-                toggle_error_modal(error);
-            });
-
-        } else {
-
-            toggle_loader();
-            submit_form();
-
-        }
-
-    }
-
-    // Listen to iframe to know when to send the data
-    console.log('Wait for builder form success...');
-    document.addEventListener('builder_form_success', (ev) => {
-        console.log('Builder form success!');
-        if ( ev?.detail ) {
-            user_logged = ev.detail;
-        }
-        toggle_register_login_modal();
-        submit_builder_data();
-    });
-
-    const lock_form = () => {
-        const formEl = document.querySelector('#builder-loader-modal');
-        if ( !formEl ) {
-            return;
-        }
-
-        formEl.classList.toggle('hidden');
-    }
-
-    // Toggle login & register modal
-    const toggle_register_login_modal = () => {
-        if ( !register_login_modal ) {
-            return;
-        }
-
-        register_login_modal.classList.toggle('hidden');
-        document.documentElement.classList.toggle('overflow-y-hidden');
-    }
-
-    // Close login & register modal
-    const close_register_login_modal = () => {
-        if ( !register_login_modal ) {
-            return;
-        }
-
-        register_login_modal.classList.add('hidden');
-        document.documentElement.classList.remove('overflow-y-hidden');
     }
 
     // Submit form data
     const submit_form = () => {
 
-        let sceneInfos = localStorage.getItem('sceneInfos');
-        sceneInfos = sceneInfos ? JSON.parse( sceneInfos ) : {};
-        sceneInfos.sceneName = document.querySelector('#my-system-scene-name-input').value;
-        sceneInfos.sceneDesc = document.querySelector('#my-system-scene-message-input').value;
-        sceneInfos = sceneInfos ? JSON.stringify( sceneInfos ) : '';
+        let sceneInfos = sessionStorage.getItem('sceneInfos');
+        if ( !sceneInfos || sceneInfos == 'null' ) {
+            return console.error('No scene data found in storage.')
+        }
+
+        // Create an URL with a sceneData parameter with the string json of the scene if it doesn't exists
+        sceneInfos = JSON.parse(sceneInfos);
+        if ( !sceneInfos?.sceneUrl ) {
+            const url = new URL(document.location.href.split('?')[0]);
+            url.searchParams.append('sceneData', JSON.stringify(sceneInfos));
+            sceneInfos.sceneUrl = url;
+        }
+        sceneInfos = JSON.stringify(sceneInfos);
 
         const formData = new FormData();
         formData.append('action', 'aug_submit_builder');
-        formData.append('nonce', window.builder.nonce);
+        formData.append('nonce', window?.builder?.nonce);
         formData.append('scene_infos', sceneInfos);
         formData.append('lang', document.documentElement.getAttribute('lang'));
-        if ( user_logged ) {
-            formData.append( 'email', user_logged?.m );
-            formData.append( 'pass', user_logged?.p );
-        }
+        formData.append('email', user_data?.email);
 
         toggle_loader();
 
-        fetch(window.builder.ajax, {
+        fetch(window?.builder?.ajax, {
            method: 'POST', // or 'PUT'
            headers: {
                //    'Content-Type': 'application/json',
@@ -128,16 +66,17 @@
         .then((response) => response.json())
         .then((data) => {
             toggle_loader();
+            form_locked = false;
             if ( data?.success === true ) {
-                reset_builder_form();
-                close_register_login_modal();
                 toggle_success_modal();
+                reset_builder_form();
             } else {
                 toggle_error_modal(data?.data);
             }
         })
         .catch((error) => {
             toggle_loader();
+            form_locked = false;
             console.error('Error:', error);
             toggle_error_modal(error);
         });
@@ -146,8 +85,8 @@
 
     const reset_builder_form = () => {
         console.log('reset builder form.');
-        localStorage.removeItem('sceneInfos');
-        localStorage.removeItem('builderStep');
+        sessionStorage.removeItem('sceneInfos');
+        sessionStorage.removeItem('builderStep');
     }
 
     const toggle_success_modal = () => {
