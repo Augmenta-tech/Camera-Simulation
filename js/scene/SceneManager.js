@@ -49,7 +49,7 @@ class ObservableParameter extends Observable {
 class SceneManager{
     static loadFont(isBuilder, callback)
     {
-        const path = './';
+        const path = window?.designerPath || './';
         new FontLoader().load( path + 'fonts/helvetiker_regular.typeface.json', function ( response ) {
             SceneManager.font = response;
             callback();
