@@ -234,14 +234,17 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
                 wp_send_json_error( $json_scene_infos );
             }
 
+            $scene_notes = wp_unslash( sanitize_textarea_field( acf_maybe_get_POST( 'note' ) ) );
+            if ( $scene_notes ) $scene_infos['notes'] = $scene_notes;
+
             $builder_data                 = array();
             $builder_data['scene_infos']  = $scene_infos;
             $builder_data['current_user'] = $current_user_data;
 
             // Send mail to owner, confirmation mail to user & send Sellsy API data
-            $this->send_builder_data_to_admin_mail( $builder_data );
-            $this->send_builder_data_to_customer_mail( $json_scene_infos );
             $this->send_builder_data_to_sellsy( $builder_data, $lang );
+            $this->send_builder_data_to_admin_mail( $builder_data );
+            $this->send_builder_data_to_customer_mail( $builder_data );
 
             // Success
             wp_send_json_success( $builder_data );
@@ -259,6 +262,7 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
             $scene_url   = acf_maybe_get( $scene_infos, 'sceneUrl' );
             $scene_name  = acf_maybe_get( $scene_infos, 'sceneName' );
             $scene_desc  = acf_maybe_get( $scene_infos, 'sceneDesc' );
+            $scene_notes = acf_maybe_get( $scene_infos, 'notes' );
 
             // User data
             $current_user_data = acf_maybe_get( $builder_data, 'current_user' );
@@ -294,7 +298,7 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
             $body = str_replace( '%%USER_MAIL%%', $user_email, $body );
             $body = str_replace( '%%BUILDER_LINK%%', $builder_link, $body );
             $body = str_replace( '%%SCENE_NAME%%', $scene_name, $body );
-            $body = str_replace( '%%SCENE_DESC%%', $scene_desc, $body );
+            $body = str_replace( '%%SCENE_DESC%%', $scene_notes ?: $scene_desc, $body );
 
             $body = str_replace( '%first_name%', $first_name, $body );
             $body = str_replace( '%last_name%', $last_name, $body );
@@ -313,6 +317,7 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
             $scene_url   = acf_maybe_get( $scene_infos, 'sceneUrl' );
             $scene_name  = acf_maybe_get( $scene_infos, 'sceneName' );
             $scene_desc  = acf_maybe_get( $scene_infos, 'sceneDesc' );
+            $scene_notes = acf_maybe_get( $scene_infos, 'notes' );
 
             $current_user_data  = acf_maybe_get( $builder_data, 'current_user' );
             $user_email         = acf_maybe_get( $current_user_data, 'user_email' );
@@ -330,7 +335,7 @@ if ( !class_exists( 'Builder_Config_V2' ) ) {
             $body = str_replace( '%%USER%%', $user_display_name, $body );
             $body = str_replace( '%%BUILDER_LINK%%', $builder_link, $body );
             $body = str_replace( '%%SCENE_NAME%%', $scene_name, $body );
-            $body = str_replace( '%%SCENE_DESC%%', $scene_desc, $body );
+            $body = str_replace( '%%SCENE_DESC%%', $scene_notes ?: $scene_desc, $body );
 
             wp_mail( $to, $subject, $body, $headers );
 

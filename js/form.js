@@ -10,8 +10,15 @@
 
     let form_locked = false;
 
+    // Toggle request quote modal
+    quoteBtnEl.addEventListener( 'click', ev => {
+        ev.preventDefault();
+        toggle_quote_modal();
+    } );
+
     // Send data
-    quoteBtnEl.addEventListener( 'click', submit_builder_data );
+    const quoteSubmitBtnEl = document.querySelector('#send-quote');
+    quoteSubmitBtnEl.addEventListener( 'click', submit_builder_data );
     function submit_builder_data(ev) {
 
         ev.preventDefault();
@@ -19,6 +26,8 @@
         if ( form_locked ) return;
 
         form_locked = true;
+
+        toggle_quote_modal();
 
         // Get builder data
         let sceneInfos = sessionStorage.getItem('sceneInfos');
@@ -53,6 +62,10 @@
         formData.append('scene_infos', sceneInfos);
         formData.append('lang', document.documentElement.getAttribute('lang'));
         formData.append('email', user_data?.email);
+
+        // Project description
+        const noteEl = document.querySelector('textarea#note');
+        if ( noteEl ) formData.append('note', noteEl.value);
 
         toggle_loader();
 
@@ -125,6 +138,17 @@
         }
 
         loaderEl.classList.toggle('hidden');
+
+    }
+
+    const toggle_quote_modal = () => {
+
+        const quoteModalEl = document.querySelector('#quote-form-modal');
+        if ( !quoteModalEl ) {
+            return;
+        }
+
+        quoteModalEl.classList.toggle('hidden');
 
     }
 
