@@ -8,6 +8,8 @@ import { SceneManager } from '../SceneManager.js';
 import { Dummy, loadModel } from './props/Dummy.js';
 import { Node } from './sensors/Node.js';
 import { Lidar } from './sensors/Lidar.js';
+import {Cylinder} from './props/Cylinder.js';
+import {CylinderUI} from '../../UI/CylinderUI.js'
 
 class SceneObjects{
     static loadFont(isBuilder, callback)
@@ -178,6 +180,14 @@ class SceneObjects{
 
             this.populateStorage();
         }
+        
+        this.addCylinder = function(){
+            //Add a cylinder to the scene
+            const newCylinder = new Cylinder(0, sceneManager.sceneWidth/2, sceneManager.sceneLength/2, 4, 2, sceneManager.sceneElevation, sceneManager.currentUnit.value);
+            newCylinder.addToScene(sceneManager.scene);
+            newCylinder.uiElement = new CylinderUI(newCylinder, sceneManager);
+        }
+        this.addCylinder();
 
         this.displayFrustums = function()
         {
@@ -221,7 +231,7 @@ class SceneObjects{
                 return;
             }
             const newLidar = new Lidar(lidars.length, typeID, x, z, r);
-            if(!isBuilder) newLidar.uiElement = new LidarUI(newLidar, sceneManager);
+            newLidar.uiElement = new LidarUI(newLidar, sceneManager);
 
             //Offset
             if(!autoConstruct)
@@ -276,6 +286,12 @@ class SceneObjects{
             this.lidarsMeshes = this.lidarsMeshes.filter(lm => lm != lidar.mesh)
 
             this.populateStorage();
+        }
+
+        this.removeCylinder = function(cylinder)
+        {
+            this.deleteObject(cylinder);
+            //this.populateStorage();
         }
 
         this.removeSensors = function()
