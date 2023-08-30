@@ -10,7 +10,7 @@ class LidarUI{
         {
             let lidarTypesOptions = ``;
             getLidarsTypes().filter(c => c.recommended).forEach(type => {
-                const optionElement = `<option value="` + type.name + `" ` + (lidar.lidarType.name === type.name ? `selected` : ``) + `>` + type.name;
+                const optionElement = `<option value="` + type.niceName + `" ` + (lidar.lidarType.niceName === type.niceName ? `selected` : ``) + `>` + type.niceName;
                 lidarTypesOptions += optionElement;
                 lidarTypesOptions += "</option>"
             });
@@ -189,7 +189,7 @@ class LidarUI{
                     let inputElem = document.createElement('input');
                     inputElem.type = "text";
                     inputElem.setAttribute("autofocus", true);
-                    inputElem.name = element.id;
+                    inputElem.niceName = element.id;
                     inputElem.value = valueElement.innerHTML;
                     inputElem.style = `
                         width: 50px;
@@ -212,7 +212,7 @@ class LidarUI{
 
         function changeLidarType()
         {
-            lidar.lidarType = getLidarsTypes().find(type => type.name === document.getElementById('lidar-type-' + lidar.id).value);
+            lidar.lidarType = getLidarsTypes().find(type => type.niceName === document.getElementById('lidar-type-' + lidar.id).value);
 
             sceneManager.scene.remove(lidar.rays);
             lidar.rays.children.forEach(r => {
